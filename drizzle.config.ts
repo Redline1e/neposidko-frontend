@@ -2,13 +2,13 @@ import { defineConfig } from "drizzle-kit";
 
 export default defineConfig({
   dialect: "postgresql",
-  schema: "./lib/schema.ts",
+  schema: "npx drizzle-kit studio",
   out: "./drizzle/migrations",
   dbCredentials: {
     url: process.env.DATABASE_URL!,
   },
   migrations: {
     table: "neposidko",
-    schema: "drizzle",
+    schema: "npx drizzle-kit studio",
   },
 });
