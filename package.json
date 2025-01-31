@@ -10,12 +10,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@hono/node-server": "^1.13.8",
+    "@hono/vite-dev-server": "^0.18.1",
     "@hookform/resolvers": "^3.10.0",
     "@tanstack/react-query": "^5.66.0",
     "drizzle-kit": "^0.30.4",
     "drizzle-orm": "^0.39.1",
     "hono": "^4.6.20",
-    "next": "15.1.6",
+    "next": "^15.1.6",
     "pg": "^8.13.1",
     "postgres": "^3.4.5",
     "react": "^19.0.0",
@@ -26,14 +28,14 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@types/node": "^20",
+    "@types/node": "^20.17.16",
     "@types/pg": "^8.11.11",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
     "eslint": "^9",
     "eslint-config-next": "15.1.6",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5.7.3"
   }
 }
