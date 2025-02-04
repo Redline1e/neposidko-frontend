@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, primaryKey, foreignKey } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, foreignKey } from "drizzle-orm/pg-core";
 
 // Roles table
 export const roles = pgTable('roles', {
@@ -15,11 +15,24 @@ export const users = pgTable('users', {
   password: text('password'),
 });
 
+// OrderStatus table
+export const orderStatus = pgTable('orderStatus', {
+  orderStatusId: serial('orderStatusId').primaryKey(),
+  name: text('name'),
+});
+
+// Orders table
+export const orders = pgTable('orders', {
+  cartId: serial('cartId').primaryKey(),
+  userId: integer('userId').references(() => users.userId),
+  orderStatusId: integer('orderStatusId').references(() => orderStatus.orderStatusId),
+  cartData: text('cartData'),
+});
+
 // Products table
 export const products = pgTable('products', {
   productId: serial('productId').primaryKey(),
-  brandId: integer('brandId'),
-  categoryId: integer('categoryId'),
+  brandId: integer('brandId').references(() => brands.brandId),
   price: integer('price'),
   discount: integer('discount'),
   description: text('description'),
@@ -51,24 +64,14 @@ export const brands = pgTable('brands', {
 // ProductOrder table
 export const productOrder = pgTable('productOrder', {
   productOrderId: serial('productOrderId').primaryKey(),
-  cartId: integer('cartId'),
+  orderId: integer('orderId').references(() => orders.cartId),
   productId: integer('productId').references(() => products.productId),
   quantity: integer('quantity'),
 });
 
-// Orders table
-export const orders = pgTable('orders', {
-  cartId: serial('cartId').primaryKey(),
-  userId: integer('userId').references(() => users.userId),
-  cartData: text('cartData'),
-  cartStatus: text('cartStatus'),
-});
-
-// ProductCategory table
-export const productCategory = pgTable('productCategory', {
+// ProductCategories table
+export const productCategories = pgTable('productCategories', {
   productCategoryId: serial('productCategoryId').primaryKey(),
-  name: text('name'),
   productId: integer('productId').references(() => products.productId),
-  brandId: integer('brandId'),
   categoryId: integer('categoryId').references(() => categories.categoryId),
 });
