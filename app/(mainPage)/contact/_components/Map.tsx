@@ -3,6 +3,7 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { Pin } from "lucide-react";
 
+
 // Use the path from the public directory
 const customIcon = new L.Icon({
   iconUrl: "/images/marker-icon.png", // Path from the public directory

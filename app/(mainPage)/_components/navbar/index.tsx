@@ -2,11 +2,10 @@ import { Logo } from "./logo";
 import { Search } from "./search";
 import { Actions } from "./actions";
 import { User } from "./user";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export const Navbar = () => {
   return (
-    <nav className="fixed top-0 w-full h-20 z-[49] bg-[#ffffff] px-2 lg:px-4 flex justify-between items-center shadow-sm border-b border-orange-600/30">
+    <nav className="w-full h-20 bg-[#ffffff] px-2 lg:px-4 flex justify-between items-center shadow-sm border-b border-neutral-700/10">
       <Logo />
       <Search />
       <div className="flex">

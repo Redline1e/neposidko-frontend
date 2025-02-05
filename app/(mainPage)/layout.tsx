@@ -9,7 +9,8 @@ export default function BrowseLayout({
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-1">{children}</main>
+      {/* Add padding-top to main to make space for the navbar */}
+      <main className="flex-1 pt-20">{children}</main>
       <Footer />
     </div>
   );
