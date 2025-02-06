@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { fetchProducts, Product } from "@/utils/api";
-import AddProduct from "@/app/(mainPage)/products/components/AddProduct";
+import AddProduct from "@/app/(mainPage)/products/_components/AddProduct";
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);

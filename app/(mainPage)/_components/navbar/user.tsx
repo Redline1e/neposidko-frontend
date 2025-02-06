@@ -5,7 +5,7 @@ import Link from "next/link";
 export const User = () => {
   return (
     <div className="relative">
-      <Link href={`/`}>
+      <Link href={`/login`}>
         <Avatar>
           <AvatarImage src="./user.png" className="object-cover" />
           {/* <AvatarFallback></AvatarFallback> */}
