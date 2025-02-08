@@ -3,11 +3,11 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { Pin } from "lucide-react";
 
-
-// Use the path from the public directory
 const customIcon = new L.Icon({
-  iconUrl: "/images/marker-icon.png", // Path from the public directory
-  shadowUrl: "/images/marker-shadow.png", // Path from the public directory
+  iconUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+  shadowUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],

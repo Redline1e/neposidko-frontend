@@ -8,7 +8,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Menu, Home, ShoppingBag, Phone } from "lucide-react";
+import { Menu, Home, ShoppingBag, Phone, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import useMedia from "use-media";
 
@@ -16,10 +16,11 @@ const actionLinks = [
   { name: "Головна", href: "/", icon: Home },
   { name: "Товари", href: "/products", icon: ShoppingBag },
   { name: "Контакти", href: "/contact", icon: Phone },
+  { name: "Кошик", href: "/cart", icon: ShoppingCart },
 ];
 
 export const Actions = () => {
-  const isWide = useMedia({ minWidth: "1100px" });
+  const isWide = useMedia({ minWidth: "1230px" });
 
   return (
     <>
@@ -36,7 +37,7 @@ export const Actions = () => {
         </ul>
       )}
       {!isWide && (
-        <div className="flex items-center px-5">
+        <div className="flex items-center px-5 gap-5">
           <Sheet>
             <SheetContent>
               <SheetHeader>
@@ -64,6 +65,9 @@ export const Actions = () => {
               <Menu />
             </SheetTrigger>
           </Sheet>
+          <Link href="/cart" className="flex items-center gap-2">
+            <ShoppingCart className="w-5 h-5" />
+          </Link>
         </div>
       )}
     </>

@@ -1,5 +1,6 @@
 import { Navbar } from "./_components/navbar";
 import { Footer } from "./_components/footer";
+import { Toaster } from "sonner";
 
 export default function BrowseLayout({
   children,
@@ -8,9 +9,9 @@ export default function BrowseLayout({
 }) {
   return (
     <div className="flex flex-col min-h-screen">
+      <Toaster />
       <Navbar />
-      {/* Add padding-top to main to make space for the navbar */}
-      <main className="flex-1 pt-20">{children}</main>
+      <main className="flex-1">{children}</main>
       <Footer />
     </div>
   );
