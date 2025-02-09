@@ -7,6 +7,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
+import { Trash2 } from "lucide-react";
 
 interface CartItem {
   id: number;
@@ -27,7 +28,8 @@ export default function Cart() {
       name: "Nike Air Max",
       price: 120,
       quantity: 2,
-      imageUrl: "https://neposidko.com/image/cache/catalog//image/data/2tufli/25862-800x800.jpg",
+      imageUrl:
+        "https://neposidko.com/image/cache/catalog//image/data/2tufli/25862-800x800.jpg",
       size: "42",
       availableSizes: ["40", "41", "42", "43", "44"],
       discount: 10,
@@ -149,9 +151,10 @@ export default function Cart() {
               </div>
               <div className="mt-4 md:mt-0 md:ml-4">
                 <Button
-                  variant="destructive"
+                  variant="outline"
                   onClick={() => handleRemoveItem(item.id)}
                 >
+                  <Trash2 />
                   Видалити
                 </Button>
               </div>
