@@ -1,3 +1,4 @@
+"use client";
 import { Product } from "@/utils/api";
 import React from "react";
 
@@ -6,7 +7,16 @@ interface ProductItemProps {
 }
 
 const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
-  const { productId, price, discount, description, imageUrl, sizes = [] } = product;
+  // Деструктуризуємо дані продукту; замість productId використовується articleNumber
+  const {
+    articleNumber,
+    name, // нове поле
+    price,
+    discount,
+    description,
+    imageUrl,
+    sizes = [],
+  } = product;
 
   const discountedPrice = discount
     ? Math.round(price * (1 - discount / 100))
@@ -14,13 +24,13 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
 
   return (
     <div
-      key={productId}
+      key={articleNumber}
       className="bg-white shadow-lg rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border"
     >
       <div className="relative">
         <img
           src={imageUrl}
-          alt={description}
+          alt={name}
           className="w-full h-60 object-cover rounded-t-lg transform hover:scale-105 transition-transform duration-300"
         />
         {discount > 0 && (
@@ -30,9 +40,10 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
         )}
       </div>
       <div className="p-4">
-        <h2 className="text-lg font-semibold text-gray-800 truncate">
-          {description}
-        </h2>
+        {/* Відображення назви товару */}
+        <h2 className="text-lg font-semibold text-gray-800 truncate">{name}</h2>
+        {/* Відображення опису товару */}
+        <p className="text-sm text-gray-600 truncate mb-2">{description}</p>
         <div className="mt-2 flex items-center space-x-2">
           {discount > 0 && (
             <span className="text-gray-400 line-through text-sm">
@@ -44,22 +55,21 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
           </span>
         </div>
 
-        {/* Display all sizes as static labels with wrapping */}
+        {/* Відображення доступних розмірів */}
         {sizes.length > 0 && (
           <div className="mt-3">
             <div className="flex flex-wrap gap-2 mt-2">
-              {sizes.map((size) => (
+              {sizes.map((sizeObj, index) => (
                 <span
-                  key={size}
+                  key={index}
                   className="px-2 py-1 border rounded-lg text-sm bg-gray-100"
                 >
-                  {size}
+                  {sizeObj.size} ({sizeObj.stock} шт.)
                 </span>
               ))}
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

@@ -45,38 +45,14 @@ export function AdminSidebar() {
             </Link>
           </Button>
           <Button variant="outline" className="w-full">
-            <Link href="/admin/manageproducts" className="block w-full">
+            <Link href="/admin/addbrand" className="block w-full">
               <p
                 className={cn(
                   "text-neutral-900",
-                  currentPath === "/admin/manageproducts" ? "font-bold" : ""
+                  currentPath === "/admin/addbrand" ? "font-bold" : ""
                 )}
               >
-                Управління товарами
-              </p>
-            </Link>
-          </Button>
-          <Button variant="outline" className="w-full">
-            <Link href="/admin/manageusers" className="block w-full">
-              <p
-                className={cn(
-                  "text-neutral-900",
-                  currentPath === "/admin/manageusers" ? "font-bold" : ""
-                )}
-              >
-                Управління користувачами
-              </p>
-            </Link>
-          </Button>
-          <Button variant="outline" className="w-full">
-            <Link href="/admin/orders" className="block w-full">
-              <p
-                className={cn(
-                  "text-neutral-900",
-                  currentPath === "/admin/orders" ? "font-bold" : ""
-                )}
-              >
-                Перегляд замовлень
+                Додати бренд
               </p>
             </Link>
           </Button>

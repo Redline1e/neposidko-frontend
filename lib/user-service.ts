@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 
 export const fetchUser = async (token: string) => {
   try {
-    const response = await axios.get(`http://localhost:5000/api/user`, {
+    const response = await axios.get(`http://localhost:5000/protected`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
@@ -20,7 +20,7 @@ export const updateUser = async (
 ) => {
   try {
     const response = await axios.put(
-      `http://localhost:5000/api/user`,
+      `http://localhost:5000/api/user`, 
       { name, email },
       {
         headers: { Authorization: `Bearer ${token}` },
@@ -33,39 +33,33 @@ export const updateUser = async (
   }
 };
 
-// Функція перевірки авторизації на основі токену
-export const useAuth = (): boolean => {
+export const useAuth = (): { isAuthenticated: boolean; loading: boolean } => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // Перевірка чи є токен в localStorage
     const checkAuth = async () => {
       const token = localStorage.getItem("token");
-
       if (!token) {
         setLoading(false);
-        return setIsAuthenticated(false); // Токен відсутній, користувач не авторизований
+        return setIsAuthenticated(false);
       }
-
       try {
-        // Запит до сервера для перевірки дійсності токену
-        const response = await fetch("http://localhost:5000/verify", {
-          method: "POST",
+        const response = await fetch("http://localhost:5000/protected", {
+          method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Передаємо токен для перевірки
+            Authorization: `Bearer ${token}`,
           },
         });
-
         if (response.ok) {
-          setIsAuthenticated(true); // Токен дійсний
+          setIsAuthenticated(true);
         } else {
-          setIsAuthenticated(false); // Токен недійсний
+          setIsAuthenticated(false);
         }
       } catch (error) {
         console.error("Error during auth check:", error);
-        setIsAuthenticated(false); // Якщо сталася помилка при запиті, не авторизовано
+        setIsAuthenticated(false);
       } finally {
         setLoading(false);
       }
@@ -74,7 +68,6 @@ export const useAuth = (): boolean => {
     checkAuth();
   }, []);
 
-  // Повертаємо статус авторизації та стан завантаження
   return { isAuthenticated, loading };
 };
 
@@ -85,13 +78,11 @@ export const useCheckRole = (): { hasAccess: boolean; loading: boolean } => {
   useEffect(() => {
     const checkUserRole = async () => {
       const token = localStorage.getItem("token");
-
       if (!token) {
         setHasAccess(false);
         setLoading(false);
         return;
       }
-
       try {
         const response = await fetch("http://localhost:5000/getUserRole", {
           method: "GET",
@@ -100,13 +91,10 @@ export const useCheckRole = (): { hasAccess: boolean; loading: boolean } => {
             Authorization: `Bearer ${token}`,
           },
         });
-
         if (!response.ok) {
           throw new Error("Failed to fetch user role");
         }
-
         const data = await response.json();
-        // Наприклад, доступ є лише якщо roleId === 1
         setHasAccess(data.roleId === 1);
       } catch (error) {
         console.error("Error checking user role:", error);

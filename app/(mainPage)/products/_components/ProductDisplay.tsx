@@ -9,17 +9,20 @@ export const ProductDisplay = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const getProducts = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchProducts();
+      setProducts(data);
+      setError(null);
+    } catch (error) {
+      setError("Не вдалося завантажити товари");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const getProducts = async () => {
-      try {
-        const data = await fetchProducts();
-        setProducts(data);
-      } catch (error) {
-        setError("Не вдалося завантажити товари");
-      } finally {
-        setLoading(false);
-      }
-    };
     getProducts();
   }, []);
 
@@ -31,14 +34,18 @@ export const ProductDisplay = () => {
     );
 
   return (
-    <>
-      <div className="mx-auto max-w-7xl px-6 py-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {products.map((product) => (
-            <ProductItem key={product.productId} product={product} />
-          ))}
-        </div>
+    <div className="mx-auto max-w-7xl px-6 py-8">
+      <button
+        onClick={getProducts}
+        className="mb-4 px-4 py-2 bg-blue-500 text-white rounded"
+      >
+        Оновити товари
+      </button>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        {products.map((product) => (
+          <ProductItem key={product.articleNumber} product={product} />
+        ))}
       </div>
-    </>
+    </div>
   );
 };

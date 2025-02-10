@@ -12,7 +12,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    // Якщо перевірка завершилась і доступу немає, робимо редірект
     if (!loading && !hasAccess) {
       router.push("/");
     }

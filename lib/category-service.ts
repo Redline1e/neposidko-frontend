@@ -1,4 +1,4 @@
-import { Category, Product } from "@/utils/api";
+import { Category } from "@/utils/api";
 import axios from "axios";
 
 export async function fetchCategories(): Promise<Category[]> {
@@ -11,15 +11,13 @@ export async function fetchCategories(): Promise<Category[]> {
   }
 }
 
-
 export const addCategory = async (category: Category): Promise<void> => {
-    try {
-      await axios.post(`http://localhost:5000/categories`, category, {
-        headers: { "Content-Type": "application/json" },
-      });
-    } catch (error) {
-      console.error("Помилка при додаванні категорії:", error);
-      throw new Error("Не вдалося додати категорію");
-    }
-  };
-  
+  try {
+    await axios.post(`http://localhost:5000/categories`, category, {
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    console.error("Помилка при додаванні категорії:", error);
+    throw new Error("Не вдалося додати категорію");
+  }
+};
