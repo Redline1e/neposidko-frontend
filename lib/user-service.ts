@@ -1,9 +1,11 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
 
+const API_URL = "http://localhost:5000";
+
 export const fetchUser = async (token: string) => {
   try {
-    const response = await axios.get(`http://localhost:5000/protected`, {
+    const response = await axios.get(`${API_URL}/protected`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
@@ -20,7 +22,7 @@ export const updateUser = async (
 ) => {
   try {
     const response = await axios.put(
-      `http://localhost:5000/api/user`, 
+      `${API_URL}/user`,
       { name, email },
       {
         headers: { Authorization: `Bearer ${token}` },
@@ -33,9 +35,34 @@ export const updateUser = async (
   }
 };
 
-export const useAuth = (): { isAuthenticated: boolean; loading: boolean } => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
+export const deleteUser = async (token: string) => {
+  try {
+    const response = await axios.delete(`${API_URL}/user`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Помилка видалення користувача:", error);
+    throw new Error("Не вдалося видалити користувача");
+  }
+};
+
+export const getUserData = async (token: string) => {
+  try {
+    const response = await axios.get(`${API_URL}/user`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Помилка отримання даних про користувача:", error);
+    throw new Error("Не вдалося отримати дані про користувача");
+  }
+};
+
+// Хук для перевірки автентифікації
+export const useAuth = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -45,18 +72,10 @@ export const useAuth = (): { isAuthenticated: boolean; loading: boolean } => {
         return setIsAuthenticated(false);
       }
       try {
-        const response = await fetch("http://localhost:5000/protected", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+        const response = await axios.get(`${API_URL}/protected`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        if (response.ok) {
-          setIsAuthenticated(true);
-        } else {
-          setIsAuthenticated(false);
-        }
+        setIsAuthenticated(response.status === 200);
       } catch (error) {
         console.error("Error during auth check:", error);
         setIsAuthenticated(false);
@@ -64,16 +83,16 @@ export const useAuth = (): { isAuthenticated: boolean; loading: boolean } => {
         setLoading(false);
       }
     };
-
     checkAuth();
   }, []);
 
   return { isAuthenticated, loading };
 };
 
-export const useCheckRole = (): { hasAccess: boolean; loading: boolean } => {
-  const [hasAccess, setHasAccess] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
+// Хук для перевірки ролі користувача
+export const useCheckRole = () => {
+  const [hasAccess, setHasAccess] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const checkUserRole = async () => {
@@ -84,18 +103,10 @@ export const useCheckRole = (): { hasAccess: boolean; loading: boolean } => {
         return;
       }
       try {
-        const response = await fetch("http://localhost:5000/getUserRole", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+        const response = await axios.get(`${API_URL}/getUserRole`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        if (!response.ok) {
-          throw new Error("Failed to fetch user role");
-        }
-        const data = await response.json();
-        setHasAccess(data.roleId === 1);
+        setHasAccess(response.data.roleId === 1);
       } catch (error) {
         console.error("Error checking user role:", error);
         setHasAccess(false);
@@ -103,7 +114,6 @@ export const useCheckRole = (): { hasAccess: boolean; loading: boolean } => {
         setLoading(false);
       }
     };
-
     checkUserRole();
   }, []);
 

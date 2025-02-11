@@ -35,12 +35,7 @@ export const ProductDisplay = () => {
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-8">
-      <button
-        onClick={getProducts}
-        className="mb-4 px-4 py-2 bg-blue-500 text-white rounded"
-      >
-        Оновити товари
-      </button>
+      {/* Кнопку "Оновити товари" видалено */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
         {products.map((product) => (
           <ProductItem key={product.articleNumber} product={product} />

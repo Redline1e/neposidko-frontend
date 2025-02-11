@@ -16,7 +16,7 @@ export default function OrderTotal({ orderItems }: Props) {
   const totalDiscount = totalOriginalPrice - totalPrice;
 
   return (
-    <div className="bg-blue-50 p-6 rounded-lg w-full md:w-80">
+    <div className="bg-blue-50 p-6 rounded-lg w-full md:w-80 h-[200px]">
       <p className="flex justify-between text-gray-700">
         <span>Сума замовлення:</span>
         <span>{totalOriginalPrice} грн.</span>

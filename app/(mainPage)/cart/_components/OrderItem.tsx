@@ -13,6 +13,7 @@ import {
 import { updateOrderItem, deleteOrderItem } from "@/lib/order-items-service";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 type Props = {
   item: OrderItemData;
@@ -22,8 +23,6 @@ type Props = {
 
 export default function OrderItem({ item, onItemUpdate, onItemDelete }: Props) {
   const router = useRouter();
-
-  // Локальні стани для селектів
   const [selectedSize, setSelectedSize] = useState<string>(item.size);
   const [selectedQuantity, setSelectedQuantity] = useState<number>(
     item.quantity
@@ -31,25 +30,19 @@ export default function OrderItem({ item, onItemUpdate, onItemDelete }: Props) {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
-  // Використовуємо ref для збереження останніх збережених значень,
-  // щоб уникнути збереження при першому рендері
   const initialValues = useRef({ size: item.size, quantity: item.quantity });
 
-  // Отримуємо дані про розмір з властивості sizes
   const sizeData = item.sizes?.find((s) => s.size === selectedSize);
   const availableStock = sizeData ? sizeData.stock : 0;
 
-  // Формуємо опції для вибору кількості (від 1 до availableStock)
   const quantityOptions = [];
   for (let i = 1; i <= availableStock; i++) {
     quantityOptions.push(i);
   }
 
-  // Функція для автоматичного збереження
   async function handleSave() {
     setIsSaving(true);
     try {
-      // Формуємо об’єкт для оновлення (тип OrderItemType)
       const updatedItem: OrderItemType = {
         productOrderId: item.productOrderId,
         orderId: item.orderId,
@@ -57,9 +50,9 @@ export default function OrderItem({ item, onItemUpdate, onItemDelete }: Props) {
         size: selectedSize,
         quantity: selectedQuantity,
       };
-      // Викликаємо API для оновлення позиції
+
       await updateOrderItem(updatedItem);
-      // Формуємо нову позицію типу OrderItemData, зберігаючи додаткові поля
+
       const newItem: OrderItemData = {
         ...item,
         size: selectedSize,
@@ -74,7 +67,6 @@ export default function OrderItem({ item, onItemUpdate, onItemDelete }: Props) {
     setIsSaving(false);
   }
 
-  // Обробник видалення позиції замовлення
   async function handleDelete() {
     if (!confirm("Ви впевнені, що хочете видалити цю позицію?")) return;
     setIsDeleting(true);
@@ -83,7 +75,6 @@ export default function OrderItem({ item, onItemUpdate, onItemDelete }: Props) {
       if (onItemDelete) {
         onItemDelete(item.productOrderId);
       }
-      // Оновлюємо сторінку після видалення
       router.refresh();
     } catch (error) {
       console.error("Помилка видалення позиції:", error);
@@ -91,7 +82,6 @@ export default function OrderItem({ item, onItemUpdate, onItemDelete }: Props) {
     setIsDeleting(false);
   }
 
-  // Використовуємо useEffect для debounce-автозбереження при зміні селектів
   useEffect(() => {
     if (
       selectedSize === initialValues.current.size &&
@@ -110,16 +100,26 @@ export default function OrderItem({ item, onItemUpdate, onItemDelete }: Props) {
   }, [selectedSize, selectedQuantity]);
 
   return (
-    <div className="flex items-start border-b pb-4">
-      <Image
-        src={item.imageUrl}
-        alt={item.description}
-        width={100}
-        height={100}
-        className="rounded-lg"
-      />
+    <div className="flex items-start border-b pb-4 w-full">
+      <Link href={`/product/${item.articleNumber}`} className="block">
+        {item.imageUrls.length > 0 ? (
+          <Image
+            src={item.imageUrls[0]}
+            alt={item.description}
+            width={100}
+            height={100}
+            className="rounded-lg"
+          />
+        ) : (
+          <div className="w-[100px] h-[100px] bg-gray-200 flex items-center justify-center rounded-lg">
+            <span className="text-gray-500 text-sm">Немає зображення</span>
+          </div>
+        )}
+      </Link>
       <div className="ml-4 flex-1">
-        <h2 className="text-lg font-semibold">{item.description}</h2>
+        <Link href={`/product/${item.articleNumber}`} className="block">
+          <h2 className="text-lg font-semibold hover:underline">{item.name}</h2>
+        </Link>
         <p className="text-sm text-gray-500">Артикул: {item.articleNumber}</p>
         {item.discount > 0 ? (
           <div>
@@ -132,8 +132,7 @@ export default function OrderItem({ item, onItemUpdate, onItemDelete }: Props) {
           <p className="text-red-500 font-semibold">{item.price} грн.</p>
         )}
         <div className="mt-2 flex flex-col md:flex-row md:items-center gap-4">
-          {/* Селект для вибору розміру */}
-          <div className="w-32">
+          <div className="w-40">
             <Select
               value={selectedSize}
               onValueChange={(value) => setSelectedSize(value)}
@@ -151,35 +150,11 @@ export default function OrderItem({ item, onItemUpdate, onItemDelete }: Props) {
               </SelectContent>
             </Select>
           </div>
-          {/* Селект для вибору кількості */}
-          <div className="w-24">
-            <Select
-              value={String(selectedQuantity)}
-              onValueChange={(value) => setSelectedQuantity(Number(value))}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Кількість" />
-              </SelectTrigger>
-              <SelectContent>
-                {quantityOptions.map((qty) => (
-                  <SelectItem key={qty} value={String(qty)}>
-                    {qty}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          {/* Індикатор процесу збереження */}
-          {isSaving && (
-            <span className="text-sm text-gray-500">Збереження...</span>
-          )}
         </div>
       </div>
-      <div>
-        <Button variant="outline" onClick={handleDelete} disabled={isDeleting}>
-          <Trash2 className={isDeleting ? "animate-spin" : ""} />
-        </Button>
-      </div>
+      <Button variant="outline" onClick={handleDelete} disabled={isDeleting}>
+        <Trash2 className={isDeleting ? "animate-spin" : ""} />
+      </Button>
     </div>
   );
 }

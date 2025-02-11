@@ -21,3 +21,13 @@ export const addBrand = async (brand: Brand): Promise<void> => {
     throw new Error("Не вдалося додати бренд");
   }
 };
+
+export const fetchBrandById = async (brandId: number): Promise<Brand> => {
+  try {
+    const response = await axios.get(`http://localhost:5000/brand/${brandId}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Помилка при завантаженні бренду ${brandId}:`, error);
+    throw new Error("Не вдалося завантажити бренд");
+  }
+};

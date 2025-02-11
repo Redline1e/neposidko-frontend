@@ -1,11 +1,9 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/router";
 import { toast } from "sonner";
+import { deleteUser } from "@/lib/user-service";
 
-export const Sidebar = () => {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-
+export const UserSidebar = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     window.location.href = "/";
@@ -21,32 +19,28 @@ export const Sidebar = () => {
     }
 
     try {
-      const res = await fetch(`${API_URL}/api/user`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      if (!res.ok) throw new Error("Помилка видалення акаунта");
-
+      await deleteUser(localStorage.getItem("token")!);
       toast.success("Акаунт видалено!");
       localStorage.removeItem("token");
-      // router.push("/register");
-    } catch (error) {
+      window.location.href = "/";
+    } catch {
       toast.error("Не вдалося видалити акаунт");
     }
   };
 
   return (
-    <aside className="w-full sm:w-64 bg-gray-800 text-white h-screen p-4 flex flex-col">
-      <h2 className="text-lg font-semibold mb-6">Меню</h2>
-      <Button variant="secondary" className="mb-4" onClick={handleLogout}>
-        Вийти
-      </Button>
-      <Button variant="destructive" onClick={handleDeleteAccount}>
-        Видалити акаунт
-      </Button>
+    <aside className="w-full sm:w-64 bg-gray-800 text-white p-4 flex flex-col h-full">
+      <h2 className="text-lg font-semibold mb-6 text-center">
+        Меню Користувача
+      </h2>
+      <div className="flex flex-col mt-auto">
+        <Button variant="secondary" className="mb-4" onClick={handleLogout}>
+          Вийти
+        </Button>
+        <Button variant="destructive" onClick={handleDeleteAccount}>
+          Видалити акаунт
+        </Button>
+      </div>
     </aside>
   );
 };

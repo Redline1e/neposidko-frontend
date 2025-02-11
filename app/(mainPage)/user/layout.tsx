@@ -1,15 +1,20 @@
-import { Sidebar } from "./_components/sidebar";
+"use client";
+import { UserSidebar } from "./_components/sidebar";
+import { AuthCheck } from "./_components/AuthCheck";
 
-export default function BrowseLayout({
-  children,
-}: {
+interface UserLayoutProps {
   children: React.ReactNode;
-}) {
+}
+
+export default function UserLayout({ children }: UserLayoutProps) {
   return (
-    <div className="flex flex-col min-h-screen">
-        <Sidebar />
-        {children}
-        
-    </div>
+    <AuthCheck>
+      <div className="flex flex-1">
+        <UserSidebar />
+        <div className="flex-1 p-4 h-full">
+          {children}
+        </div>
+      </div>
+    </AuthCheck>
   );
 }

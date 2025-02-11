@@ -11,7 +11,6 @@ export const fetchProducts = async (): Promise<Product[]> => {
   }
 };
 
-
 export const addProduct = async (product: Product): Promise<void> => {
   try {
     await axios.post(`http://localhost:5000/products`, product, {
@@ -20,5 +19,19 @@ export const addProduct = async (product: Product): Promise<void> => {
   } catch (error) {
     console.error("Помилка при додаванні товару:", error);
     throw new Error("Не вдалося додати товар");
+  }
+};
+
+export const fetchProductByArticle = async (
+  articleNumber: string
+): Promise<Product> => {
+  try {
+    const response = await axios.get(
+      `http://localhost:5000/product/${articleNumber}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error(`Помилка при завантаженні товару ${articleNumber}:`, error);
+    throw new Error("Не вдалося завантажити товар");
   }
 };

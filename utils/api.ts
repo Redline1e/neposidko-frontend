@@ -6,7 +6,7 @@ export interface Product {
   discount: number;
   name: string;
   description: string;
-  imageUrl: string;
+  imageUrls: string[];
   sizes: { size: string; stock: number }[];
 }
 
@@ -56,16 +56,15 @@ export interface OrderItemData {
   imageUrl: string;
 }
 
-
 export interface OrderItemData {
-    productOrderId: number;
-    orderId: number;
-    articleNumber: string;
-    size: string;
-    quantity: number;
-    price: number;
-    discount: number;
-    description: string;
-    imageUrl: string;
-    sizes?: { size: string; stock: number }[];
-  }
+  productOrderId: number;
+  orderId: number;
+  articleNumber: string;
+  size: string;
+  quantity: number;
+  price: number;
+  discount: number;
+  name: string;
+  imageUrls: string[];
+  sizes?: { size: string; stock: number }[];
+}

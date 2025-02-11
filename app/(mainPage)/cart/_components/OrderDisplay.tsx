@@ -2,8 +2,9 @@
 import { useEffect, useState } from "react";
 import OrderItem from "./OrderItem";
 import OrderTotal from "./OrderTotal";
-import { OrderItemData, Product } from "@/utils/api";
+import { OrderItemData } from "@/utils/api";
 import { fetchOrderItems } from "@/lib/order-items-service";
+import { fetchProductByArticle } from "@/lib/product-service";
 
 export const OrderDisplay = () => {
   const [orderItems, setOrderItems] = useState<OrderItemData[]>([]);
@@ -15,23 +16,25 @@ export const OrderDisplay = () => {
         const enrichedItems = await Promise.all(
           items.map(async (item) => {
             try {
-              const res = await fetch(
-                `http://localhost:5000/products/${item.articleNumber}`
+              const productData = await fetchProductByArticle(
+                item.articleNumber
               );
-              const productData: Product = await res.json();
-              return { ...item, ...productData } as OrderItemData;
+              return {
+                ...item,
+                ...productData,
+                imageUrl: productData.imageUrls?.[0] || "", // Виправлення тут
+              } as OrderItemData;
             } catch (error) {
               console.error(
-                "Помилка отримання даних продукту для articleNumber:",
-                item.articleNumber,
+                `Помилка отримання даних продукту для ${item.articleNumber}:`,
                 error
               );
               return {
                 ...item,
                 price: 0,
                 discount: 0,
-                description: "",
-                imageUrl: "",
+                description: "Немає даних",
+                imageUrl: "", // Виправлення тут
               } as OrderItemData;
             }
           })
@@ -41,6 +44,7 @@ export const OrderDisplay = () => {
         console.error("Помилка завантаження order items:", error);
       }
     }
+
     loadOrders();
   }, []);
 
@@ -55,7 +59,7 @@ export const OrderDisplay = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row gap-6">
+    <div className="flex flex-col md:flex-row gap-8">
       <div className="flex-1 space-y-4">
         {orderItems.length > 0 ? (
           orderItems.map((item) => (

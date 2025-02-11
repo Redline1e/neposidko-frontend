@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Product, Brand, Category } from "@/utils/api";
+import { Product, Brand, Category } from "@/utils/api"; // Переконайтеся, що Product тепер містить imageUrls: string[]
 import { addProduct } from "@/lib/product-service";
 import { Plus } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -23,9 +23,12 @@ export default function AddProduct() {
     price: 0,
     discount: 0,
     description: "",
-    imageUrl: "",
+    imageUrls: [], 
     sizes: [],
   });
+
+  // Окремий стан для введення URL зображень (як рядок, де URL розділено комами)
+  const [imageUrlsInput, setImageUrlsInput] = useState<string>("");
 
   // Стан для введення нового розміру та кількості
   const [newSize, setNewSize] = useState<string>("");
@@ -89,6 +92,12 @@ export default function AddProduct() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Розбиваємо введений рядок URL за комами, обрізаємо пробіли та фільтруємо порожні рядки
+    const imageUrls = imageUrlsInput
+      .split(",")
+      .map((url: string) => url.trim())
+      .filter((url) => url !== "");
+
     // Якщо режим введення знижки "amount", конвертуємо її у відсотки
     let discountPercent = form.discount;
     if (discountMode === "amount") {
@@ -99,12 +108,16 @@ export default function AddProduct() {
       }
     }
 
-    const productToAdd = { ...form, discount: discountPercent };
+    const productToAdd: Product = {
+      ...form,
+      discount: discountPercent,
+      imageUrls: imageUrls, // Зберігаємо масив URL
+    };
 
     await addProduct(productToAdd);
     alert("Товар додано!");
 
-    // Очищуємо форму після відправки
+    // Очищуємо форму та поле введення URL
     setForm({
       articleNumber: "",
       name: "",
@@ -113,9 +126,10 @@ export default function AddProduct() {
       price: 0,
       discount: 0,
       description: "",
-      imageUrl: "",
+      imageUrls: [],
       sizes: [],
     });
+    setImageUrlsInput("");
   };
 
   return (
@@ -212,7 +226,7 @@ export default function AddProduct() {
         />
       </label>
 
-      {/* Рядок з полем для знижки (зліва) та перемикачем режимів (справа) */}
+      {/* Рядок з полем для знижки та перемикачем режимів */}
       <div className="flex items-start gap-4">
         <div className="flex-1">
           <label className="flex flex-col">
@@ -274,16 +288,18 @@ export default function AddProduct() {
         />
       </label>
 
+      {/* Поле для введення URL зображень через кому */}
       <label className="flex flex-col">
         <span className="text-sm font-medium text-gray-700">
-          URL зображення:
+          URL зображень (через кому):
         </span>
         <input
           type="text"
-          name="imageUrl"
-          value={form.imageUrl}
-          onChange={handleChange}
+          name="imageUrls"
+          value={imageUrlsInput}
+          onChange={(e) => setImageUrlsInput(e.target.value)}
           required
+          placeholder="https://example.com/img1.jpg, https://example.com/img2.jpg"
           className="border p-2 rounded-md"
         />
       </label>
