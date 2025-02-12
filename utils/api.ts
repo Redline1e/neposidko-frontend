@@ -68,3 +68,11 @@ export interface OrderItemData {
   imageUrls: string[];
   sizes?: { size: string; stock: number }[];
 }
+
+export interface Review {
+  userId: number;
+  articleNumber: string;
+  rating: number;
+  comment: string;
+  reviewDate: string;
+}

@@ -24,7 +24,7 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
             alt={`Мініатюра ${index + 1}`}
             className={`w-20 h-20 object-cover rounded cursor-pointer transition-transform duration-150 hover:scale-105 ${
               selectedImage === img
-                ? "border-2 border-blue-500"
+                ? "border-2 border-neutral-500"
                 : "border border-gray-300"
             }`}
             onClick={() => setSelectedImage(img)}
