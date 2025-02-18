@@ -99,7 +99,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
           Додати в кошик
         </Button>
         <Button
-          variant="outline"
+          variant= "outline"
           onClick={onToggleWishlist}
           className="flex items-center"
           aria-label={isFavorite ? "Видалити з обраного" : "Додати в обране"}
@@ -163,7 +163,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
         <AccordionItem value="3">
           <AccordionTrigger>Доставка та оплата</AccordionTrigger>
           <AccordionContent>
-            <div className="space-y-4 font-semibold">
+            <div className="space-y-4">
               <p>-Самовивіз</p>
               <p>-Нова Пошта</p>
               <p>-Укр Пошта</p>

@@ -1,11 +1,9 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
 
-const API_URL = "http://localhost:5000";
-
 export const fetchUser = async (token: string) => {
   try {
-    const response = await axios.get(`${API_URL}/protected`, {
+    const response = await axios.get(`http://localhost:5000/protected`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
@@ -22,7 +20,7 @@ export const updateUser = async (
 ) => {
   try {
     const response = await axios.put(
-      `${API_URL}/user`,
+      `http://localhost:5000/user`,
       { name, email },
       {
         headers: { Authorization: `Bearer ${token}` },
@@ -37,7 +35,7 @@ export const updateUser = async (
 
 export const deleteUser = async (token: string) => {
   try {
-    const response = await axios.delete(`${API_URL}/user`, {
+    const response = await axios.delete(`http://localhost:5000/user`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
@@ -49,7 +47,7 @@ export const deleteUser = async (token: string) => {
 
 export const getUserData = async (token: string) => {
   try {
-    const response = await axios.get(`${API_URL}/user`, {
+    const response = await axios.get(`http://localhost:5000/user`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
@@ -72,7 +70,7 @@ export const useAuth = () => {
         return setIsAuthenticated(false);
       }
       try {
-        const response = await axios.get(`${API_URL}/protected`, {
+        const response = await axios.get(`http://localhost:5000/protected`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setIsAuthenticated(response.status === 200);
@@ -103,7 +101,7 @@ export const useCheckRole = () => {
         return;
       }
       try {
-        const response = await axios.get(`${API_URL}/getUserRole`, {
+        const response = await axios.get(`http://localhost:5000/getUserRole`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setHasAccess(response.data.roleId === 1);

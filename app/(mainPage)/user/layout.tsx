@@ -11,9 +11,7 @@ export default function UserLayout({ children }: UserLayoutProps) {
     <AuthCheck>
       <div className="flex flex-1">
         <UserSidebar />
-        <div className="flex-1 p-4 h-full">
-          {children}
-        </div>
+        <div className="flex-1 p-4 h-full">{children}</div>
       </div>
     </AuthCheck>
   );

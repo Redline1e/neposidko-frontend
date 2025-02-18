@@ -1,58 +1,106 @@
 "use client";
+
 import { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { Loader2 } from "lucide-react";
-import { fetchUser } from "@/lib/user-service";
-interface User {
-  name?: string;
-  email?: string;
-  userId?: number;
-}
+import { fetchUser, updateUser } from "@/lib/user-service";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner";
+
+type FormData = {
+  name: string;
+  email: string;
+};
 
 const ProtectedPage = () => {
-  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const { control, handleSubmit, reset } = useForm<FormData>({
+    defaultValues: {
+      name: "",
+      email: "",
+    },
+  });
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const loadUserData = async () => {
       const token = localStorage.getItem("token");
       if (!token) {
         window.location.href = "/login";
         return;
       }
-
       try {
-        const data = await fetchUser(token);
-        setUser(data);
-      } catch {
+        const userData = await fetchUser(token);
+        console.log("Fetched user data:", userData);
+        reset({
+          name: userData.name,
+          email: userData.email,
+        });
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        toast.error("Помилка завантаження користувача");
         window.location.href = "/login";
       } finally {
         setLoading(false);
       }
     };
 
-    checkAuth();
-  }, []);
+    loadUserData();
+  }, [reset]);
+
+  const onSubmit = async (data: FormData) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Користувач не авторизований");
+      window.location.href = "/login";
+      return;
+    }
+    try {
+      await updateUser(token, data.name, data.email);
+      toast.success("Дані успішно оновлено!");
+    } catch (error) {
+      toast.error("Не вдалося оновити дані");
+    }
+  };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <Loader2 className="animate-spin size-10" />
+        <Loader2 className="animate-spin" />
       </div>
     );
   }
 
-  if (!user) {
-    return null;
-  }
-
-  const { name, email, userId } = user;
-
   return (
-    <div>
-      <h1>Вітаємо, {name || "Користувач"}</h1>
-      <p>Ваш email: {email || "Не вказано"}</p>
-      <p>Ваш ID: {userId !== undefined ? userId : "Не вказано"}</p>
-    </div>
+    <Card className="max-w-md mx-auto mt-10 p-4">
+      <CardHeader>
+        <CardTitle>Редагувати профіль</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium">Ім'я</label>
+            <Controller
+              control={control}
+              name="name"
+              render={({ field }) => <Input {...field} required />}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium">Email</label>
+            <Controller
+              control={control}
+              name="email"
+              render={({ field }) => <Input {...field} type="email" required />}
+            />
+          </div>
+          <Button type="submit" className="w-full">
+            Зберегти зміни
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 };
 

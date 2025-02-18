@@ -4,9 +4,9 @@ import { Slider } from "./_components/slider/Slider";
 
 export default function Home() {
   return (
-    <>
+    <div className="flex w-full flex-col justify-center">
       <CategoriesDisplay />
       <Slider />
-    </>
+    </div>
   );
 }
