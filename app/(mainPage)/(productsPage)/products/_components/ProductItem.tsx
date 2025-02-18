@@ -1,8 +1,14 @@
+import { useEffect, useState } from "react";
 import { Product } from "@/utils/api";
 import React from "react";
 import { Heart, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import {
+  addToFavorites,
+  removeFromFavorites,
+  fetchFavorites,
+} from "@/lib/favorites-service";
 
 interface SizeInfo {
   size: string;
@@ -18,8 +24,8 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
     articleNumber,
     price,
     discount,
-    description,
-    imageUrls, // тепер це масив URL зображень
+    name,
+    imageUrls,
     sizes = [],
   } = product;
 
@@ -31,13 +37,54 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
   const imageSrc =
     imageUrls && imageUrls.length > 0 ? imageUrls[0] : "/fallback.jpg";
 
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
+
+  // Перевірка чи товар вже знаходиться в обраних
+  useEffect(() => {
+    const checkFavoriteStatus = async () => {
+      try {
+        const favorites = await fetchFavorites();
+        setIsFavorite(
+          favorites.some((fav) => fav.articleNumber === articleNumber)
+        );
+      } catch (error) {
+        console.error("Помилка при перевірці улюблених:", error);
+      }
+    };
+
+    checkFavoriteStatus();
+  }, [articleNumber]);
+
+  const handleToggleFavorite = async (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isFavorite) {
+      try {
+        await addToFavorites(articleNumber);
+        setIsFavorite(true);
+      } catch (error) {
+        console.error("Не вдалося додати в улюблені:", error);
+      }
+    } else {
+      try {
+        await removeFromFavorites(articleNumber);
+        setIsFavorite(false);
+      } catch (error) {
+        console.error("Не вдалося видалити з улюблених:", error);
+      }
+    }
+  };
+
   return (
     <Link href={`/product/${articleNumber}`} passHref className="block">
       <div className="bg-white shadow-lg rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border">
         <div className="relative">
           <img
             src={imageSrc}
-            alt={description}
+            alt={name}
             className="w-full h-60 object-cover rounded-t-lg"
           />
           {discount > 0 && (
@@ -46,20 +93,19 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
             </div>
           )}
           <Button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
-            className="absolute top-1 right-2 bg-white rounded-full shadow-md"
+            onClick={handleToggleFavorite}
+            className={`absolute top-1 right-2 rounded-full shadow-md  ${
+              isFavorite ? "bg-red-500 hover:bg-red-500/80" : ""
+            }`}
             variant="ghost"
             size="sm"
           >
-            <Heart className="text-red-500" />
+            <Heart className={isFavorite ? "text-white" : "text-red-500"} />
           </Button>
         </div>
         <div className="p-4">
           <h2 className="text-lg font-semibold text-gray-800 truncate">
-            {description}
+            {name}
           </h2>
           <div className="mt-2 flex items-center space-x-2">
             {discount > 0 && (

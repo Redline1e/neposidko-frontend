@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import ProductItem from "./FavoriteItem";
+import ProductItem from "@/app/(mainPage)/(productsPage)/products/_components/ProductItem";
 import { Product } from "@/utils/api";
 import { fetchFavorites } from "@/lib/favorites-service";
+import { Loader2, AlertCircle } from "lucide-react";
 
 export const FavoriteDisplay = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -12,25 +13,41 @@ export const FavoriteDisplay = () => {
   const getFavorites = async () => {
     setLoading(true);
     try {
-      const data = await fetchFavorites(); // Fetch only the favorite products
+      const data = await fetchFavorites();
       setProducts(data);
       setError(null);
     } catch (error) {
-      setError("Не вдалося завантажити улюблені товари");
+      setError("У вас ще немає улюблених товарів");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    getFavorites(); // Get the favorites when the component loads
+    getFavorites();
   }, []);
 
+  const removeFavorite = (articleNumber: string) => {
+    setProducts((prev) =>
+      prev.filter((p) => p.articleNumber !== articleNumber)
+    );
+  };
+
   if (loading)
-    return <p className="text-center text-xl font-semibold">Завантаження...</p>;
+    return (
+      <p className="flex justify-center items-center animate-spin py-20">
+        <Loader2 size={32} />
+      </p>
+    );
+
   if (error)
     return (
-      <p className="text-center text-xl font-semibold text-red-500">{error}</p>
+      <div className="flex flex-col justify-center items-center py-20">
+        <AlertCircle size={44} className="text-gray-900 mb-4" />
+        <p className="text-center text-2xl font-semibold text-gray-900">
+          {error}
+        </p>
+      </div>
     );
 
   return (
@@ -42,7 +59,10 @@ export const FavoriteDisplay = () => {
           </p>
         ) : (
           products.map((product) => (
-            <ProductItem key={product.articleNumber} product={product} />
+            <ProductItem
+              key={product.articleNumber}
+              product={product}
+            />
           ))
         )}
       </div>

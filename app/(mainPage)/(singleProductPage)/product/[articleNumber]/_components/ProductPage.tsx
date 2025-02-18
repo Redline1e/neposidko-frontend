@@ -7,7 +7,11 @@ import { CommentsSection } from "./CommentsSection";
 import { fetchProductByArticle } from "@/lib/product-service";
 import { Product } from "@/utils/api";
 import { Loader2 } from "lucide-react";
-import { addToFavorites } from "@/lib/favorites-service";
+import {
+  addToFavorites,
+  removeFromFavorites,
+  fetchFavorites,
+} from "@/lib/favorites-service";
 import { toast } from "sonner";
 import axios from "axios";
 
@@ -17,6 +21,7 @@ export const ProductPage: React.FC = () => {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
     if (!articleNumber) return;
@@ -36,6 +41,24 @@ export const ProductPage: React.FC = () => {
     loadProduct();
   }, [articleNumber]);
 
+  // Після завантаження товару перевіряємо, чи є він у списку обраного
+  useEffect(() => {
+    if (product) {
+      const checkFavorite = async () => {
+        try {
+          const favorites = await fetchFavorites();
+          const isFav = favorites.some(
+            (fav) => fav.articleNumber === product.articleNumber
+          );
+          setIsFavorite(isFav);
+        } catch (error) {
+          console.error("Помилка при перевірці обраного:", error);
+        }
+      };
+      checkFavorite();
+    }
+  }, [product]);
+
   const handleSizeSelect = (size: string) => {
     setSelectedSize(size);
   };
@@ -50,19 +73,14 @@ export const ProductPage: React.FC = () => {
       const cartItem = {
         articleNumber: product.articleNumber,
         size: selectedSize,
-        quantity: 1, // Always add 1 quantity
+        quantity: 1, // Додаємо завжди 1 штуку
       };
 
-      // Make the request to add the item to the cart
-      const response = await axios.post(
-        "http://localhost:5000/order-items",
-        cartItem,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      await axios.post("http://localhost:5000/order-items", cartItem, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
       toast.success("Товар додано до кошика!");
     } catch (error) {
@@ -70,14 +88,19 @@ export const ProductPage: React.FC = () => {
     }
   };
 
-  const handleAddToWishlist = async () => {
+  const handleToggleWishlist = async () => {
     if (!product) return;
-
     try {
-      await addToFavorites(product.articleNumber); // Add to favorites by article number
-      toast.success("Товар додано в обране!");
+      if (!isFavorite) {
+        await addToFavorites(product.articleNumber);
+        setIsFavorite(true);
+
+      } else {
+        await removeFromFavorites(product.articleNumber);
+        setIsFavorite(false);
+      }
     } catch (error) {
-      toast.error("Не вдалося додати товар в обране");
+      toast.error("Не вдалося оновити обране");
     }
   };
 
@@ -101,8 +124,9 @@ export const ProductPage: React.FC = () => {
           discount={product.discount}
           sizes={product.sizes?.map((s) => s.size) || []}
           onAddToCart={handleAddToCart}
-          onSizeSelect={handleSizeSelect} // Pass the size select handler here
-          onAddToWishlist={handleAddToWishlist}
+          onSizeSelect={handleSizeSelect}
+          onToggleWishlist={handleToggleWishlist}
+          isFavorite={isFavorite}
         />
       </div>
       <CommentsSection />

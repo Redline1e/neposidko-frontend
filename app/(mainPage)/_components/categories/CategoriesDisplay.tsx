@@ -3,6 +3,7 @@ import { fetchCategories } from "@/lib/category-service";
 import { Category } from "@/utils/api";
 import { useEffect, useState } from "react";
 import { CategoriesItem } from "./CategoryItem";
+import { Loader2 } from "lucide-react";
 
 export const CategoriesDisplay = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -28,7 +29,9 @@ export const CategoriesDisplay = () => {
 
   if (loading) {
     return (
-      <div className="text-center text-gray-500">Завантаження категорій...</div>
+      <div className="text-center animate-spin">
+        <Loader2 />
+      </div>
     );
   }
 
@@ -38,7 +41,9 @@ export const CategoriesDisplay = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold text-center mb-6">Категорії</h1>
+      <h1 className="text-2xl font-bold text-center mb-6">
+        Популярні категорії
+      </h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {categories.map((category, id) => (
           <CategoriesItem key={id} category={category} />

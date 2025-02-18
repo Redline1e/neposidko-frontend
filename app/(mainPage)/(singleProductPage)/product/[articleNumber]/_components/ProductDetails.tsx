@@ -8,7 +8,7 @@ import {
   AccordionContent,
 } from "@/components/ui/accordion";
 import { useState } from "react";
-import { toast } from "sonner"; // Assuming you're using sonner for notifications
+import { toast } from "sonner";
 
 interface ProductDetailsProps {
   title: string;
@@ -17,8 +17,9 @@ interface ProductDetailsProps {
   discount: number;
   sizes: string[];
   onAddToCart: () => void;
-  onAddToWishlist: () => void; // Function to add product to wishlist
-  onSizeSelect: (size: string) => void; // Function to handle size selection
+  onToggleWishlist: () => void;
+  onSizeSelect: (size: string) => void;
+  isFavorite: boolean;
 }
 
 export const ProductDetails: React.FC<ProductDetailsProps> = ({
@@ -28,25 +29,26 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
   discount,
   sizes,
   onAddToCart,
-  onAddToWishlist,
-  onSizeSelect, // Handle size select function
+  onToggleWishlist,
+  onSizeSelect,
+  isFavorite,
 }) => {
   const product = parseProductDescription(description);
   const discountedPrice = discount ? price - (price * discount) / 100 : price;
 
-  const [selectedSize, setSelectedSize] = useState<string | null>(null); // To track the selected size
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
 
   const handleSizeSelect = (size: string) => {
-    setSelectedSize(size); // Update the selected size
-    onSizeSelect(size); // Pass selected size back to parent component
+    setSelectedSize(size);
+    onSizeSelect(size);
   };
 
   const handleAddToCartClick = () => {
     if (!selectedSize) {
-      toast.error("Будь ласка, виберіть розмір перед додаванням в кошик!"); // Show error if no size is selected
+      toast.error("Будь ласка, виберіть розмір перед додаванням в кошик!");
       return;
     }
-    onAddToCart(); // Proceed with adding to cart if a size is selected
+    onAddToCart();
   };
 
   return (
@@ -61,9 +63,11 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
             {price.toFixed(0)}
           </span>
         )}
-        <div className="absolute top-4 left-20 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
-          -{discount}%
-        </div>
+        {discount > 0 && (
+          <div className="absolute top-4 left-20 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+            -{discount}%
+          </div>
+        )}
       </div>
       <div className="mb-5">
         <span className="font-semibold">Розміри: </span>
@@ -72,11 +76,9 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
             sizes.map((size, index) => (
               <span
                 key={index}
-                onClick={() => handleSizeSelect(size)} // Handle size selection
+                onClick={() => handleSizeSelect(size)}
                 className={`px-4 py-2 border rounded text-sm font-medium cursor-pointer transition duration-200 ${
-                  selectedSize === size
-                    ? "bg-neutral-400" // Neutral color for selected size
-                    : "hover:bg-gray-100"
+                  selectedSize === size ? "bg-neutral-400" : "hover:bg-gray-100"
                 }`}
               >
                 {size}
@@ -98,16 +100,21 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
         </Button>
         <Button
           variant="outline"
-          onClick={onAddToWishlist}
+          onClick={onToggleWishlist}
           className="flex items-center"
-          aria-label="Додати в обране"
+          aria-label={isFavorite ? "Видалити з обраного" : "Додати в обране"}
         >
-          <Heart className="sm:mr-2 md:mr-2 lg:mr-2 h-5 w-5" />
-          <p className="hidden sm:block md:block lg:block">Додати в обране</p>
+          <Heart
+            className={`sm:mr-2 md:mr-2 lg:mr-2 h-5 w-5 ${
+              isFavorite ? "text-red-500" : ""
+            }`}
+          />
+          <p className="hidden sm:block md:block lg:block">
+            {isFavorite ? "В обраному" : "Додати в обране"}
+          </p>
         </Button>
       </div>
 
-      {/* Accordion for product details */}
       <Accordion type="single" collapsible>
         <AccordionItem value="1">
           <AccordionTrigger>Детально про товар</AccordionTrigger>
@@ -137,7 +144,6 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
           </AccordionContent>
         </AccordionItem>
 
-        {/* Materials */}
         <AccordionItem value="2">
           <AccordionTrigger>Матеріали</AccordionTrigger>
           <AccordionContent>
@@ -147,14 +153,13 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
                 <div>{product.upperMaterial}</div>
               </div>
               <div className="flex justify-between">
-                <div className="font-semibold ">Матеріал підкладки:</div>
+                <div className="font-semibold">Матеріал підкладки:</div>
                 <div className="text-end">{product.liningMaterial}</div>
               </div>
             </div>
           </AccordionContent>
         </AccordionItem>
 
-        {/* Delivery and payment */}
         <AccordionItem value="3">
           <AccordionTrigger>Доставка та оплата</AccordionTrigger>
           <AccordionContent>

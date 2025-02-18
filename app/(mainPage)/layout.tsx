@@ -11,9 +11,7 @@ export default function BrowseLayout({
     <div className="flex flex-col min-h-screen">
       <Toaster />
       <Navbar />
-      <main className="flex-1 flex">
-        {children}
-      </main>
+      <main className="flex-1 flex-col">{children}</main>
       <Footer />
     </div>
   );
