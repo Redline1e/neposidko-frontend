@@ -14,24 +14,27 @@ export const fetchUser = async (token: string) => {
 };
 
 export const updateUser = async (
-  token: string,
-  name: string,
-  email: string
-) => {
-  try {
-    const response = await axios.put(
-      `http://localhost:5000/user`,
-      { name, email },
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Помилка оновлення користувача:", error);
-    throw new Error("Не вдалося оновити дані користувача");
-  }
-};
+    token: string,
+    name: string,
+    email: string,
+    telephone: string, 
+    deliveryAddress: string
+  ) => {
+    try {
+      const response = await axios.put(
+        `http://localhost:5000/user`,
+        { name, email, telephone, deliveryAddress },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Помилка оновлення користувача:", error);
+      throw new Error("Не вдалося оновити дані користувача");
+    }
+  };
+  
 
 export const deleteUser = async (token: string) => {
   try {
