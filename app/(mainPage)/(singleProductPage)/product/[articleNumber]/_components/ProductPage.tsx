@@ -41,7 +41,7 @@ export const ProductPage: React.FC = () => {
     loadProduct();
   }, [articleNumber]);
 
-  // Після завантаження товару перевіряємо, чи є він у списку обраного
+  // Перевірка, чи є товар у списку обраного
   useEffect(() => {
     if (product) {
       const checkFavorite = async () => {
@@ -94,7 +94,6 @@ export const ProductPage: React.FC = () => {
       if (!isFavorite) {
         await addToFavorites(product.articleNumber);
         setIsFavorite(true);
-
       } else {
         await removeFromFavorites(product.articleNumber);
         setIsFavorite(false);
@@ -129,7 +128,8 @@ export const ProductPage: React.FC = () => {
           isFavorite={isFavorite}
         />
       </div>
-      <CommentsSection />
+      {/* Передаємо articleNumber в CommentsSection */}
+      <CommentsSection articleNumber={product.articleNumber} />
     </div>
   );
 };

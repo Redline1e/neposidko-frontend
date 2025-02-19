@@ -44,17 +44,7 @@ export interface OrderData {
   items?: OrderItem[];
 }
 
-export interface OrderItemData {
-  productOrderId: number;
-  orderId: number;
-  articleNumber: string;
-  size: string;
-  quantity: number;
-  price: number;
-  discount: number;
-  description: string;
-  imageUrl: string;
-}
+
 
 export interface OrderItemData {
   productOrderId: number;
@@ -70,9 +60,20 @@ export interface OrderItemData {
 }
 
 export interface Review {
+  reviewId: number;
   userId: number;
   articleNumber: string;
   rating: number;
   comment: string;
   reviewDate: string;
+}
+
+export interface User {
+  readonly userId: number;
+  readonly roleId: number;
+  name: string;
+  email: string;
+  password: string;
+  telephone?: string;
+  deliveryAddress?: string;
 }

@@ -1,3 +1,4 @@
+import { User } from "@/utils/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -73,19 +74,27 @@ export const getUserData = async (token: string) => {
 export const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem("token");
       if (!token) {
         setLoading(false);
-        return setIsAuthenticated(false);
+        setIsAuthenticated(false);
+        return;
       }
       try {
         const response = await axios.get("http://localhost:5000/protected", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setIsAuthenticated(response.status === 200);
+        if (response.status === 200) {
+          setIsAuthenticated(true);
+          // Припускаємо, що endpoint повертає дані користувача
+          setUser(response.data);
+        } else {
+          setIsAuthenticated(false);
+        }
       } catch (error) {
         console.error("Error during auth check:", error);
         setIsAuthenticated(false);
@@ -96,9 +105,8 @@ export const useAuth = () => {
     checkAuth();
   }, []);
 
-  return { isAuthenticated, loading };
+  return { isAuthenticated, loading, user };
 };
-
 // Хук для перевірки ролі користувача
 export const useCheckRole = () => {
   const [hasAccess, setHasAccess] = useState(false);
@@ -128,4 +136,22 @@ export const useCheckRole = () => {
   }, []);
 
   return { hasAccess, loading };
+};
+
+export const fetchUserById = async (userId: number): Promise<User> => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    throw new Error("Токен не знайдено");
+  }
+  try {
+    const response = await axios.get(`http://localhost:5000/user/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error: any) {
+    const message =
+      error.response?.data?.error || "Не вдалося отримати дані користувача";
+    console.error("Помилка отримання користувача за ID:", message);
+    throw new Error(message);
+  }
 };
