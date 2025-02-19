@@ -1,62 +1,71 @@
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
+// Функція для отримання даних користувача
 export const fetchUser = async (token: string) => {
   try {
-    const response = await axios.get(`http://localhost:5000/protected`, {
+    const response = await axios.get("http://localhost:5000/protected", {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
-  } catch (error) {
-    console.error("Помилка отримання користувача:", error);
-    throw new Error("Не вдалося отримати дані користувача");
+  } catch (error: any) {
+    const message =
+      error.response?.data?.error || "Не вдалося отримати дані користувача";
+    console.error("Помилка отримання користувача:", message);
+    throw new Error(message);
   }
 };
 
+// Функція для оновлення даних користувача
 export const updateUser = async (
-    token: string,
-    name: string,
-    email: string,
-    telephone: string, 
-    deliveryAddress: string
-  ) => {
-    try {
-      const response = await axios.put(
-        `http://localhost:5000/user`,
-        { name, email, telephone, deliveryAddress },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      return response.data;
-    } catch (error) {
-      console.error("Помилка оновлення користувача:", error);
-      throw new Error("Не вдалося оновити дані користувача");
-    }
-  };
-  
+  token: string,
+  name: string,
+  email: string,
+  telephone: string,
+  deliveryAddress: string
+) => {
+  try {
+    const response = await axios.put(
+      "http://localhost:5000/user",
+      { name, email, telephone, deliveryAddress },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data;
+  } catch (error: any) {
+    const message =
+      error.response?.data?.error || "Не вдалося оновити дані користувача";
+    console.error("Помилка оновлення користувача:", message);
+    throw new Error(message);
+  }
+};
 
+// Функція для видалення користувача
 export const deleteUser = async (token: string) => {
   try {
-    const response = await axios.delete(`http://localhost:5000/user`, {
+    const response = await axios.delete("http://localhost:5000/user", {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
-  } catch (error) {
-    console.error("Помилка видалення користувача:", error);
-    throw new Error("Не вдалося видалити користувача");
+  } catch (error: any) {
+    const message =
+      error.response?.data?.error || "Не вдалося видалити користувача";
+    console.error("Помилка видалення користувача:", message);
+    throw new Error(message);
   }
 };
 
+// Функція для отримання даних користувача (якщо потрібен інший endpoint)
 export const getUserData = async (token: string) => {
   try {
-    const response = await axios.get(`http://localhost:5000/user`, {
+    const response = await axios.get("http://localhost:5000/user", {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
-  } catch (error) {
-    console.error("Помилка отримання даних про користувача:", error);
-    throw new Error("Не вдалося отримати дані про користувача");
+  } catch (error: any) {
+    const message =
+      error.response?.data?.error || "Не вдалося отримати дані про користувача";
+    console.error("Помилка отримання даних про користувача:", message);
+    throw new Error(message);
   }
 };
 
@@ -73,7 +82,7 @@ export const useAuth = () => {
         return setIsAuthenticated(false);
       }
       try {
-        const response = await axios.get(`http://localhost:5000/protected`, {
+        const response = await axios.get("http://localhost:5000/protected", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setIsAuthenticated(response.status === 200);
@@ -104,7 +113,7 @@ export const useCheckRole = () => {
         return;
       }
       try {
-        const response = await axios.get(`http://localhost:5000/getUserRole`, {
+        const response = await axios.get("http://localhost:5000/getUserRole", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setHasAccess(response.data.roleId === 1);

@@ -27,11 +27,6 @@ export const FavoriteDisplay = () => {
     getFavorites();
   }, []);
 
-  const removeFavorite = (articleNumber: string) => {
-    setProducts((prev) =>
-      prev.filter((p) => p.articleNumber !== articleNumber)
-    );
-  };
 
   if (loading)
     return (
