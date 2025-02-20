@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import OrderItem from "./OrderItem";
 import OrderTotal from "./OrderTotal";
 import { OrderItemData } from "@/utils/api";
-import { fetchOrderItems } from "@/lib/order-items-service";
-import { fetchProductByArticle } from "@/lib/product-service";
+import { fetchOrderItems } from "@/lib/api/order-items-service";
+import { fetchProductByArticle } from "@/lib/api/product-service";
 
 export const OrderDisplay = () => {
   const [orderItems, setOrderItems] = useState<OrderItemData[]>([]);

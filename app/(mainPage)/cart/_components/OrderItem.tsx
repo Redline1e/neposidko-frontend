@@ -10,7 +10,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { updateOrderItem, deleteOrderItem } from "@/lib/order-items-service";
+import {
+  updateOrderItem,
+  deleteOrderItem,
+} from "@/lib/api/order-items-service";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";

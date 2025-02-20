@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
 import { Category } from "@/utils/api";
-import { addCategory } from "@/lib/category-service";
-import { addBrand } from "@/lib/brands-service";
+import { addCategory } from "@/lib/api/category-service";
+import { addBrand } from "@/lib/api/brands-service";
 
 export default function AddBrand() {
   const [form, setForm] = useState<Category>({

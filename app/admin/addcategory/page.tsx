@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Product } from "@/utils/api";
 import { CategoriesDisplay } from "./_components/CategoriesDisplay";
-import { fetchProducts } from "@/lib/product-service";
+import { fetchProducts } from "@/lib/api/product-service";
 import AddCategory from "./_components/AddCategory";
 
 export default function Home() {

@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Loader2 } from "lucide-react";
-import { fetchUser, updateUser } from "@/lib/user-service";
+import { fetchUser, updateUser } from "@/lib/api/user-service";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

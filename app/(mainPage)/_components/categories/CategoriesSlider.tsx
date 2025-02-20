@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { fetchCategories } from "@/lib/category-service";
+import { fetchCategories } from "@/lib/api/category-service";
 import { Category } from "@/utils/api";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

@@ -1,5 +1,5 @@
 "use client";
-import { fetchCategories } from "@/lib/category-service";
+import { fetchCategories } from "@/lib/api/category-service";
 import { Category } from "@/utils/api";
 import { useEffect, useState } from "react";
 import { CategoriesItem } from "./CategoryItem";
@@ -29,7 +29,7 @@ export const CategoriesDisplay = () => {
 
   if (loading) {
     return (
-      <div className="text-center animate-spin">
+      <div className="flex justify-center items-center animate-spin">
         <Loader2 />
       </div>
     );

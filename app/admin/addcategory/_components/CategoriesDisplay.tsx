@@ -1,5 +1,5 @@
 "use client";
-import { fetchCategories } from "@/lib/category-service";
+import { fetchCategories } from "@/lib/api/category-service";
 import { Category } from "@/utils/api";
 import { useEffect, useState } from "react";
 import { CategoriesItem } from "./CategoryItem";

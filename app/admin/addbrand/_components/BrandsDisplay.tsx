@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { BrandItem } from "./BrandItem";
 import { Brand } from "@/utils/api";
-import { fetchBrands } from "@/lib/brands-service";
+import { fetchBrands } from "@/lib/api/brands-service";
 
 export const BrandsDisplay = () => {
   const [Brands, setBrands] = useState<Brand[]>([]);

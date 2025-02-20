@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import ProductItem from "@/app/(mainPage)/(productsPage)/products/_components/ProductItem";
 import { Product } from "@/utils/api";
-import { fetchFavorites } from "@/lib/favorites-service";
+import { fetchFavorites } from "@/lib/api/favorites-service";
 import { Loader2, AlertCircle } from "lucide-react";
 
 export const FavoriteDisplay = () => {
@@ -26,7 +26,6 @@ export const FavoriteDisplay = () => {
   useEffect(() => {
     getFavorites();
   }, []);
-
 
   if (loading)
     return (
@@ -54,10 +53,7 @@ export const FavoriteDisplay = () => {
           </p>
         ) : (
           products.map((product) => (
-            <ProductItem
-              key={product.articleNumber}
-              product={product}
-            />
+            <ProductItem key={product.articleNumber} product={product} />
           ))
         )}
       </div>

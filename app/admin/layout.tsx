@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useCheckRole } from "@/lib/user-service";
+import { useCheckRole } from "@/lib/api/user-service";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AdminSidebar } from "./_components/AdminSidebar";
 import { Loader2 } from "lucide-react";

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Product } from "@/utils/api";
 import AddProduct from "./_components/AddProduct";
 import { ProductDisplay } from "./_components/ProductDisplay";
-import { fetchProducts } from "@/lib/product-service";
+import { fetchProducts } from "@/lib/api/product-service";
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);

@@ -1,7 +1,7 @@
 // components/ProtectedRoute.tsx
 "use client";
 import { useEffect } from "react";
-import { useCheckRole } from "@/lib/user-service";
+import { useCheckRole } from "@/lib/api/user-service";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { hasAccess, loading } = useCheckRole();

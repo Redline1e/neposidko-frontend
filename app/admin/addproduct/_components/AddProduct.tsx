@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Product, Brand, Category } from "@/utils/api"; // Переконайтеся, що Product тепер містить imageUrls: string[]
-import { addProduct } from "@/lib/product-service";
+import { addProduct } from "@/lib/api/product-service";
 import { Plus } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
@@ -11,8 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { fetchBrands } from "@/lib/brands-service";
-import { fetchCategories } from "@/lib/category-service";
+import { fetchBrands } from "@/lib/api/brands-service";
+import { fetchCategories } from "@/lib/api/category-service";
 
 export default function AddProduct() {
   const [form, setForm] = useState<Product>({
@@ -23,7 +23,7 @@ export default function AddProduct() {
     price: 0,
     discount: 0,
     description: "",
-    imageUrls: [], 
+    imageUrls: [],
     sizes: [],
   });
 

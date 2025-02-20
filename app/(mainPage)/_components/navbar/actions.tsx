@@ -18,7 +18,7 @@ import {
 import Link from "next/link";
 import useMedia from "use-media";
 import { useEffect, useState } from "react";
-import { fetchFavorites } from "@/lib/favorites-service";
+import { fetchFavorites } from "@/lib/api/favorites-service";
 
 const actionLinks = [
   { name: "Головна", href: "/", icon: Home },

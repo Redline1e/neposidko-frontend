@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Brand } from "@/utils/api";
 import { BrandsDisplay } from "./_components/BrandsDisplay";
 import AddBrand from "./_components/AddBrand";
-import { fetchBrands } from "@/lib/brands-service";
+import { fetchBrands } from "@/lib/api/brands-service";
 
 export default function Home() {
   const [brand, setBrand] = useState<Brand[]>([]);

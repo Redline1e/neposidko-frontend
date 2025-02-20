@@ -31,3 +31,4 @@ export const fetchBrandById = async (brandId: number): Promise<Brand> => {
     throw new Error("Не вдалося завантажити бренд");
   }
 };
+

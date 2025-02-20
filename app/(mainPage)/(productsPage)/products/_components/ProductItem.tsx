@@ -8,7 +8,7 @@ import {
   addToFavorites,
   removeFromFavorites,
   fetchFavorites,
-} from "@/lib/favorites-service";
+} from "@/lib/api/favorites-service";
 
 interface SizeInfo {
   size: string;

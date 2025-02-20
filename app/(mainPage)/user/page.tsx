@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchUser } from "@/lib/user-service";
+import { fetchUser } from "@/lib/api/user-service";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 

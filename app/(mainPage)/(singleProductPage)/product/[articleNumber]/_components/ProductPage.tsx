@@ -4,14 +4,14 @@ import { useParams } from "next/navigation";
 import { ProductImageGallery } from "./ProductImageGallery";
 import { ProductDetails } from "./ProductDetails";
 import { CommentsSection } from "./CommentsSection";
-import { fetchProductByArticle } from "@/lib/product-service";
+import { fetchProductByArticle } from "@/lib/api/product-service";
 import { Product } from "@/utils/api";
 import { Loader2 } from "lucide-react";
 import {
   addToFavorites,
   removeFromFavorites,
   fetchFavorites,
-} from "@/lib/favorites-service";
+} from "@/lib/api/favorites-service";
 import { toast } from "sonner";
 import axios from "axios";
 

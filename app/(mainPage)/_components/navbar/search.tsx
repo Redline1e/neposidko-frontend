@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { X, Frown } from "lucide-react";
-import { searchProducts } from "@/lib/product-service";
+import { searchProducts } from "@/lib/api/product-service";
 import { Product } from "@/utils/api";
 
 export const Search = () => {

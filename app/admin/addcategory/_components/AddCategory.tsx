@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Category } from "@/utils/api";
-import { addCategory } from "@/lib/category-service";
+import { addCategory } from "@/lib/api/category-service";
 
 export default function AddCategory() {
   const [form, setForm] = useState<Category>({

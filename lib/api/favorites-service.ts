@@ -1,6 +1,6 @@
 import axios from "axios";
 import { toast } from "sonner";
-import { getToken } from "@/utils/auth";
+import { getToken } from "../hooks/getToken";
 import { Product } from "@/utils/api";
 
 export const addToFavorites = async (articleNumber: string): Promise<void> => {
@@ -10,7 +10,7 @@ export const addToFavorites = async (articleNumber: string): Promise<void> => {
       throw new Error("Token not available");
     }
     await axios.post(
-      `http://localhost:5000/favorites`,
+      "http://localhost:5000/favorites",
       { articleNumber },
       {
         headers: {
@@ -29,15 +29,28 @@ export const addToFavorites = async (articleNumber: string): Promise<void> => {
 
 export const fetchFavorites = async (): Promise<Product[]> => {
   try {
+    const token = getToken();
+    if (!token) {
+      console.warn("Token is not available");
+      return [];
+    }
     const response = await axios.get("http://localhost:5000/favorites", {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
     });
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
+    if (error.response && error.response.status === 403) {
+      console.warn(
+        "Access forbidden: invalid token or insufficient permissions"
+      );
+      // Якщо токен недійсний, повертаємо порожній масив, щоб уникнути помилки в UI
+      return [];
+    }
     console.error("Помилка при завантаженні улюблених товарів:", error);
-    throw new Error("Не вдалося завантажити улюблені товари");
+    return [];
   }
 };
 

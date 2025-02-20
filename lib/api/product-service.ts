@@ -11,8 +11,6 @@ export const fetchProducts = async (): Promise<Product[]> => {
   }
 };
 
-
-
 export const addProduct = async (product: Product): Promise<void> => {
   try {
     await axios.post("http://localhost:5000/products", product, {

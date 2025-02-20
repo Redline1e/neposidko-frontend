@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { deleteUser } from "@/lib/user-service";
+import { deleteUser } from "@/lib/api/user-service";
 import { History, LogOut, Pen, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useMedia } from "use-media";
