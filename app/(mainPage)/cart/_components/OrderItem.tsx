@@ -35,9 +35,11 @@ export default function OrderItem({ item, onItemUpdate, onItemDelete }: Props) {
 
   const initialValues = useRef({ size: item.size, quantity: item.quantity });
 
+  // Знаходимо інформацію про доступний stock для обраного розміру
   const sizeData = item.sizes?.find((s) => s.size === selectedSize);
   const availableStock = sizeData ? sizeData.stock : 0;
 
+  // Створюємо масив варіантів для вибору кількості
   const quantityOptions = [];
   for (let i = 1; i <= availableStock; i++) {
     quantityOptions.push(i);
@@ -108,7 +110,7 @@ export default function OrderItem({ item, onItemUpdate, onItemDelete }: Props) {
         {item.imageUrls.length > 0 ? (
           <Image
             src={item.imageUrls[0]}
-            alt={item.description}
+            alt={item.name}
             width={100}
             height={100}
             className="rounded-lg"
@@ -135,6 +137,7 @@ export default function OrderItem({ item, onItemUpdate, onItemDelete }: Props) {
           <p className="text-red-500 font-semibold">{item.price} грн.</p>
         )}
         <div className="mt-2 flex flex-col md:flex-row md:items-center gap-4">
+          {/* Селектор розміру */}
           <div className="w-40">
             <Select
               value={selectedSize}
@@ -150,6 +153,24 @@ export default function OrderItem({ item, onItemUpdate, onItemDelete }: Props) {
                       {sizeObj.size}
                     </SelectItem>
                   ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {/* Селектор кількості */}
+          <div className="w-20">
+            <Select
+              value={selectedQuantity.toString()}
+              onValueChange={(value) => setSelectedQuantity(Number(value))}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Кількість" />
+              </SelectTrigger>
+              <SelectContent>
+                {quantityOptions.map((q) => (
+                  <SelectItem key={q} value={q.toString()}>
+                    {q}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

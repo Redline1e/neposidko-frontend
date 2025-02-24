@@ -19,10 +19,18 @@ export const OrderDisplay = () => {
               const productData = await fetchProductByArticle(
                 item.articleNumber
               );
+              // Формуємо об’єкт, що відповідає OrderItemData
               return {
-                ...item,
-                ...productData,
-                imageUrl: productData.imageUrls?.[0] || "", // Виправлення тут
+                productOrderId: item.productOrderId,
+                orderId: item.orderId,
+                articleNumber: item.articleNumber,
+                size: item.size,
+                quantity: item.quantity,
+                price: productData.price,
+                discount: productData.discount,
+                name: productData.name,
+                imageUrls: productData.imageUrls || [],
+                sizes: productData.sizes || [],
               } as OrderItemData;
             } catch (error) {
               console.error(
@@ -30,11 +38,16 @@ export const OrderDisplay = () => {
                 error
               );
               return {
-                ...item,
+                productOrderId: item.productOrderId,
+                orderId: item.orderId,
+                articleNumber: item.articleNumber,
+                size: item.size,
+                quantity: item.quantity,
                 price: 0,
                 discount: 0,
-                description: "Немає даних",
-                imageUrl: "", // Виправлення тут
+                name: "Немає даних",
+                imageUrls: [],
+                sizes: [],
               } as OrderItemData;
             }
           })

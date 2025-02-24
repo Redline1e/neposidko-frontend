@@ -3,7 +3,13 @@ import axios from "axios";
 
 export async function fetchOrders(): Promise<Order[]> {
   try {
-    const response = await axios.get(`http://localhost:5000/orders`);
+    const token = localStorage.getItem("token");
+    const response = await axios.get(`http://localhost:5000/orders`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return response.data;
   } catch (error) {
     console.error("Помилка завантаження замовлень:", error);
@@ -22,4 +28,3 @@ export async function addOrder(order: Order): Promise<Order> {
     throw new Error("Не вдалося додати замовлення");
   }
 }
-
