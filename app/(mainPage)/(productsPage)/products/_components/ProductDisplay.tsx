@@ -43,33 +43,17 @@ export const ProductDisplay: React.FC<ProductDisplayProps> = ({
 
   // Фільтрація товарів лише за категоріями (використовується поле category)
   const filteredProducts = products.filter((product) => {
-    // Отримуємо категорію товару у нижньому регістрі та обрізаємо пробіли
-    const productCategory =
-      product.category?.toString().toLowerCase().trim() || "";
-    // Перетворюємо вибрані категорії у нижній регістр і обрізаємо пробіли
-    const selectedCategories = filters.categories.map((c) =>
-      c.toLowerCase().trim()
-    );
+    // Якщо categoryId є null, то воно не відповідає жодній вибраній категорії
+    const categoryIdStr =
+      product.categoryId != null ? product.categoryId.toString() : "";
     const matchesCategory =
-      selectedCategories.length === 0 ||
-      selectedCategories.includes(productCategory);
+      filters.categories.length === 0 ||
+      filters.categories.includes(categoryIdStr);
 
-    console.log(
-      `Product ${
-        product.articleNumber
-      } - category: "${productCategory}", selectedCategories: ${JSON.stringify(
-        selectedCategories
-      )}, matchesCategory: ${matchesCategory}`
-    );
-
+    // Решта фільтрації залишається без змін
     const matchesSize =
       filters.sizes.length === 0 ||
       product.sizes.some((s) => filters.sizes.includes(Number(s.size)));
-    console.log(
-      `Product ${product.articleNumber} - sizes: ${product.sizes
-        .map((s) => s.size)
-        .join(", ")}, matchesSize: ${matchesSize}`
-    );
 
     let productPrice = product.discount
       ? Math.round(product.price * (1 - product.discount / 100))
@@ -84,23 +68,11 @@ export const ProductDisplay: React.FC<ProductDisplayProps> = ({
     } else if (filters.priceRange === "5000+ грн") {
       matchesPrice = productPrice >= 5000;
     }
-    console.log(
-      `Product ${product.articleNumber} - price: ${productPrice}, matchesPrice: ${matchesPrice}`
-    );
 
     const matchesDiscount =
       !filters.discountOnly || (filters.discountOnly && product.discount > 0);
-    console.log(
-      `Product ${product.articleNumber} - discount: ${product.discount}, matchesDiscount: ${matchesDiscount}`
-    );
 
-    const overallMatch =
-      matchesCategory && matchesSize && matchesPrice && matchesDiscount;
-    console.log(
-      `Product ${product.articleNumber} - overallMatch: ${overallMatch}`
-    );
-
-    return overallMatch;
+    return matchesCategory && matchesSize && matchesPrice && matchesDiscount;
   });
 
   // Сортування товарів
@@ -140,7 +112,7 @@ export const ProductDisplay: React.FC<ProductDisplayProps> = ({
     );
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-8">
+    <div className="mt-20">
       {sortedProducts.length === 0 ? (
         <p className="text-center text-xl font-semibold">Товари не знайдено</p>
       ) : (

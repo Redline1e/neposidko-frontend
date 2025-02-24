@@ -1,11 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarHeader,
-} from "@/components/ui/sidebar";
 import { Checkbox } from "@/components/ui/checkbox";
 import axios from "axios";
 
@@ -51,11 +45,12 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     fetchCategories();
   }, []);
 
-  const handleCategoryChange = (categoryName: string) => {
+  const handleCategoryChange = (categoryId: number) => {
     setFilters((prev) => {
-      const newCategories = prev.categories.includes(categoryName)
-        ? prev.categories.filter((c) => c !== categoryName)
-        : [...prev.categories, categoryName];
+      const categoryIdStr = categoryId.toString();
+      const newCategories = prev.categories.includes(categoryIdStr)
+        ? prev.categories.filter((c) => c !== categoryIdStr)
+        : [...prev.categories, categoryIdStr];
       return { ...prev, categories: newCategories };
     });
   };
@@ -69,7 +64,6 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     });
   };
 
-  // Оновлено: якщо вибрана ціна вже обрана, скидаємо її вибір
   const handlePriceRangeChange = (priceRange: string) => {
     setFilters((prev) => ({
       ...prev,
@@ -82,12 +76,11 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   };
 
   return (
-    <Sidebar className="w-64 p-4">
-      <SidebarHeader className="text-xl font-semibold text-center">
-        Фільтри
-      </SidebarHeader>
-      <SidebarContent className="mt-4">
-        <SidebarGroup className="mb-4">
+    <div className="custom-sidebar sticky w-64 p-4 border border-gray-300 rounded">
+      <h2 className="text-xl font-semibold text-center">Фільтри</h2>
+      <div className="mt-4">
+        {/* Категорії */}
+        <div className="mb-4">
           <p className="font-medium text-neutral-900">Категорії</p>
           <div className="mt-2 space-y-2">
             {categories.map((cat) => (
@@ -96,15 +89,19 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                 className="flex items-center space-x-2"
               >
                 <Checkbox
-                  checked={filters.categories.includes(cat.name)}
-                  onCheckedChange={() => handleCategoryChange(cat.name)}
+                  checked={filters.categories.includes(
+                    cat.categoryId.toString()
+                  )}
+                  onCheckedChange={() => handleCategoryChange(cat.categoryId)}
                 />
                 <span>{cat.name}</span>
               </label>
             ))}
           </div>
-        </SidebarGroup>
-        <SidebarGroup className="mb-4">
+        </div>
+
+        {/* Розмір */}
+        <div className="mb-4">
           <p className="font-medium text-neutral-900">Розмір</p>
           <div className="mt-2 space-y-2">
             {[36, 37, 38, 39, 40, 41, 42, 43].map((size) => (
@@ -117,8 +114,10 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
               </label>
             ))}
           </div>
-        </SidebarGroup>
-        <SidebarGroup className="mb-4">
+        </div>
+
+        {/* Ціна */}
+        <div className="mb-4">
           <p className="font-medium text-neutral-900">Ціна</p>
           <div className="mt-2 space-y-2">
             {[
@@ -136,8 +135,10 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
               </label>
             ))}
           </div>
-        </SidebarGroup>
-        <SidebarGroup className="mb-4">
+        </div>
+
+        {/* Наявність знижки */}
+        <div className="mb-4">
           <p className="font-medium text-neutral-900">Наявність знижки</p>
           <div className="mt-2">
             <label className="flex items-center space-x-2">
@@ -148,8 +149,8 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
               <span>Показувати лише зі знижкою</span>
             </label>
           </div>
-        </SidebarGroup>
-      </SidebarContent>
-    </Sidebar>
+        </div>
+      </div>
+    </div>
   );
 };

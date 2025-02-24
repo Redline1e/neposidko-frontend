@@ -1,7 +1,7 @@
 export interface Product {
   readonly articleNumber: string;
   readonly brandId: number;
-  readonly categoryId: number;
+  readonly categoryId: number; // Обов’язкове поле для прив’язки категорії
   price: number;
   discount: number;
   name: string;
@@ -43,8 +43,6 @@ export interface OrderData {
   cartData: string | Record<string, any>;
   items?: OrderItem[];
 }
-
-
 
 export interface OrderItemData {
   productOrderId: number;
