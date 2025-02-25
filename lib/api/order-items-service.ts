@@ -1,22 +1,21 @@
-import { OrderItem } from "@/utils/api";
 import axios from "axios";
+import { OrderItem } from "@/utils/api";
 
+const api = axios.create({
+  baseURL: "http://localhost:5000",
+  headers: { "Content-Type": "application/json" },
+});
+
+// Отримання позицій замовлення
 export async function fetchOrderItems(): Promise<OrderItem[]> {
   try {
     const token = localStorage.getItem("token");
-    // Якщо токена немає, повертаємо порожній масив без спроби виклику API
-    if (!token) {
-      return [];
-    }
-    const response = await axios.get("http://localhost:5000/order-items", {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+    if (!token) return [];
+    const response = await api.get("/order-items", {
+      headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
-  } catch (error) {
-    // Якщо статус помилки 403, повертаємо порожній масив
+  } catch (error: any) {
     if (axios.isAxiosError(error) && error.response?.status === 403) {
       return [];
     }
@@ -25,15 +24,10 @@ export async function fetchOrderItems(): Promise<OrderItem[]> {
   }
 }
 
+// Додавання позиції замовлення
 export async function addOrderItem(orderItem: OrderItem): Promise<OrderItem> {
   try {
-    const response = await axios.post(
-      "http://localhost:5000/order-items",
-      orderItem,
-      {
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    const response = await api.post("/order-items", orderItem);
     return response.data;
   } catch (error) {
     console.error("Помилка при додаванні позиції замовлення:", error);
@@ -41,28 +35,20 @@ export async function addOrderItem(orderItem: OrderItem): Promise<OrderItem> {
   }
 }
 
+// Оновлення позиції замовлення
 export async function updateOrderItem(
   orderItem: OrderItem
 ): Promise<OrderItem> {
   try {
     const token = localStorage.getItem("token");
-    // Якщо токена немає, просто повертаємо отриманий об'єкт без спроби оновлення
-    if (!token) {
-      return orderItem;
-    }
-    const response = await axios.put(
-      `http://localhost:5000/order-items/${orderItem.productOrderId}`,
+    if (!token) return orderItem;
+    const response = await api.put(
+      `/order-items/${orderItem.productOrderId}`,
       orderItem,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
+      { headers: { Authorization: `Bearer ${token}` } }
     );
     return response.data;
-  } catch (error) {
-    // Якщо статус помилки 403, повертаємо об'єкт без змін
+  } catch (error: any) {
     if (axios.isAxiosError(error) && error.response?.status === 403) {
       return orderItem;
     }
@@ -71,20 +57,15 @@ export async function updateOrderItem(
   }
 }
 
-
+// Видалення позиції замовлення
 export async function deleteOrderItem(productOrderId: number): Promise<void> {
   try {
     const token = localStorage.getItem("token");
-    if (!token) {
-      return;
-    }
-    await axios.delete(`http://localhost:5000/order-items/${productOrderId}`, {
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
+    if (!token) return;
+    await api.delete(`/order-items/${productOrderId}`, {
+      headers: { Authorization: `Bearer ${token}` },
     });
-  } catch (error) {
+  } catch (error: any) {
     if (axios.isAxiosError(error) && error.response?.status === 403) {
       return;
     }

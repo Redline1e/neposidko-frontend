@@ -1,9 +1,15 @@
-import { Product } from "@/utils/api";
 import axios from "axios";
+import { Product } from "@/utils/api";
 
+const api = axios.create({
+  baseURL: "http://localhost:5000",
+  headers: { "Content-Type": "application/json" },
+});
+
+// Отримання списку товарів
 export const fetchProducts = async (): Promise<Product[]> => {
   try {
-    const response = await axios.get("http://localhost:5000/products");
+    const response = await api.get("/products");
     return response.data;
   } catch (error) {
     console.error("Помилка при завантаженні товарів:", error);
@@ -11,24 +17,22 @@ export const fetchProducts = async (): Promise<Product[]> => {
   }
 };
 
+// Додавання нового товару
 export const addProduct = async (product: Product): Promise<void> => {
   try {
-    await axios.post("http://localhost:5000/products", product, {
-      headers: { "Content-Type": "application/json" },
-    });
+    await api.post("/products", product);
   } catch (error) {
     console.error("Помилка при додаванні товару:", error);
     throw new Error("Не вдалося додати товар");
   }
 };
 
+// Отримання товару за articleNumber
 export const fetchProductByArticle = async (
   articleNumber: string
 ): Promise<Product> => {
   try {
-    const response = await axios.get(
-      `http://localhost:5000/product/${articleNumber}`
-    );
+    const response = await api.get(`/product/${articleNumber}`);
     return response.data;
   } catch (error) {
     console.error(`Помилка при завантаженні товару ${articleNumber}:`, error);
@@ -36,11 +40,10 @@ export const fetchProductByArticle = async (
   }
 };
 
+// Пошук товарів за запитом
 export const searchProducts = async (query: string): Promise<Product[]> => {
   try {
-    const response = await axios.get(
-      `http://localhost:5000/search?q=${encodeURIComponent(query)}`
-    );
+    const response = await api.get(`/search?q=${encodeURIComponent(query)}`);
     return response.data;
   } catch (error) {
     console.error("Помилка при пошуку товарів:", error);

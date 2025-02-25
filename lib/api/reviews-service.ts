@@ -1,6 +1,11 @@
 import axios from "axios";
 import { Review } from "@/utils/api";
 
+const api = axios.create({
+  baseURL: "http://localhost:5000",
+  headers: { "Content-Type": "application/json" },
+});
+
 // Створення нового відгуку
 export const createReview = async (reviewData: {
   articleNumber: string;
@@ -8,16 +13,9 @@ export const createReview = async (reviewData: {
   comment: string;
 }): Promise<Review> => {
   try {
-    const response = await axios.post(
-      "http://localhost:5000/reviews",
-      reviewData,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
+    const response = await api.post("/reviews", reviewData, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    });
     return response.data;
   } catch (error) {
     console.error("Помилка при створенні відгуку:", error);
@@ -30,9 +28,7 @@ export const fetchReviewsByArticle = async (
   articleNumber: string
 ): Promise<Review[]> => {
   try {
-    const response = await axios.get(
-      `http://localhost:5000/reviews/${articleNumber}`
-    );
+    const response = await api.get(`/reviews/${articleNumber}`);
     return response.data;
   } catch (error) {
     console.error("Помилка при завантаженні відгуків:", error);
@@ -46,16 +42,9 @@ export const updateReview = async (
   reviewData: { rating: number; comment: string }
 ): Promise<Review> => {
   try {
-    const response = await axios.put(
-      `http://localhost:5000/reviews/${reviewId}`,
-      reviewData,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
+    const response = await api.put(`/reviews/${reviewId}`, reviewData, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    });
     return response.data;
   } catch (error) {
     console.error("Помилка при оновленні відгуку:", error);
@@ -66,10 +55,8 @@ export const updateReview = async (
 // Видалення відгуку (тільки для власника)
 export const deleteReview = async (reviewId: number): Promise<void> => {
   try {
-    await axios.delete(`http://localhost:5000/reviews/${reviewId}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
+    await api.delete(`/reviews/${reviewId}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     });
   } catch (error) {
     console.error("Помилка при видаленні відгуку:", error);

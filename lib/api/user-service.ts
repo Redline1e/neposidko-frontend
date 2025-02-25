@@ -1,17 +1,29 @@
-import { User } from "@/utils/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { User } from "@/utils/api";
+
+// Створення axios‑instance із базовим URL
+const api = axios.create({
+  baseURL: "http://localhost:5000",
+  headers: { "Content-Type": "application/json" },
+});
+
+// Допоміжна функція для узгодженого отримання повідомлення про помилку
+const extractErrorMessage = (error: any, defaultMsg: string) =>
+  error?.response?.data?.error || defaultMsg;
 
 // Функція для отримання даних користувача
-export const fetchUser = async (token: string) => {
+export const fetchUser = async (token: string): Promise<User> => {
   try {
-    const response = await axios.get("http://localhost:5000/protected", {
+    const response = await api.get("/protected", {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
   } catch (error: any) {
-    const message =
-      error.response?.data?.error || "Не вдалося отримати дані користувача";
+    const message = extractErrorMessage(
+      error,
+      "Не вдалося отримати дані користувача"
+    );
     console.error("Помилка отримання користувача:", message);
     throw new Error(message);
   }
@@ -24,48 +36,75 @@ export const updateUser = async (
   email: string,
   telephone: string,
   deliveryAddress: string
-) => {
+): Promise<User> => {
   try {
-    const response = await axios.put(
-      "http://localhost:5000/user",
+    const response = await api.put(
+      "/user",
       { name, email, telephone, deliveryAddress },
       { headers: { Authorization: `Bearer ${token}` } }
     );
     return response.data;
   } catch (error: any) {
-    const message =
-      error.response?.data?.error || "Не вдалося оновити дані користувача";
+    const message = extractErrorMessage(
+      error,
+      "Не вдалося оновити дані користувача"
+    );
     console.error("Помилка оновлення користувача:", message);
     throw new Error(message);
   }
 };
 
 // Функція для видалення користувача
-export const deleteUser = async (token: string) => {
+export const deleteUser = async (
+  token: string
+): Promise<{ message: string }> => {
   try {
-    const response = await axios.delete("http://localhost:5000/user", {
+    const response = await api.delete("/user", {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
   } catch (error: any) {
-    const message =
-      error.response?.data?.error || "Не вдалося видалити користувача";
+    const message = extractErrorMessage(
+      error,
+      "Не вдалося видалити користувача"
+    );
     console.error("Помилка видалення користувача:", message);
     throw new Error(message);
   }
 };
 
-// Функція для отримання даних користувача (якщо потрібен інший endpoint)
-export const getUserData = async (token: string) => {
+// Функція для отримання даних користувача (альтернативний endpoint)
+export const getUserData = async (token: string): Promise<User> => {
   try {
-    const response = await axios.get("http://localhost:5000/user", {
+    const response = await api.get("/user", {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
   } catch (error: any) {
-    const message =
-      error.response?.data?.error || "Не вдалося отримати дані про користувача";
+    const message = extractErrorMessage(
+      error,
+      "Не вдалося отримати дані про користувача"
+    );
     console.error("Помилка отримання даних про користувача:", message);
+    throw new Error(message);
+  }
+};
+
+// Отримання користувача за ID
+export const fetchUserById = async (userId: number): Promise<User> => {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("Токен не знайдено");
+  try {
+    const response = await api.get(`/user/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error: any) {
+    const message = extractErrorMessage(
+      error,
+      "Не вдалося отримати дані користувача"
+    );
+    console.error("Помилка отримання користувача за ID:", message);
     throw new Error(message);
   }
 };
@@ -80,17 +119,16 @@ export const useAuth = () => {
     const checkAuth = async () => {
       const token = localStorage.getItem("token");
       if (!token) {
-        setLoading(false);
         setIsAuthenticated(false);
+        setLoading(false);
         return;
       }
       try {
-        const response = await axios.get("http://localhost:5000/protected", {
+        const response = await api.get("/protected", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (response.status === 200) {
           setIsAuthenticated(true);
-          // Припускаємо, що endpoint повертає дані користувача
           setUser(response.data);
         } else {
           setIsAuthenticated(false);
@@ -107,6 +145,7 @@ export const useAuth = () => {
 
   return { isAuthenticated, loading, user };
 };
+
 // Хук для перевірки ролі користувача
 export const useCheckRole = () => {
   const [hasAccess, setHasAccess] = useState(false);
@@ -121,7 +160,7 @@ export const useCheckRole = () => {
         return;
       }
       try {
-        const response = await axios.get("http://localhost:5000/getUserRole", {
+        const response = await api.get("/getUserRole", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setHasAccess(response.data.roleId === 1);
@@ -136,22 +175,4 @@ export const useCheckRole = () => {
   }, []);
 
   return { hasAccess, loading };
-};
-
-export const fetchUserById = async (userId: number): Promise<User> => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    throw new Error("Токен не знайдено");
-  }
-  try {
-    const response = await axios.get(`http://localhost:5000/user/${userId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return response.data;
-  } catch (error: any) {
-    const message =
-      error.response?.data?.error || "Не вдалося отримати дані користувача";
-    console.error("Помилка отримання користувача за ID:", message);
-    throw new Error(message);
-  }
 };
