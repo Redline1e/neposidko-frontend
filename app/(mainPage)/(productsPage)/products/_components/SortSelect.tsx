@@ -11,8 +11,8 @@ const SortSelect: React.FC<SortSelectProps> = ({ sortOrder, setSortOrder }) => {
   };
 
   return (
-    <div className="absolute right-0 p-4 flex items-center">
-      <label className="mr-2 font-medium">Сортувати за:</label>
+    <div className="absolute right-0 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:gap-4">
+      <label className="font-medium">Сортувати за:</label>
       <select
         value={sortOrder}
         onChange={handleChange}

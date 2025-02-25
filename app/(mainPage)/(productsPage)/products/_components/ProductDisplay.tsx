@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import ProductItem from "./ProductItem";
 import { Product } from "@/utils/api";
 import { fetchProducts } from "@/lib/api/product-service";
+import { Frown } from "lucide-react";
 
 interface ProductDisplayProps {
   filters: {
@@ -41,16 +42,14 @@ export const ProductDisplay: React.FC<ProductDisplayProps> = ({
     getProducts();
   }, []);
 
-  // Фільтрація товарів лише за категоріями (використовується поле category)
+  // Фільтрація товарів (за категоріями, розмірами, ціною та знижкою)
   const filteredProducts = products.filter((product) => {
-    // Якщо categoryId є null, то воно не відповідає жодній вибраній категорії
     const categoryIdStr =
       product.categoryId != null ? product.categoryId.toString() : "";
     const matchesCategory =
       filters.categories.length === 0 ||
       filters.categories.includes(categoryIdStr);
 
-    // Решта фільтрації залишається без змін
     const matchesSize =
       filters.sizes.length === 0 ||
       product.sizes.some((s) => filters.sizes.includes(Number(s.size)));
@@ -105,21 +104,27 @@ export const ProductDisplay: React.FC<ProductDisplayProps> = ({
   console.log("Sorted products:", sortedProducts);
 
   if (loading)
-    return <p className="text-center text-xl font-semibold">Завантаження...</p>;
+    return (
+      <p className="mt-20 text-center text-xl font-semibold">Завантаження...</p>
+    );
   if (error)
     return (
       <p className="text-center text-xl font-semibold text-red-500">{error}</p>
     );
-
   return (
-    <div className="mt-20">
+    <div className="md:mt-20 mt-28 mb-10">
       {sortedProducts.length === 0 ? (
-        <p className="text-center text-xl font-semibold">Товари не знайдено</p>
+        <p className="flex justify-center items-center text-xl font-semibold gap-x-2">
+          Товари не знайдено <Frown />
+        </p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {sortedProducts.map((product) => (
-            <ProductItem key={product.articleNumber} product={product} />
-          ))}
+        <div className="container mx-auto px-4">
+          {/* Центруємо товари */}
+          <div className="flex flex-wrap gap-8 justify-center">
+            {sortedProducts.map((product) => (
+              <ProductItem key={product.articleNumber} product={product} />
+            ))}
+          </div>
         </div>
       )}
     </div>

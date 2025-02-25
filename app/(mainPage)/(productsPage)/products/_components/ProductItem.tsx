@@ -33,13 +33,11 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
     ? Math.round(price * (1 - discount / 100))
     : price;
 
-  // Вибір першого URL з масиву або fallback-зображення, якщо масив порожній
   const imageSrc =
     imageUrls && imageUrls.length > 0 ? imageUrls[0] : "/fallback.jpg";
 
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
-  // Перевірка чи товар вже знаходиться в обраних
   useEffect(() => {
     const checkFavoriteStatus = async () => {
       try {
@@ -80,12 +78,12 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
 
   return (
     <Link href={`/product/${articleNumber}`} passHref className="block">
-      <div className="bg-white shadow-lg rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border">
-        <div className="relative">
+      <div className="bg-white shadow-lg rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border w-64">
+        <div className="relative w-64 h-64">
           <img
             src={imageSrc}
             alt={name}
-            className="w-full h-60 object-cover rounded-t-lg"
+            className="w-full h-full object-cover rounded-t-lg"
           />
           {discount > 0 && (
             <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
@@ -94,7 +92,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
           )}
           <Button
             onClick={handleToggleFavorite}
-            className={`absolute top-1 right-2 rounded-full shadow-md  ${
+            className={`absolute top-1 right-2 rounded-full shadow-md ${
               isFavorite ? "bg-red-500 hover:bg-red-500/80" : ""
             }`}
             variant="ghost"
@@ -113,14 +111,14 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
                 {price} ₴
               </span>
             )}
-            <span className="text-red-500 font-semibold text-lg">
+            <span className="text-red-500 font-semibold text-lg whitespace-nowrap">
               {discountedPrice} ₴
             </span>
           </div>
 
           {sizes.length > 0 && (
             <div className="mt-3">
-              <span className="text-gray-800 font-semibold">
+              <span className="text-gray-800 font-semibold whitespace-nowrap">
                 {sizes
                   .slice(0, 2)
                   .map((sizeObj) => sizeObj.size)

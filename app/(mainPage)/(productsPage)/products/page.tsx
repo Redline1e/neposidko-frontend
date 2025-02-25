@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import { SidebarProvider } from "@/components/ui/sidebar";
 import { FilterSidebar } from "./_components/FilterSidebar";
 import ProductDisplay from "./_components/ProductDisplay";
 import SortSelect from "./_components/SortSelect";
@@ -37,11 +36,9 @@ export default function Home() {
   }, [categoryQuery]);
 
   return (
-    <div className="flex">
-      <SidebarProvider>
-        <FilterSidebar filters={filters} setFilters={setFilters} />
-      </SidebarProvider>
-      <main>
+    <div className="flex w-full">
+      <FilterSidebar filters={filters} setFilters={setFilters} />
+      <main className="flex-1">
         <ProductDisplay filters={filters} sortOrder={sortOrder} />
       </main>
       <SortSelect sortOrder={sortOrder} setSortOrder={setSortOrder} />
