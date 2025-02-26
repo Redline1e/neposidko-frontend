@@ -1,10 +1,12 @@
-import { Brand,} from "@/utils/api";
+// components/BrandItem.tsx
+"use client";
 
-interface BrandsItemProps {
-  brand: Brand;
-}
+import React from "react";
+import { AdminItem } from "../../_components/AdminItem";
+import { Brand } from "@/utils/api";
+import { deleteBrand, updateBrand } from "@/lib/api/brands-service";
 
-export const BrandItem: React.FC<BrandsItemProps> = ({ brand }) => {
+const renderBrandCard = (brand: Brand) => {
   return (
     <div className="bg-white shadow-lg rounded-xl overflow-hidden transform transition duration-300 hover:scale-105">
       <div className="p-4">
@@ -13,5 +15,35 @@ export const BrandItem: React.FC<BrandsItemProps> = ({ brand }) => {
         </h2>
       </div>
     </div>
+  );
+};
+
+const renderBrandEditForm = (
+  brand: Brand,
+  onChange: (changed: Partial<Brand>) => void
+) => {
+  return (
+    <div className="space-y-4">
+      <input
+        type="text"
+        value={brand.name}
+        onChange={(e) => onChange({ name: e.target.value })}
+        className="input w-full p-2 border border-gray-300 rounded"
+        placeholder="Назва бренду"
+      />
+    </div>
+  );
+};
+
+export const BrandItem: React.FC<{ brand: Brand }> = ({ brand }) => {
+  return (
+    <AdminItem<Brand>
+      item={brand}
+      itemLabel="бренд"
+      renderCard={renderBrandCard}
+      renderEditForm={renderBrandEditForm}
+      onSave={updateBrand}
+      onDelete={deleteBrand}
+    />
   );
 };

@@ -72,7 +72,7 @@ export const Actions = () => {
                   <div className="-mt-2">Меню</div>
                 </SheetTitle>
               </SheetHeader>
-              <SheetDescription>
+              <SheetDescription asChild>
                 <ul className="flex flex-col pt-5 gap-6 items-start text-xl text-neutral-700">
                   {actionLinks.map((link, index) => (
                     <li key={index} className="relative">

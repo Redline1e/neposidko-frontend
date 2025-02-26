@@ -25,4 +25,22 @@ export const addCategory = async (category: Category): Promise<void> => {
     console.error("Помилка при додаванні категорії:", error);
     throw new Error("Не вдалося додати категорію");
   }
-}
+};
+
+export const updateCategory = async (category: Category): Promise<void> => {
+  try {
+    await api.put(`/categories/${category.categoryId}`, category);
+  } catch (error) {
+    console.error("Error updating category:", error);
+    throw new Error("Не вдалося оновити категорію");
+  }
+};
+
+export const deleteCategory = async (category: Category): Promise<void> => {
+  try {
+    await api.delete(`/categories/${category.categoryId}`);
+  } catch (error) {
+    console.error("Error deleting category:", error);
+    throw new Error("Не вдалося видалити категорію");
+  }
+};

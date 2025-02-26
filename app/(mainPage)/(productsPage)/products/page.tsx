@@ -7,7 +7,7 @@ import { useSearchParams } from "next/navigation";
 
 interface FiltersState {
   categories: string[];
-  sizes: number[];
+  sizes: string[];
   priceRange: string;
   discountOnly: boolean;
 }
@@ -36,7 +36,7 @@ export default function Home() {
   }, [categoryQuery]);
 
   return (
-    <div className="flex w-full">
+    <div className="flex w-full h-screen">
       <FilterSidebar filters={filters} setFilters={setFilters} />
       <main className="flex-1">
         <ProductDisplay filters={filters} sortOrder={sortOrder} />

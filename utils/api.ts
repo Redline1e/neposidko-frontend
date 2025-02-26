@@ -8,6 +8,7 @@ export interface Product {
   description: string;
   imageUrls: string[];
   sizes: { size: string; stock: number }[];
+  isActive: boolean;
 }
 
 export interface Category {
@@ -25,7 +26,6 @@ export interface Order {
   readonly orderId?: number;
   readonly userId: number;
   orderStatusId?: number;
-  cartData?: Record<string, any>;
 }
 
 export interface OrderItem {
@@ -40,7 +40,6 @@ export interface OrderData {
   readonly orderId: number;
   readonly userId: number;
   readonly orderStatusId: number;
-  cartData: string | Record<string, any>;
   items?: OrderItem[];
 }
 
@@ -74,4 +73,11 @@ export interface User {
   password: string;
   telephone?: string;
   deliveryAddress?: string;
+}
+
+export interface Sizes {
+  readonly sizeId: number;
+  readonly articleNumber: number;
+  size: string;
+  stock: string;
 }

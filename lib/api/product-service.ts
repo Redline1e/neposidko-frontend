@@ -6,7 +6,7 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// Отримання списку товарів
+// Отримання всіх продуктів (без фільтрації за isActive)
 export const fetchProducts = async (): Promise<Product[]> => {
   try {
     const response = await api.get("/products");
@@ -17,7 +17,29 @@ export const fetchProducts = async (): Promise<Product[]> => {
   }
 };
 
-// Додавання нового товару
+// Додано: Отримання лише активних продуктів (isActive: true)
+export const fetchActiveProducts = async (): Promise<Product[]> => {
+  try {
+    const response = await api.get("/products/active");
+    return response.data;
+  } catch (error) {
+    console.error("Помилка при завантаженні активних товарів:", error);
+    throw new Error("Не вдалося завантажити активні товари");
+  }
+};
+
+// Додано: Отримання лише неактивних продуктів (isActive: false)
+export const fetchInactiveProducts = async (): Promise<Product[]> => {
+  try {
+    const response = await api.get("/products/inactive");
+    return response.data;
+  } catch (error) {
+    console.error("Помилка при завантаженні неактивних товарів:", error);
+    throw new Error("Не вдалося завантажити неактивні товари");
+  }
+};
+
+// Додавання нового продукту (при створенні isActive встановлюється як true за замовчуванням)
 export const addProduct = async (product: Product): Promise<void> => {
   try {
     await api.post("/products", product);
@@ -27,7 +49,7 @@ export const addProduct = async (product: Product): Promise<void> => {
   }
 };
 
-// Отримання товару за articleNumber
+// Отримання продукту за articleNumber
 export const fetchProductByArticle = async (
   articleNumber: string
 ): Promise<Product> => {
@@ -40,7 +62,7 @@ export const fetchProductByArticle = async (
   }
 };
 
-// Пошук товарів за запитом
+// Пошук продуктів за запитом
 export const searchProducts = async (query: string): Promise<Product[]> => {
   try {
     const response = await api.get(`/search?q=${encodeURIComponent(query)}`);
@@ -48,5 +70,38 @@ export const searchProducts = async (query: string): Promise<Product[]> => {
   } catch (error) {
     console.error("Помилка при пошуку товарів:", error);
     throw new Error("Не вдалося виконати пошук");
+  }
+};
+
+// Оновлення даних продукту
+export const updateProduct = async (product: Product): Promise<void> => {
+  try {
+    await api.put(`/product/${product.articleNumber}`, product);
+  } catch (error) {
+    console.error("Error updating product:", error);
+    throw new Error("Не вдалося оновити товар");
+  }
+};
+
+// Додавання: Зміна параметра isActive для продукту
+export const updateProductActiveStatus = async (
+  articleNumber: string,
+  isActive: boolean
+): Promise<void> => {
+  try {
+    await api.patch(`/product/${articleNumber}/active`, { isActive });
+  } catch (error) {
+    console.error("Error updating product active status:", error);
+    throw new Error("Не вдалося оновити статус активності товару");
+  }
+};
+
+// Видалення продукту
+export const deleteProduct = async (product: Product): Promise<void> => {
+  try {
+    await api.delete(`/product/${product.articleNumber}`);
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    throw new Error("Не вдалося видалити товар");
   }
 };

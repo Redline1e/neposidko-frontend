@@ -37,3 +37,21 @@ export const fetchBrandById = async (brandId: number): Promise<Brand> => {
     throw new Error("Не вдалося завантажити бренд");
   }
 };
+
+export const updateBrand = async (brand: Brand): Promise<void> => {
+  try {
+    await api.put(`/brand/${brand.brandId}`, brand);
+  } catch (error) {
+    console.error("Error updating brand:", error);
+    throw new Error("Не вдалося оновити бренд");
+  }
+};
+
+export const deleteBrand = async (brand: Brand): Promise<void> => {
+  try {
+    await api.delete(`/brand/${brand.brandId}`);
+  } catch (error) {
+    console.error("Error deleting brand:", error);
+    throw new Error("Не вдалося видалити бренд");
+  }
+};

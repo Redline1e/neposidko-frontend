@@ -2,13 +2,13 @@
 import { useEffect, useState } from "react";
 import ProductItem from "./ProductItem";
 import { Product } from "@/utils/api";
-import { fetchProducts } from "@/lib/api/product-service";
 import { Frown } from "lucide-react";
+import { fetchActiveProducts } from "@/lib/api/product-service";
 
 interface ProductDisplayProps {
   filters: {
     categories: string[];
-    sizes: number[];
+    sizes: string[];
     priceRange: string;
     discountOnly: boolean;
   };
@@ -26,7 +26,7 @@ export const ProductDisplay: React.FC<ProductDisplayProps> = ({
   const getProducts = async () => {
     setLoading(true);
     try {
-      const data = await fetchProducts();
+      const data = await fetchActiveProducts();
       console.log("Отримані товари:", data);
       setProducts(data);
       setError(null);
@@ -52,7 +52,7 @@ export const ProductDisplay: React.FC<ProductDisplayProps> = ({
 
     const matchesSize =
       filters.sizes.length === 0 ||
-      product.sizes.some((s) => filters.sizes.includes(Number(s.size)));
+      product.sizes.some((s) => filters.sizes.includes(s.size));
 
     let productPrice = product.discount
       ? Math.round(product.price * (1 - product.discount / 100))

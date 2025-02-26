@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
-import ProductItem from "./ProductItem";
 import { Product } from "@/utils/api";
 import { fetchProducts } from "@/lib/api/product-service";
+import { ProductItem } from "./ProductItem";
 
 export const ProductDisplay = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -34,7 +34,6 @@ export const ProductDisplay = () => {
     <div className="mx-auto max-w-7xl px-6 py-8">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
         {products.map((product) => (
-          // Використовуємо articleNumber як унікальний ключ
           <ProductItem key={product.articleNumber} product={product} />
         ))}
       </div>

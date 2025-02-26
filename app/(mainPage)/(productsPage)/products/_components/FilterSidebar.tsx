@@ -1,9 +1,10 @@
-"use client";
 import { useEffect, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import axios from "axios";
 import { Filter, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { fetchSizes } from "@/lib/api/sizes-service";
+import { Sizes } from "@/utils/api";
 
 interface Category {
   categoryId: number;
@@ -14,14 +15,15 @@ interface Category {
 interface FilterSidebarProps {
   filters: {
     categories: string[];
-    sizes: number[];
+    sizes: string[];
     priceRange: string;
     discountOnly: boolean;
   };
+
   setFilters: React.Dispatch<
     React.SetStateAction<{
       categories: string[];
-      sizes: number[];
+      sizes: string[];
       priceRange: string;
       discountOnly: boolean;
     }>
@@ -33,11 +35,11 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   setFilters,
 }) => {
   const [categories, setCategories] = useState<Category[]>([]);
-  // Стан для контролю відкриття/закриття сайдбара на мобільних пристроях
+  const [sizes, setSizes] = useState<Sizes[]>([]); // стан для розмірів
   const [isOpen, setIsOpen] = useState(false);
 
+  // Завантаження категорій з API
   useEffect(() => {
-    // Завантаження категорій з API
     const fetchCategories = async () => {
       try {
         const response = await axios.get("http://localhost:5000/categories");
@@ -47,6 +49,19 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
       }
     };
     fetchCategories();
+  }, []);
+
+  // Завантаження розмірів з API
+  useEffect(() => {
+    const getSizes = async () => {
+      try {
+        const sizesData = await fetchSizes();
+        setSizes(sizesData);
+      } catch (error) {
+        console.error("Помилка завантаження розмірів:", error);
+      }
+    };
+    getSizes();
   }, []);
 
   // Забороняємо прокручування сторінки при відкритому сайдбарі
@@ -71,11 +86,12 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     });
   };
 
-  const handleSizeChange = (size: number) => {
+  // Якщо розміри в БД зберігаються як рядок, перетворюємо на число, якщо потрібно
+  const handleSizeChange = (sizeValue: string) => {
     setFilters((prev) => {
-      const newSizes = prev.sizes.includes(size)
-        ? prev.sizes.filter((s) => s !== size)
-        : [...prev.sizes, size];
+      const newSizes = prev.sizes.includes(sizeValue)
+        ? prev.sizes.filter((s) => s !== sizeValue)
+        : [...prev.sizes, sizeValue];
       return { ...prev, sizes: newSizes };
     });
   };
@@ -93,7 +109,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
   return (
     <>
-      {/* Бургер-іконка, видима лише на мобільних пристроях */}
+      {/* Бургер-іконка для мобільних пристроїв */}
       <Button
         variant="outline"
         onClick={() => setIsOpen(true)}
@@ -102,7 +118,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
         <Filter size={24} />
       </Button>
 
-      {/* Оверлей, який закриває сайдбар при кліку (тільки на мобільних) */}
+      {/* Оверлей для закриття сайдбару на мобільних */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black opacity-50 z-40 md:hidden"
@@ -118,7 +134,6 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           md:static md:translate-x-0 md:block
         `}
       >
-        {/* Внутрішня розмітка сайдбара з flex-розташуванням */}
         <div className="mt-3 flex flex-col h-full">
           {/* Кнопка закриття для мобільних пристроїв */}
           <div className="md:hidden flex justify-end p-2">
@@ -127,7 +142,6 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
             </button>
           </div>
           <h2 className="text-xl font-semibold text-center mb-4">Фільтри</h2>
-          {/* Контейнер з прокручуванням лише в середині */}
           <div className="flex-1 overflow-y-auto p-4">
             {/* Категорії */}
             <div className="mb-4">
@@ -156,15 +170,39 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
             <div className="mb-4">
               <p className="font-medium text-neutral-900">Розмір</p>
               <div className="mt-2 space-y-2">
-                {[36, 37, 38, 39, 40, 41, 42, 43].map((size) => (
-                  <label key={size} className="flex items-center space-x-2">
-                    <Checkbox
-                      checked={filters.sizes.includes(size)}
-                      onCheckedChange={() => handleSizeChange(size)}
-                    />
-                    <span>{size}</span>
-                  </label>
-                ))}
+                {[...sizes]
+                  .sort((a, b) => {
+                    const aNum = parseFloat(a.size);
+                    const bNum = parseFloat(b.size);
+                    const aIsNum = !isNaN(aNum);
+                    const bIsNum = !isNaN(bNum);
+
+                    if (aIsNum && bIsNum) {
+                      // Обидва значення — числа, сортуємо за числовим значенням
+                      return aNum - bNum;
+                    } else if (aIsNum) {
+                      // a — число, b — не число, тому a має йти першим
+                      return -1;
+                    } else if (bIsNum) {
+                      // b — число, a — не число, тому b має йти першим
+                      return 1;
+                    } else {
+                      // Обидва значення — не числа, сортуємо за алфавітом
+                      return a.size.localeCompare(b.size);
+                    }
+                  })
+                  .map((s, index) => (
+                    <label
+                      key={`${s.size}-${index}`}
+                      className="flex items-center space-x-2"
+                    >
+                      <Checkbox
+                        checked={filters.sizes.includes(s.size)}
+                        onCheckedChange={() => handleSizeChange(s.size)}
+                      />
+                      <span>{s.size}</span>
+                    </label>
+                  ))}
               </div>
             </div>
 
