@@ -1,8 +1,8 @@
 // app/admin/products/page.tsx
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { useCheckRole } from "@/lib/api/user-service";
-import { Product } from "@/utils/api";
+import { useCheckRole } from "@/lib/hooks/auth";
+import { Product } from "@/utils/types";
 import {
   searchProducts,
   fetchInactiveProducts,

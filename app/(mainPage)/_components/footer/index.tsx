@@ -64,7 +64,7 @@ export const Footer = () => {
             <h3 className="text-lg sm:text-xl font-semibold mb-2">
               Зв'язатись з нами
             </h3>
-            <div className="flex lg:justify-self-end sm:flex-col gap-4 sm:gap-1 sm:items-center justify-center ">
+            <div className="flex lg:justify-self-end sm:flex-col gap-4 sm:gap-1 sm:items-center justify-center">
               <a
                 href={`mailto:${footerData.contact.email}`}
                 className="flex items-center gap-2 text-gray-400 hover:text-white"
@@ -87,7 +87,7 @@ export const Footer = () => {
           </div>
         </div>
 
-        {/* Copyright Section */}
+        {/* Copyright */}
         <div className="mt-3 border-t border-gray-700 pt-2 text-center text-xs sm:text-sm">
           <p className="text-gray-400">{footerData.copyright}</p>
         </div>

@@ -1,24 +1,13 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
-import { User } from "@/utils/api";
+import { apiClient, extractErrorMessage } from "@/utils/apiClient";
+import { User, UserSchema } from "@/utils/types";
 
-// Створення axios‑instance із базовим URL
-const api = axios.create({
-  baseURL: "http://localhost:5000",
-  headers: { "Content-Type": "application/json" },
-});
-
-// Допоміжна функція для узгодженого отримання повідомлення про помилку
-const extractErrorMessage = (error: any, defaultMsg: string) =>
-  error?.response?.data?.error || defaultMsg;
-
-// Функція для отримання даних користувача
+// Отримання даних користувача
 export const fetchUser = async (token: string): Promise<User> => {
   try {
-    const response = await api.get("/protected", {
+    const response = await apiClient.get("/protected", {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return response.data;
+    return UserSchema.parse(response.data);
   } catch (error: any) {
     const message = extractErrorMessage(
       error,
@@ -29,21 +18,21 @@ export const fetchUser = async (token: string): Promise<User> => {
   }
 };
 
-// Функція для оновлення даних користувача
+// Оновлення даних користувача
 export const updateUser = async (
   token: string,
   name: string,
   email: string,
-  telephone: string,
-  deliveryAddress: string
+  telephone?: string,
+  deliveryAddress?: string
 ): Promise<User> => {
   try {
-    const response = await api.put(
+    const response = await apiClient.put(
       "/user",
       { name, email, telephone, deliveryAddress },
       { headers: { Authorization: `Bearer ${token}` } }
     );
-    return response.data;
+    return UserSchema.parse(response.data);
   } catch (error: any) {
     const message = extractErrorMessage(
       error,
@@ -54,12 +43,12 @@ export const updateUser = async (
   }
 };
 
-// Функція для видалення користувача
+// Видалення користувача
 export const deleteUser = async (
   token: string
 ): Promise<{ message: string }> => {
   try {
-    const response = await api.delete("/user", {
+    const response = await apiClient.delete("/user", {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
@@ -73,13 +62,13 @@ export const deleteUser = async (
   }
 };
 
-// Функція для отримання даних користувача (альтернативний endpoint)
+// Альтернативний endpoint для отримання даних користувача
 export const getUserData = async (token: string): Promise<User> => {
   try {
-    const response = await api.get("/user", {
+    const response = await apiClient.get("/user", {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return response.data;
+    return UserSchema.parse(response.data);
   } catch (error: any) {
     const message = extractErrorMessage(
       error,
@@ -95,10 +84,10 @@ export const fetchUserById = async (userId: number): Promise<User> => {
   const token = localStorage.getItem("token");
   if (!token) throw new Error("Токен не знайдено");
   try {
-    const response = await api.get(`/user/${userId}`, {
+    const response = await apiClient.get(`/user/${userId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return response.data;
+    return UserSchema.parse(response.data);
   } catch (error: any) {
     const message = extractErrorMessage(
       error,
@@ -107,72 +96,4 @@ export const fetchUserById = async (userId: number): Promise<User> => {
     console.error("Помилка отримання користувача за ID:", message);
     throw new Error(message);
   }
-};
-
-// Хук для перевірки автентифікації
-export const useAuth = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setIsAuthenticated(false);
-        setLoading(false);
-        return;
-      }
-      try {
-        const response = await api.get("/protected", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (response.status === 200) {
-          setIsAuthenticated(true);
-          setUser(response.data);
-        } else {
-          setIsAuthenticated(false);
-        }
-      } catch (error) {
-        console.error("Error during auth check:", error);
-        setIsAuthenticated(false);
-      } finally {
-        setLoading(false);
-      }
-    };
-    checkAuth();
-  }, []);
-
-  return { isAuthenticated, loading, user };
-};
-
-// Хук для перевірки ролі користувача
-export const useCheckRole = () => {
-  const [hasAccess, setHasAccess] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const checkUserRole = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setHasAccess(false);
-        setLoading(false);
-        return;
-      }
-      try {
-        const response = await api.get("/getUserRole", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setHasAccess(response.data.roleId === 1);
-      } catch (error) {
-        console.error("Error checking user role:", error);
-        setHasAccess(false);
-      } finally {
-        setLoading(false);
-      }
-    };
-    checkUserRole();
-  }, []);
-
-  return { hasAccess, loading };
 };

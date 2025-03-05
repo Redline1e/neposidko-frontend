@@ -1,11 +1,12 @@
 "use client";
+
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { FilterSidebar } from "./_components/FilterSidebar";
 import ProductDisplay from "./_components/ProductDisplay";
 import SortSelect from "./_components/SortSelect";
-import { useSearchParams } from "next/navigation";
 
-interface FiltersState {
+export interface FiltersState {
   categories: string[];
   sizes: string[];
   priceRange: string;
@@ -25,13 +26,10 @@ export default function Home() {
   const [filters, setFilters] = useState<FiltersState>(initialFilters);
   const [sortOrder, setSortOrder] = useState("default");
 
-  // Якщо зміниться query-параметр, оновлюємо фільтр категорій
+  // Оновлення фільтра категорій при зміні query-параметра
   useEffect(() => {
     if (categoryQuery) {
-      setFilters((prev) => ({
-        ...prev,
-        categories: [categoryQuery],
-      }));
+      setFilters((prev) => ({ ...prev, categories: [categoryQuery] }));
     }
   }, [categoryQuery]);
 

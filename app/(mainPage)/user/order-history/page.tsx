@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Order, OrderItem } from "@/utils/api";
+import { Order, OrderItem } from "@/utils/types";
 import { fetchOrders } from "@/lib/api/order-service";
 import { fetchOrderItems } from "@/lib/api/order-items-service";
 

@@ -1,18 +1,13 @@
-import axios from "axios";
-import { Sizes } from "@/utils/api";
+import { apiClient } from "@/utils/apiClient";
+import { Sizes, SizesSchema } from "@/utils/types";
+import { z } from "zod";
 
-const api = axios.create({
-  baseURL: "http://localhost:5000",
-  headers: { "Content-Type": "application/json" },
-});
-
-// Отримання списку брендів
-export async function fetchSizes(): Promise<Sizes[]> {
+export const fetchSizes = async (): Promise<Sizes[]> => {
   try {
-    const response = await api.get("/sizes");
-    return response.data;
-  } catch (error) {
+    const response = await apiClient.get("/sizes");
+    return z.array(SizesSchema).parse(response.data);
+  } catch (error: any) {
     console.error("Помилка завантаження розмірів:", error);
     throw new Error("Не вдалося завантажити розміри");
   }
-}
+};

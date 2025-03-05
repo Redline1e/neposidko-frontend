@@ -1,10 +1,17 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  FormEvent,
+  ChangeEvent,
+} from "react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { X, Frown } from "lucide-react";
 import { searchProducts } from "@/lib/api/product-service";
-import { Product } from "@/utils/api";
+import { Product } from "@/utils/types";
 
 export const Search = () => {
   const [query, setQuery] = useState("");
@@ -53,12 +60,20 @@ export const Search = () => {
     setShowDropdown(false);
   };
 
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setQuery(e.target.value);
+  };
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+  };
+
   return (
     <div className="relative z-50" ref={containerRef}>
-      <form onSubmit={(e) => e.preventDefault()} className="flex">
+      <form onSubmit={handleSubmit} className="flex">
         <Input
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={handleChange}
           placeholder="Пошук..."
           aria-label="Пошук"
           className="rounded-l border border-gray-300 pr-8"

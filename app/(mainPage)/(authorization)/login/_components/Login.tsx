@@ -1,4 +1,5 @@
 "use client";
+
 import { useForm } from "react-hook-form";
 import { FC } from "react";
 import Link from "next/link";
@@ -12,20 +13,9 @@ type FormData = {
 const LoginPage: FC = () => {
   const { register, handleSubmit } = useForm<FormData>();
 
-  //   const [isMounted, setIsMounted] = useState(false);
-  //   const searchParams = useSearchParams();
-  // useEffect(() => {
-  //   setIsMounted(true);
-  //   const token = searchParams.get("token");
-  //   if (token) {
-  //     localStorage.setItem("token", token);
-  //     alert("Вхід через Google успішний");
-  //   }
-  // }, [searchParams, router]);
-
   const onSubmit = async (data: FormData) => {
     try {
-      const response = await fetch(`http://localhost:5000/login`, {
+      const response = await fetch("http://localhost:5000/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -46,12 +36,6 @@ const LoginPage: FC = () => {
       toast.error(error.message || "Помилка входу");
     }
   };
-
-  // const handleGoogleLogin = () => {
-  //   window.location.href = `${process.env.SERVER_URL}/auth/google`;
-  // };
-
-  // if (!isMounted) return null;
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-lg">
@@ -74,7 +58,7 @@ const LoginPage: FC = () => {
         <div className="flex justify-between text-sm">
           <p>Ще не маєте акаунта?</p>
           <Link className="font-semibold" href="/register">
-            Зареєструватись
+            Зареєструватися
           </Link>
         </div>
         <button
@@ -84,12 +68,6 @@ const LoginPage: FC = () => {
           Увійти
         </button>
       </form>
-      {/* <button
-        onClick={handleGoogleLogin}
-        className="w-full py-3 bg-red-600 text-white rounded-lg mt-4 hover:bg-red-700 transition"
-      >
-        Увійти через Google
-      </button> */}
     </div>
   );
 };

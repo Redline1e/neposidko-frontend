@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Category } from "@/utils/api";
+import { Category } from "@/utils/types";
 import { addCategory } from "@/lib/api/category-service";
 import { addBrand } from "@/lib/api/brands-service";
 

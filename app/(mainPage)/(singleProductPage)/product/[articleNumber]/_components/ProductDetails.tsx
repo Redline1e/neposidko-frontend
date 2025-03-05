@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Heart } from "lucide-react";
 import { parseProductDescription } from "@/utils/parseProductDescription";
@@ -7,7 +8,6 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@/components/ui/accordion";
-import { useState } from "react";
 import { toast } from "sonner";
 
 interface ProductDetailsProps {
@@ -35,7 +35,6 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
 }) => {
   const product = parseProductDescription(description);
   const discountedPrice = discount ? price - (price * discount) / 100 : price;
-
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
 
   const handleSizeSelect = (size: string) => {
@@ -99,7 +98,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
           Додати в кошик
         </Button>
         <Button
-          variant= "outline"
+          variant="outline"
           onClick={onToggleWishlist}
           className="flex items-center"
           aria-label={isFavorite ? "Видалити з обраного" : "Додати в обране"}

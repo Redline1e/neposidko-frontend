@@ -3,7 +3,7 @@
 
 import React from "react";
 import { AdminItem } from "../../_components/AdminItem";
-import { Category } from "@/utils/api";
+import { Category } from "@/utils/types";
 import Image from "next/image";
 import { deleteCategory, updateCategory } from "@/lib/api/category-service";
 

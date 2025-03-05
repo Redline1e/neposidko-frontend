@@ -1,29 +1,28 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { ProductImageGallery } from "./ProductImageGallery";
 import { ProductDetails } from "./ProductDetails";
 import { CommentsSection } from "./CommentsSection";
 import { fetchProductByArticle } from "@/lib/api/product-service";
-import { Product } from "@/utils/api";
+import { Product, OrderItem } from "@/utils/types";
 import { Loader2 } from "lucide-react";
 import {
   addToFavorites,
   removeFromFavorites,
   fetchFavorites,
 } from "@/lib/api/favorites-service";
+import { addOrderItem } from "@/lib/api/order-items-service";
 import { toast } from "sonner";
-import axios from "axios";
 
 export const ProductPage: React.FC = () => {
   const { articleNumber } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [isFavorite, setIsFavorite] = useState(false);
-
-
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
   useEffect(() => {
     if (!articleNumber) return;
@@ -43,7 +42,7 @@ export const ProductPage: React.FC = () => {
     loadProduct();
   }, [articleNumber]);
 
-  // Перевірка, чи є товар у списку обраного
+  // Перевірка, чи є товар в обраному
   useEffect(() => {
     if (product) {
       const checkFavorite = async () => {
@@ -72,18 +71,13 @@ export const ProductPage: React.FC = () => {
     }
 
     try {
-      const cartItem = {
+      const cartItem: OrderItem = {
         articleNumber: product.articleNumber,
         size: selectedSize,
-        quantity: 1, // Додаємо завжди 1 штуку
+        quantity: 1,
       };
 
-      await axios.post("http://localhost:5000/order-items", cartItem, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
+      await addOrderItem(cartItem);
       toast.success("Товар додано до кошика!");
     } catch (error) {
       toast.error("Не вдалося додати товар до кошика");
@@ -123,14 +117,13 @@ export const ProductPage: React.FC = () => {
           description={product.description}
           price={product.price}
           discount={product.discount}
-          sizes={product.sizes?.map((s) => s.size) || []}
+          sizes={product.sizes}
           onAddToCart={handleAddToCart}
           onSizeSelect={handleSizeSelect}
           onToggleWishlist={handleToggleWishlist}
           isFavorite={isFavorite}
         />
       </div>
-      {/* Передаємо articleNumber в CommentsSection */}
       <CommentsSection articleNumber={product.articleNumber} />
     </div>
   );

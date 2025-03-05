@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import ProductItem from "@/app/(mainPage)/(productsPage)/products/_components/ProductItem";
-import { Product } from "@/utils/api";
+import { Product } from "@/utils/types";
 import { fetchFavorites } from "@/lib/api/favorites-service";
 import { Loader2, AlertCircle } from "lucide-react";
 

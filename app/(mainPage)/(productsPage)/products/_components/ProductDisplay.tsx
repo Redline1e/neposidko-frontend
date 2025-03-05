@@ -1,9 +1,10 @@
 "use client";
+
 import { useEffect, useState } from "react";
-import ProductItem from "./ProductItem";
-import { Product } from "@/utils/api";
 import { Frown } from "lucide-react";
+import ProductItem from "./ProductItem";
 import { fetchActiveProducts } from "@/lib/api/product-service";
+import { Product } from "@/utils/types";
 
 interface ProductDisplayProps {
   filters: {
@@ -15,10 +16,7 @@ interface ProductDisplayProps {
   sortOrder: string;
 }
 
-export const ProductDisplay: React.FC<ProductDisplayProps> = ({
-  filters,
-  sortOrder,
-}) => {
+export const ProductDisplay: React.FC<ProductDisplayProps> = ({ filters, sortOrder }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +40,7 @@ export const ProductDisplay: React.FC<ProductDisplayProps> = ({
     getProducts();
   }, []);
 
-  // Фільтрація товарів (за категоріями, розмірами, ціною та знижкою)
+  // Фільтрація товарів за категоріями, розмірами, ціною та знижкою
   const filteredProducts = products.filter((product) => {
     const categoryIdStr =
       product.categoryId != null ? product.categoryId.toString() : "";
@@ -52,7 +50,7 @@ export const ProductDisplay: React.FC<ProductDisplayProps> = ({
 
     const matchesSize =
       filters.sizes.length === 0 ||
-      product.sizes.some((s) => filters.sizes.includes(s.size));
+      product.sizes?.some((s) => filters.sizes.includes(s.size));
 
     let productPrice = product.discount
       ? Math.round(product.price * (1 - product.discount / 100))
@@ -74,23 +72,15 @@ export const ProductDisplay: React.FC<ProductDisplayProps> = ({
     return matchesCategory && matchesSize && matchesPrice && matchesDiscount;
   });
 
-  // Сортування товарів
+  // Сортування товарів за вибраним порядком
   const sortedProducts = filteredProducts.sort((a, b) => {
     if (sortOrder === "priceAsc") {
-      const priceA = a.discount
-        ? Math.round(a.price * (1 - a.discount / 100))
-        : a.price;
-      const priceB = b.discount
-        ? Math.round(b.price * (1 - b.discount / 100))
-        : b.price;
+      const priceA = a.discount ? Math.round(a.price * (1 - a.discount / 100)) : a.price;
+      const priceB = b.discount ? Math.round(b.price * (1 - b.discount / 100)) : b.price;
       return priceA - priceB;
     } else if (sortOrder === "priceDesc") {
-      const priceA = a.discount
-        ? Math.round(a.price * (1 - a.discount / 100))
-        : a.price;
-      const priceB = b.discount
-        ? Math.round(b.price * (1 - b.discount / 100))
-        : b.price;
+      const priceA = a.discount ? Math.round(a.price * (1 - a.discount / 100)) : a.price;
+      const priceB = b.discount ? Math.round(b.price * (1 - b.discount / 100)) : b.price;
       return priceB - priceA;
     } else if (sortOrder === "alphabetAsc") {
       return a.name.localeCompare(b.name);
@@ -111,6 +101,7 @@ export const ProductDisplay: React.FC<ProductDisplayProps> = ({
     return (
       <p className="text-center text-xl font-semibold text-red-500">{error}</p>
     );
+
   return (
     <div className="md:mt-20 mt-28 mb-10 h-[calc(100vh-80px)] overflow-y-auto">
       {sortedProducts.length === 0 ? (
@@ -119,7 +110,6 @@ export const ProductDisplay: React.FC<ProductDisplayProps> = ({
         </p>
       ) : (
         <div className="container mx-auto px-4 mb-5">
-          {/* Центруємо товари */}
           <div className="flex flex-wrap gap-8 justify-center">
             {sortedProducts.map((product) => (
               <ProductItem key={product.articleNumber} product={product} />

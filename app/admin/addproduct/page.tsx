@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Product } from "@/utils/api";
+import { Product } from "@/utils/types";
 import AddProduct from "./_components/AddProduct";
 import { ProductDisplay } from "./_components/ProductDisplay";
 import { fetchProducts } from "@/lib/api/product-service";

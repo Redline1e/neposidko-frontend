@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import OrderItem from "./OrderItem";
 import OrderTotal from "./OrderTotal";
-import { OrderItemData } from "@/utils/api";
+import { OrderItemData } from "@/utils/types";
 import { fetchOrderItems } from "@/lib/api/order-items-service";
 import { fetchProductByArticle } from "@/lib/api/product-service";
 

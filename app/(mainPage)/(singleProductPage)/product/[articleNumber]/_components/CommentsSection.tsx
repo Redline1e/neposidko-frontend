@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useEffect, FormEvent, ChangeEvent } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -8,29 +9,24 @@ import {
   updateReview,
   deleteReview,
 } from "@/lib/api/reviews-service";
-import { Review } from "@/utils/api";
+import { Review } from "@/utils/types";
 import { toast } from "sonner";
 import { Star, Trash2, User2Icon } from "lucide-react";
-import { useAuth } from "@/lib/hooks/useAuth";
+import { useAuth } from "@/lib/hooks/auth";
 import { fetchUserById } from "@/lib/api/user-service";
 
 interface CommentsSectionProps {
   articleNumber: string;
 }
 
-export const CommentsSection: React.FC<CommentsSectionProps> = ({
-  articleNumber,
-}) => {
+export const CommentsSection: React.FC<CommentsSectionProps> = ({ articleNumber }) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [newComment, setNewComment] = useState<string>("");
   const [newRating, setNewRating] = useState<number>(5);
   const [loading, setLoading] = useState<boolean>(false);
-  // Стан для редагування: id відгуку, що редагується, а також нові значення
   const [editingReviewId, setEditingReviewId] = useState<number | null>(null);
   const [editComment, setEditComment] = useState<string>("");
   const [editRating, setEditRating] = useState<number>(5);
-
-  // Стан для збереження імен користувачів за їх id
   const [reviewUsers, setReviewUsers] = useState<Record<number, string>>({});
 
   const { isAuthenticated, user } = useAuth();
@@ -122,9 +118,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
   const handleDeleteReview = async (reviewId: number) => {
     try {
       await deleteReview(reviewId);
-      setReviews((prevReviews) =>
-        prevReviews.filter((r) => r.reviewId !== reviewId)
-      );
+      setReviews((prevReviews) => prevReviews.filter((r) => r.reviewId !== reviewId));
       toast.success("Відгук успішно видалено");
     } catch (error) {
       toast.error("Не вдалося видалити відгук");
@@ -134,10 +128,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
   const renderStars = (rating: number) => (
     <div className="flex">
       {Array.from({ length: 5 }, (_, i) => (
-        <Star
-          key={i}
-          className={i < rating ? "text-yellow-500" : "text-gray-300"}
-        />
+        <Star key={i} className={i < rating ? "text-yellow-500" : "text-gray-300"} />
       ))}
     </div>
   );
@@ -187,8 +178,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
               isAuthenticated &&
               user &&
               review.userId === user.userId &&
-              Date.now() - new Date(review.reviewDate).getTime() <=
-                10 * 60 * 1000;
+              Date.now() - new Date(review.reviewDate).getTime() <= 10 * 60 * 1000;
 
             return (
               <div

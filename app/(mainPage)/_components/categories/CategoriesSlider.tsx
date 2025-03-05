@@ -3,22 +3,18 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { fetchCategories } from "@/lib/api/category-service";
-import { Category } from "@/utils/api";
+import { Category } from "@/utils/types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
-// Визначаємо варіанти анімації для слайду
 const variants = {
   enter: (direction: number) => ({
     x: direction > 0 ? 300 : -300,
     opacity: 0,
   }),
-  center: {
-    x: 0,
-    opacity: 1,
-  },
+  center: { x: 0, opacity: 1 },
   exit: (direction: number) => ({
     x: direction > 0 ? -300 : 300,
     opacity: 0,
@@ -28,7 +24,6 @@ const variants = {
 export const CategoriesSlider = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
-  // Додатковий стан для збереження напрямку (1 для наступного, -1 для попереднього)
   const [direction, setDirection] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -56,15 +51,12 @@ export const CategoriesSlider = () => {
 
   const prevSlide = () => {
     setDirection(-1);
-    setCurrentIndex(
-      (prevIndex) => (prevIndex - 1 + categories.length) % categories.length
-    );
+    setCurrentIndex((prevIndex) => (prevIndex - 1 + categories.length) % categories.length);
   };
 
   if (loading) return <div className="text-center">Завантаження...</div>;
   if (error) return <div className="text-center text-red-500">{error}</div>;
-  if (categories.length === 0)
-    return <div className="text-center">Немає категорій</div>;
+  if (categories.length === 0) return <div className="text-center">Немає категорій</div>;
 
   return (
     <div className="relative w-full max-w-md mx-auto">
@@ -82,24 +74,19 @@ export const CategoriesSlider = () => {
               className="absolute inset-0"
             >
               <Image
-                src={categories[currentIndex].imageUrl}
+                src={categories[currentIndex].imageUrl || "/placeholder.jpg"}
                 alt={categories[currentIndex].name}
                 fill
                 className="object-cover"
-                // Розкоментуй наступне, якщо потрібно відключити оптимізацію:
-                // unoptimized
               />
             </motion.div>
           </AnimatePresence>
         </div>
         <div className="p-4 text-center">
-          <h3 className="text-xl font-semibold">
-            {categories[currentIndex].name}
-          </h3>
+          <h3 className="text-xl font-semibold">{categories[currentIndex].name}</h3>
         </div>
       </Card>
 
-      {/* Кнопки навігації з іконками з lucide-react */}
       <Button
         onClick={prevSlide}
         variant="outline"
@@ -115,7 +102,6 @@ export const CategoriesSlider = () => {
         <ArrowRight className="h-5 w-5" />
       </Button>
 
-      {/* Індикатори слайдів */}
       <div className="flex justify-center mt-4">
         {categories.map((_, index) => (
           <div

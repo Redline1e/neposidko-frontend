@@ -1,27 +1,21 @@
-import axios from "axios";
-import { Category } from "@/utils/api";
+import { apiClient } from "@/utils/apiClient";
+import { Category, CategorySchema } from "@/utils/types";
+import { z } from "zod";
 
-const api = axios.create({
-  baseURL: "http://localhost:5000",
-  headers: { "Content-Type": "application/json" },
-});
-
-// Отримання списку категорій
-export async function fetchCategories(): Promise<Category[]> {
+export const fetchCategories = async (): Promise<Category[]> => {
   try {
-    const response = await api.get("/categories");
-    return response.data;
-  } catch (error) {
-    console.error("Помилка завантаження категорії:", error);
+    const response = await apiClient.get("/categories");
+    return z.array(CategorySchema).parse(response.data);
+  } catch (error: any) {
+    console.error("Помилка завантаження категорій:", error);
     throw new Error("Не вдалося завантажити категорії");
   }
-}
+};
 
-// Додавання нової категорії
 export const addCategory = async (category: Category): Promise<void> => {
   try {
-    await api.post("/categories", category);
-  } catch (error) {
+    await apiClient.post("/categories", category);
+  } catch (error: any) {
     console.error("Помилка при додаванні категорії:", error);
     throw new Error("Не вдалося додати категорію");
   }
@@ -29,18 +23,21 @@ export const addCategory = async (category: Category): Promise<void> => {
 
 export const updateCategory = async (category: Category): Promise<void> => {
   try {
-    await api.put(`/categories/${category.categoryId}`, category);
-  } catch (error) {
-    console.error("Error updating category:", error);
+    if (!category.categoryId) {
+      throw new Error("categoryId є обов’язковим для оновлення");
+    }
+    await apiClient.put(`/categories/${category.categoryId}`, category);
+  } catch (error: any) {
+    console.error("Помилка при оновленні категорії:", error);
     throw new Error("Не вдалося оновити категорію");
   }
 };
 
-export const deleteCategory = async (category: Category): Promise<void> => {
+export const deleteCategory = async (categoryId: number): Promise<void> => {
   try {
-    await api.delete(`/categories/${category.categoryId}`);
-  } catch (error) {
-    console.error("Error deleting category:", error);
+    await apiClient.delete(`/categories/${categoryId}`);
+  } catch (error: any) {
+    console.error("Помилка при видаленні категорії:", error);
     throw new Error("Не вдалося видалити категорію");
   }
 };

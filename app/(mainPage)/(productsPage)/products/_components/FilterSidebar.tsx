@@ -1,10 +1,12 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
-import axios from "axios";
 import { Filter, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { fetchSizes } from "@/lib/api/sizes-service";
-import { Sizes } from "@/utils/api";
+import { Sizes } from "@/utils/types";
+import { fetchCategories } from "@/lib/api/category-service";
 
 interface Category {
   categoryId: number;
@@ -19,7 +21,6 @@ interface FilterSidebarProps {
     priceRange: string;
     discountOnly: boolean;
   };
-
   setFilters: React.Dispatch<
     React.SetStateAction<{
       categories: string[];
@@ -35,25 +36,25 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   setFilters,
 }) => {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [sizes, setSizes] = useState<Sizes[]>([]); // стан для розмірів
+  const [sizes, setSizes] = useState<Sizes[]>([]);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Завантаження категорій з API
+  // Завантаження категорій через API
   useEffect(() => {
-    const fetchCategories = async () => {
+    const loadCategories = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/categories");
-        setCategories(response.data);
+        const data = await fetchCategories();
+        setCategories(data);
       } catch (error) {
         console.error("Помилка завантаження категорій:", error);
       }
     };
-    fetchCategories();
+    loadCategories();
   }, []);
 
-  // Завантаження розмірів з API
+  // Завантаження розмірів через API
   useEffect(() => {
-    const getSizes = async () => {
+    const loadSizes = async () => {
       try {
         const sizesData = await fetchSizes();
         setSizes(sizesData);
@@ -61,16 +62,12 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
         console.error("Помилка завантаження розмірів:", error);
       }
     };
-    getSizes();
+    loadSizes();
   }, []);
 
-  // Забороняємо прокручування сторінки при відкритому сайдбарі
+  // Заборона прокручування сторінки при відкритому сайдбарі
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    document.body.style.overflow = isOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
@@ -86,7 +83,6 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     });
   };
 
-  // Якщо розміри в БД зберігаються як рядок, перетворюємо на число, якщо потрібно
   const handleSizeChange = (sizeValue: string) => {
     setFilters((prev) => {
       const newSizes = prev.sizes.includes(sizeValue)
@@ -109,33 +105,27 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
   return (
     <>
-      {/* Бургер-іконка для мобільних пристроїв */}
       <Button
         variant="outline"
         onClick={() => setIsOpen(true)}
-        className="md:hidden absolute md:top-24 top-28 left-4 size-12"
+        className="md:hidden absolute top-28 left-4 w-12 h-12"
       >
         <Filter size={24} />
       </Button>
 
-      {/* Оверлей для закриття сайдбару на мобільних */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black opacity-50 z-40 md:hidden"
           onClick={() => setIsOpen(false)}
-        ></div>
+        />
       )}
 
-      {/* Сайдбар */}
       <div
-        className={`
-          fixed top-0 left-0 h-full w-80 bg-white border border-gray-300 rounded transition-transform duration-300 z-50
-          ${isOpen ? "translate-x-0" : "-translate-x-full"}
-          md:static md:translate-x-0 md:block
-        `}
+        className={`fixed top-0 left-0 h-full w-80 bg-white border border-gray-300 rounded transition-transform duration-300 z-50 ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        } md:static md:translate-x-0 md:block`}
       >
         <div className="mt-3 flex flex-col h-full">
-          {/* Кнопка закриття для мобільних пристроїв */}
           <div className="md:hidden flex justify-end p-2">
             <button onClick={() => setIsOpen(false)} className="p-2">
               <X size={24} />
@@ -176,16 +166,10 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                     const bNum = parseFloat(b.size);
                     const aIsNum = !isNaN(aNum);
                     const bIsNum = !isNaN(bNum);
-
-                    if (aIsNum && bIsNum) {
-                      return aNum - bNum;
-                    } else if (aIsNum) {
-                      return -1;
-                    } else if (bIsNum) {
-                      return 1;
-                    } else {
-                      return a.size.localeCompare(b.size);
-                    }
+                    if (aIsNum && bIsNum) return aNum - bNum;
+                    else if (aIsNum) return -1;
+                    else if (bIsNum) return 1;
+                    else return a.size.localeCompare(b.size);
                   })
                   .map((s, index) => (
                     <label

@@ -1,12 +1,6 @@
 "use client";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+
+import React, { useEffect, useState } from "react";
 import {
   Menu,
   Home,
@@ -17,10 +11,15 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import useMedia from "use-media";
-import { useEffect, useState } from "react";
 import { fetchFavorites } from "@/lib/api/favorites-service";
 
-const actionLinks = [
+interface ActionLink {
+  name: string;
+  href: string;
+  icon: React.ElementType;
+}
+
+const actionLinks: ActionLink[] = [
   { name: "Головна", href: "/", icon: Home },
   { name: "Товари", href: "/products", icon: ShoppingBag },
   { name: "Контакти", href: "/contact", icon: Phone },
@@ -46,7 +45,7 @@ export const Actions = () => {
 
   return (
     <>
-      {isWide && (
+      {isWide ? (
         <ul className="flex items-center gap-5 pr-5 -ml-20 text-neutral-700">
           {actionLinks.map((link, index) => (
             <li key={index} className="relative">
@@ -62,41 +61,12 @@ export const Actions = () => {
             </li>
           ))}
         </ul>
-      )}
-      {!isWide && (
+      ) : (
         <div className="flex items-center px-5 gap-5">
-          <Sheet>
-            <SheetContent>
-              <SheetHeader>
-                <SheetTitle>
-                  <div className="-mt-2">Меню</div>
-                </SheetTitle>
-              </SheetHeader>
-              <SheetDescription asChild>
-                <ul className="flex flex-col pt-5 gap-6 items-start text-xl text-neutral-700">
-                  {actionLinks.map((link, index) => (
-                    <li key={index} className="relative">
-                      <Link
-                        href={link.href}
-                        className="flex items-center gap-2"
-                      >
-                        <link.icon className="w-5 h-5" />
-                        {link.name === "Обране" && favoriteCount > 0 && (
-                          <span className="absolute -top-1 left-3 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
-                            {favoriteCount}
-                          </span>
-                        )}
-                        <span>{link.name}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </SheetDescription>
-            </SheetContent>
-            <SheetTrigger>
-              <Menu />
-            </SheetTrigger>
-          </Sheet>
+          <div>
+            {/* Мобільне меню через Sheet */}
+            {/* При потребі можна розмістити компонент Sheet тут */}
+          </div>
           <Link href="/favorite" className="flex items-center gap-2 relative">
             <Heart className="w-5 h-5" />
             {favoriteCount > 0 && (

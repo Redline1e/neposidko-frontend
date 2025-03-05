@@ -3,7 +3,7 @@
 
 import React from "react";
 import { AdminItem } from "../../_components/AdminItem";
-import { Brand } from "@/utils/api";
+import { Brand } from "@/utils/types";
 import { deleteBrand, updateBrand } from "@/lib/api/brands-service";
 
 const renderBrandCard = (brand: Brand) => {

@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import type { OrderItemData, OrderItem as OrderItemType } from "@/utils/api";
+import type { OrderItemData, OrderItem as OrderItemType } from "@/utils/types";
 import {
   Select,
   SelectContent,

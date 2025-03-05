@@ -8,7 +8,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { fetchAllOrders } from "@/lib/api/order-service";
-import { Order } from "@/utils/api";
+import { Order } from "@/utils/types";
 
 const monthNames = [
   "Січень",

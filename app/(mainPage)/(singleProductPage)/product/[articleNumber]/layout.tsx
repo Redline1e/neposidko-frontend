@@ -1,7 +1,11 @@
+import { ReactNode } from "react";
+
+interface ProductDetailLayoutProps {
+  children: ReactNode;
+}
+
 export default function ProductDetailLayout({
   children,
-}: {
-  children: React.ReactNode;
-}) {
+}: ProductDetailLayoutProps) {
   return <>{children}</>;
 }

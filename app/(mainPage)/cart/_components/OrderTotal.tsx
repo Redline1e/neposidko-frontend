@@ -1,4 +1,4 @@
-import { OrderItemData } from "@/utils/api";
+import { OrderItemData } from "@/utils/types";
 
 type Props = {
   orderItems: OrderItemData[];

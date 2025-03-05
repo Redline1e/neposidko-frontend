@@ -1,6 +1,6 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import { Product } from "@/utils/api";
-import React from "react";
 import { Heart, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -9,6 +9,7 @@ import {
   removeFromFavorites,
   fetchFavorites,
 } from "@/lib/api/favorites-service";
+import { Product } from "@/utils/types";
 
 interface SizeInfo {
   size: string;
@@ -16,35 +17,22 @@ interface SizeInfo {
 }
 
 interface ProductItemProps {
-  product: Product & { sizes?: SizeInfo[] };
+  product: Product & { sizes?: SizeInfo[]; categoryId?: number };
 }
 
 const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
-  const {
-    articleNumber,
-    price,
-    discount,
-    name,
-    imageUrls,
-    sizes = [],
-  } = product;
-
+  const { articleNumber, price, discount, name, imageUrls, sizes = [] } = product;
   const discountedPrice = discount
     ? Math.round(price * (1 - discount / 100))
     : price;
-
-  const imageSrc =
-    imageUrls && imageUrls.length > 0 ? imageUrls[0] : "/fallback.jpg";
-
+  const imageSrc = imageUrls && imageUrls.length > 0 ? imageUrls[0] : "/fallback.jpg";
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
   useEffect(() => {
     const checkFavoriteStatus = async () => {
       try {
         const favorites = await fetchFavorites();
-        setIsFavorite(
-          favorites.some((fav) => fav.articleNumber === articleNumber)
-        );
+        setIsFavorite(favorites.some((fav) => fav.articleNumber === articleNumber));
       } catch (error) {
         console.error("Помилка при перевірці улюблених:", error);
       }
@@ -53,9 +41,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
     checkFavoriteStatus();
   }, [articleNumber]);
 
-  const handleToggleFavorite = async (
-    e: React.MouseEvent<HTMLButtonElement>
-  ) => {
+  const handleToggleFavorite = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -102,32 +88,23 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
           </Button>
         </div>
         <div className="p-4">
-          <h2 className="text-lg font-semibold text-gray-800 truncate">
-            {name}
-          </h2>
+          <h2 className="text-lg font-semibold text-gray-800 truncate">{name}</h2>
           <div className="mt-2 flex items-center space-x-2">
             {discount > 0 && (
-              <span className="text-gray-400 line-through text-sm">
-                {price} ₴
-              </span>
+              <span className="text-gray-400 line-through text-sm">{price} ₴</span>
             )}
             <span className="text-red-500 font-semibold text-lg whitespace-nowrap">
               {discountedPrice} ₴
             </span>
           </div>
-
           {sizes.length > 0 && (
             <div className="mt-3">
               <span className="text-gray-800 font-semibold whitespace-nowrap">
-                {sizes
-                  .slice(0, 2)
-                  .map((sizeObj) => sizeObj.size)
-                  .join(", ")}
+                {sizes.slice(0, 2).map((sizeObj) => sizeObj.size).join(", ")}
                 {sizes.length > 2 && "..."}
               </span>
             </div>
           )}
-
           <div className="mt-4">
             <Button
               onClick={(e) => {

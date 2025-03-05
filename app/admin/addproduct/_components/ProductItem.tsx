@@ -2,7 +2,7 @@
 
 import React from "react";
 import { AdminItem } from "../../_components/AdminItem";
-import { Product } from "@/utils/api";
+import { Product } from "@/utils/types";
 import {
   deleteProduct,
   updateProduct,

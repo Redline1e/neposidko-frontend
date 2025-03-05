@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Brand } from "@/utils/api";
+import { Brand } from "@/utils/types";
 import { BrandsDisplay } from "./_components/BrandsDisplay";
 import AddBrand from "./_components/AddBrand";
 import { fetchBrands } from "@/lib/api/brands-service";
