@@ -6,7 +6,6 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// Отримання позицій замовлення
 export async function fetchOrderItems(): Promise<OrderItem[]> {
   try {
     const token = localStorage.getItem("token");

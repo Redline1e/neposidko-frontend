@@ -26,6 +26,7 @@ export interface Order {
   readonly orderId?: number;
   readonly userId: number;
   orderStatusId?: number;
+  orderDate: string;
 }
 
 export interface OrderItem {

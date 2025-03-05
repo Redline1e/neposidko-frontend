@@ -21,6 +21,18 @@ export function AdminSidebar() {
       <SidebarContent className="p-4">
         <SidebarGroup className="space-y-2">
           <Button variant="outline" className="w-full">
+            <Link href="/admin" className="block w-full">
+              <p
+                className={cn(
+                  "text-neutral-900",
+                  currentPath === "/admin" ? "font-bold" : ""
+                )}
+              >
+                Головна(Пошук)
+              </p>
+            </Link>
+          </Button>
+          <Button variant="outline" className="w-full">
             <Link href="/admin/addproduct" className="block w-full">
               <p
                 className={cn(
@@ -53,6 +65,18 @@ export function AdminSidebar() {
                 )}
               >
                 Додати бренд
+              </p>
+            </Link>
+          </Button>
+          <Button variant="outline" className="w-full">
+            <Link href="/admin/statistics" className="block w-full">
+              <p
+                className={cn(
+                  "text-neutral-900",
+                  currentPath === "/admin/statistics" ? "font-bold" : ""
+                )}
+              >
+                Переглянути статистику
               </p>
             </Link>
           </Button>

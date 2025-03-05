@@ -9,6 +9,12 @@ import {
   updateProductActiveStatus,
 } from "@/lib/api/product-service";
 
+interface ProductItemProps {
+  product: Product;
+  onDelete: (product: Product) => Promise<void>;
+  onStatusChange: (product: Product) => Promise<void>;
+}
+
 const renderProductCard = (product: Product) => {
   const imageSrc =
     product.imageUrls && product.imageUrls.length > 0
@@ -164,7 +170,11 @@ const renderProductEditForm = (
   );
 };
 
-export const ProductItem: React.FC<{ product: Product }> = ({ product }) => {
+export const ProductItem: React.FC<ProductItemProps> = ({
+  product,
+  onDelete,
+  onStatusChange,
+}) => {
   return (
     <AdminItem<Product>
       item={product}
@@ -172,10 +182,11 @@ export const ProductItem: React.FC<{ product: Product }> = ({ product }) => {
       renderCard={renderProductCard}
       renderEditForm={renderProductEditForm}
       onSave={updateProduct}
-      onDelete={deleteProduct}
-      onToggleActive={(item, newStatus) =>
-        updateProductActiveStatus(item.articleNumber, newStatus)
-      }
+      onDelete={() => onDelete(product)}
+      onToggleActive={(item, newStatus) => {
+        onStatusChange(item);
+        return updateProductActiveStatus(item.articleNumber, newStatus);
+      }}
     />
   );
 };

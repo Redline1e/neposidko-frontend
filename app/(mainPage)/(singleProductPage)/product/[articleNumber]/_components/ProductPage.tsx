@@ -23,6 +23,8 @@ export const ProductPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isFavorite, setIsFavorite] = useState(false);
 
+
+
   useEffect(() => {
     if (!articleNumber) return;
 

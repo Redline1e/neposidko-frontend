@@ -169,7 +169,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
             {/* Розмір */}
             <div className="mb-4">
               <p className="font-medium text-neutral-900">Розмір</p>
-              <div className="mt-2 space-y-2">
+              <div className="mt-2 grid grid-cols-2 gap-2">
                 {[...sizes]
                   .sort((a, b) => {
                     const aNum = parseFloat(a.size);
@@ -178,16 +178,12 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                     const bIsNum = !isNaN(bNum);
 
                     if (aIsNum && bIsNum) {
-                      // Обидва значення — числа, сортуємо за числовим значенням
                       return aNum - bNum;
                     } else if (aIsNum) {
-                      // a — число, b — не число, тому a має йти першим
                       return -1;
                     } else if (bIsNum) {
-                      // b — число, a — не число, тому b має йти першим
                       return 1;
                     } else {
-                      // Обидва значення — не числа, сортуємо за алфавітом
                       return a.size.localeCompare(b.size);
                     }
                   })

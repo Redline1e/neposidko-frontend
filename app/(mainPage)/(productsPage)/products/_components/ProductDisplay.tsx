@@ -112,13 +112,13 @@ export const ProductDisplay: React.FC<ProductDisplayProps> = ({
       <p className="text-center text-xl font-semibold text-red-500">{error}</p>
     );
   return (
-    <div className="md:mt-20 mt-28 mb-10">
+    <div className="md:mt-20 mt-28 mb-10 h-[calc(100vh-80px)] overflow-y-auto">
       {sortedProducts.length === 0 ? (
         <p className="flex justify-center items-center text-xl font-semibold gap-x-2">
           Товари не знайдено <Frown />
         </p>
       ) : (
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 mb-5">
           {/* Центруємо товари */}
           <div className="flex flex-wrap gap-8 justify-center">
             {sortedProducts.map((product) => (

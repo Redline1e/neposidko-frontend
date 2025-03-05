@@ -6,7 +6,6 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// Отримання замовлень користувача
 export async function fetchOrders(): Promise<Order[]> {
   try {
     const token = localStorage.getItem("token");
@@ -28,5 +27,16 @@ export async function addOrder(order: Order): Promise<Order> {
   } catch (error) {
     console.error("Помилка при додаванні замовлення:", error);
     throw new Error("Не вдалося додати замовлення");
+  }
+}
+
+
+export async function fetchAllOrders(): Promise<Order[]> {
+  try {
+    const response = await api.get("/orders/all");
+    return response.data;
+  } catch (error) {
+    console.error("Помилка завантаження всіх замовлень:", error);
+    throw new Error("Не вдалося завантажити всі замовлення");
   }
 }
