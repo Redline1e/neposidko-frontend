@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import {
   ChartContainer,
@@ -41,21 +41,23 @@ interface OrderChartData {
 
 const colorPalette = ["#4ade80", "#facc15", "#60a5fa", "#f87171"];
 
-export default function ChartComponent() {
+const ChartComponent: React.FC = () => {
   const [chartData, setChartData] = useState<OrderChartData[]>([]);
 
   useEffect(() => {
-    async function loadData() {
+    const loadData = async () => {
       try {
         const orders = (await fetchAllOrders()) as Order[];
-        // Агрегуємо замовлення за місяцями та статусами за допомогою reduce
         const dataMap = orders.reduce((acc, order) => {
           if (!order.orderDate || order.orderStatusId === undefined) return acc;
           const date = new Date(order.orderDate);
           const month = monthNames[date.getMonth()];
           const status =
-            statusMapping[order.orderStatusId] ||
-            `Статус ${order.orderStatusId}`;
+            order.orderStatusId !== null
+              ? statusMapping[order.orderStatusId] ||
+                `Статус ${order.orderStatusId}`
+              : "Невідомий";
+
           if (!acc[month]) {
             acc[month] = { month };
           }
@@ -67,7 +69,7 @@ export default function ChartComponent() {
       } catch (error) {
         console.error("Помилка завантаження замовлень:", error);
       }
-    }
+    };
     loadData();
   }, []);
 
@@ -98,4 +100,6 @@ export default function ChartComponent() {
       </ChartContainer>
     </div>
   );
-}
+};
+
+export default ChartComponent;

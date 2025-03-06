@@ -1,3 +1,4 @@
+import React from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -16,7 +17,7 @@ const customIcon = new L.Icon({
 
 const position: [number, number] = [50.3036071, 34.890111];
 
-export default function MapClient() {
+const MapClient: React.FC = () => {
   return (
     <MapContainer
       center={position}
@@ -37,4 +38,6 @@ export default function MapClient() {
       </Marker>
     </MapContainer>
   );
-}
+};
+
+export default MapClient;

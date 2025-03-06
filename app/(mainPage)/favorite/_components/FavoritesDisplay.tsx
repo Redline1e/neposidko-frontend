@@ -1,11 +1,12 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import React, { useEffect, useState } from "react";
 import ProductItem from "@/app/(mainPage)/(productsPage)/products/_components/ProductItem";
 import { Product } from "@/utils/types";
 import { fetchFavorites } from "@/lib/api/favorites-service";
 import { Loader2, AlertCircle } from "lucide-react";
 
-export const FavoriteDisplay = () => {
+export const FavoriteDisplay: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -16,7 +17,8 @@ export const FavoriteDisplay = () => {
       const data = await fetchFavorites();
       setProducts(data);
       setError(null);
-    } catch (error) {
+    } catch (err) {
+      console.error("Помилка отримання улюблених товарів:", err);
       setError("У вас ще немає улюблених товарів");
     } finally {
       setLoading(false);

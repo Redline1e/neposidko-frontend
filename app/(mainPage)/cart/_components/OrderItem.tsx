@@ -1,5 +1,6 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import type { OrderItemData, OrderItem as OrderItemType } from "@/utils/types";
@@ -18,13 +19,17 @@ import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-type Props = {
+interface OrderItemProps {
   item: OrderItemData;
   onItemUpdate?: (updatedItem: OrderItemData) => void;
   onItemDelete?: (deletedItemId: number) => void;
-};
+}
 
-export default function OrderItem({ item, onItemUpdate, onItemDelete }: Props) {
+const OrderItem: React.FC<OrderItemProps> = ({
+  item,
+  onItemUpdate,
+  onItemDelete,
+}) => {
   const router = useRouter();
   const [selectedSize, setSelectedSize] = useState<string>(item.size);
   const [selectedQuantity, setSelectedQuantity] = useState<number>(
@@ -39,13 +44,12 @@ export default function OrderItem({ item, onItemUpdate, onItemDelete }: Props) {
   const sizeData = item.sizes?.find((s) => s.size === selectedSize);
   const availableStock = sizeData ? sizeData.stock : 0;
 
-  // Створюємо масив варіантів для вибору кількості
-  const quantityOptions = [];
-  for (let i = 1; i <= availableStock; i++) {
-    quantityOptions.push(i);
-  }
+  // Використовуємо useMemo для створення масиву варіантів кількості
+  const quantityOptions = useMemo(() => {
+    return Array.from({ length: availableStock }, (_, i) => i + 1);
+  }, [availableStock]);
 
-  async function handleSave() {
+  const handleSave = async () => {
     setIsSaving(true);
     try {
       const updatedItem: OrderItemType = {
@@ -63,29 +67,28 @@ export default function OrderItem({ item, onItemUpdate, onItemDelete }: Props) {
         size: selectedSize,
         quantity: selectedQuantity,
       };
-      if (onItemUpdate) {
-        onItemUpdate(newItem);
-      }
+
+      onItemUpdate?.(newItem);
     } catch (error) {
       console.error("Помилка оновлення позиції:", error);
+    } finally {
+      setIsSaving(false);
     }
-    setIsSaving(false);
-  }
+  };
 
-  async function handleDelete() {
+  const handleDelete = async () => {
     if (!confirm("Ви впевнені, що хочете видалити цю позицію?")) return;
     setIsDeleting(true);
     try {
       await deleteOrderItem(item.productOrderId);
-      if (onItemDelete) {
-        onItemDelete(item.productOrderId);
-      }
+      onItemDelete?.(item.productOrderId);
       router.refresh();
     } catch (error) {
       console.error("Помилка видалення позиції:", error);
+    } finally {
+      setIsDeleting(false);
     }
-    setIsDeleting(false);
-  }
+  };
 
   useEffect(() => {
     if (
@@ -139,20 +142,16 @@ export default function OrderItem({ item, onItemUpdate, onItemDelete }: Props) {
         <div className="mt-2 flex flex-col md:flex-row md:items-center gap-4">
           {/* Селектор розміру */}
           <div className="w-40">
-            <Select
-              value={selectedSize}
-              onValueChange={(value) => setSelectedSize(value)}
-            >
+            <Select value={selectedSize} onValueChange={setSelectedSize}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Оберіть розмір" />
               </SelectTrigger>
               <SelectContent>
-                {item.sizes &&
-                  item.sizes.map((sizeObj) => (
-                    <SelectItem key={sizeObj.size} value={sizeObj.size}>
-                      {sizeObj.size}
-                    </SelectItem>
-                  ))}
+                {item.sizes?.map((sizeObj) => (
+                  <SelectItem key={sizeObj.size} value={sizeObj.size}>
+                    {sizeObj.size}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -181,4 +180,6 @@ export default function OrderItem({ item, onItemUpdate, onItemDelete }: Props) {
       </Button>
     </div>
   );
-}
+};
+
+export default OrderItem;

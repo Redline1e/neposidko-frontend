@@ -1,25 +1,23 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import React, { useEffect, useState } from "react";
 import OrderItem from "./OrderItem";
 import OrderTotal from "./OrderTotal";
 import { OrderItemData } from "@/utils/types";
 import { fetchOrderItems } from "@/lib/api/order-items-service";
 import { fetchProductByArticle } from "@/lib/api/product-service";
 
-export const OrderDisplay = () => {
+export const OrderDisplay: React.FC = () => {
   const [orderItems, setOrderItems] = useState<OrderItemData[]>([]);
 
   useEffect(() => {
-    async function loadOrders() {
+    const loadOrders = async () => {
       try {
         const items = await fetchOrderItems();
         const enrichedItems = await Promise.all(
           items.map(async (item) => {
             try {
-              const productData = await fetchProductByArticle(
-                item.articleNumber
-              );
-              // Формуємо об’єкт, що відповідає OrderItemData
+              const productData = await fetchProductByArticle(item.articleNumber);
               return {
                 productOrderId: item.productOrderId,
                 orderId: item.orderId,
@@ -56,7 +54,7 @@ export const OrderDisplay = () => {
       } catch (error) {
         console.error("Помилка завантаження order items:", error);
       }
-    }
+    };
 
     loadOrders();
   }, []);

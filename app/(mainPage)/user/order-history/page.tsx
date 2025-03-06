@@ -1,30 +1,29 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import React, { useEffect, useState } from "react";
 import { Order, OrderItem } from "@/utils/types";
 import { fetchOrders } from "@/lib/api/order-service";
 import { fetchOrderItems } from "@/lib/api/order-items-service";
 
-// Розширюємо інтерфейс OrderItem, щоб врахувати додаткові поля (якщо вони повертаються API)
 interface ExtendedOrderItem extends OrderItem {
   name?: string;
   imageUrls?: string[];
 }
 
-// Розширюємо замовлення, щоб містити позиції розширеного типу
 interface ExtendedOrder extends Order {
   orderItems: ExtendedOrderItem[];
-  userName?: string; // Очікуємо, що API поверне назву користувача, якщо вона є
+  userName?: string;
 }
 
 const STATUS_STYLES: Record<number, string> = {
-  1: "bg-blue-100 text-blue-800", // Нове замовлення
-  2: "bg-yellow-100 text-yellow-800", // В обробці
-  3: "bg-orange-100 text-orange-800", // Очікує оплати
-  4: "bg-purple-100 text-purple-800", // Відправлене
-  5: "bg-green-100 text-green-800", // Доставлене
-  6: "bg-red-100 text-red-800", // Повернене
-  7: "bg-gray-100 text-gray-800", // Виконане
-  8: "bg-black text-white", // Відмінене
+  1: "bg-blue-100 text-blue-800",
+  2: "bg-yellow-100 text-yellow-800",
+  3: "bg-orange-100 text-orange-800",
+  4: "bg-purple-100 text-purple-800",
+  5: "bg-green-100 text-green-800",
+  6: "bg-red-100 text-red-800",
+  7: "bg-gray-100 text-gray-800",
+  8: "bg-black text-white",
 };
 
 const STATUS_LABELS: Record<number, string> = {
@@ -38,18 +37,16 @@ const STATUS_LABELS: Record<number, string> = {
   8: "Відмінене",
 };
 
-export default function OrderHistory() {
+const OrderHistory: React.FC = () => {
   const [orders, setOrders] = useState<ExtendedOrder[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    async function fetchData() {
+    const fetchData = async () => {
       try {
-        // Завантаження замовлень та позицій замовлень через API з "@/utils/api"
         const ordersData = await fetchOrders();
         const orderItemsData = await fetchOrderItems();
 
-        // Групуємо позиції замовлень за orderId
         const orderItemsByOrderId = orderItemsData.reduce(
           (acc, item: ExtendedOrderItem) => {
             if (!acc[item.orderId]) {
@@ -61,7 +58,6 @@ export default function OrderHistory() {
           {} as Record<number, ExtendedOrderItem[]>
         );
 
-        // Додаємо orderItems до кожного замовлення
         const extendedOrders: ExtendedOrder[] = ordersData.map((order) => ({
           ...order,
           orderItems: orderItemsByOrderId[order.orderId || 0] || [],
@@ -73,7 +69,7 @@ export default function OrderHistory() {
       } finally {
         setLoading(false);
       }
-    }
+    };
 
     fetchData();
   }, []);
@@ -84,7 +80,9 @@ export default function OrderHistory() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-center">Історія замовлень</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">
+        Історія замовлень
+      </h1>
       {orders.length === 0 ? (
         <p className="text-gray-500 text-center">У вас ще немає замовлень.</p>
       ) : (
@@ -105,12 +103,10 @@ export default function OrderHistory() {
                 {STATUS_LABELS[order.orderStatusId || 1]}
               </span>
             </div>
-            {/* Якщо є назва користувача, відображаємо її */}
             {order.userName && (
               <div className="mb-4 text-gray-700">
                 <p>
-                  <span className="font-medium">Замовник:</span>{" "}
-                  {order.userName}
+                  <span className="font-medium">Замовник:</span> {order.userName}
                 </p>
               </div>
             )}
@@ -119,8 +115,6 @@ export default function OrderHistory() {
               {order.orderItems && order.orderItems.length > 0 ? (
                 <ul className="space-y-3">
                   {order.orderItems.map((item) => {
-                    // Якщо API повертає name та imageUrls, використовуємо їх,
-                    // інакше fallback на articleNumber та placeholder для зображення.
                     const productImage =
                       item.imageUrls && item.imageUrls.length > 0
                         ? item.imageUrls[0]
@@ -162,4 +156,6 @@ export default function OrderHistory() {
       )}
     </div>
   );
-}
+};
+
+export default OrderHistory;

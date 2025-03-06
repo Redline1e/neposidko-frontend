@@ -1,6 +1,6 @@
 "use client";
-import { useState, useEffect } from "react";
-import { Product, Brand, Category } from "@/utils/types"; // Переконайтеся, що Product тепер містить imageUrls: string[]
+import React, { useState, useCallback, useEffect } from "react";
+import { Product, Brand, Category } from "@/utils/types";
 import { addProduct } from "@/lib/api/product-service";
 import { Plus } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -14,7 +14,7 @@ import {
 import { fetchBrands } from "@/lib/api/brands-service";
 import { fetchCategories } from "@/lib/api/category-service";
 
-export default function AddProduct() {
+const AddProduct: React.FC = () => {
   const [form, setForm] = useState<Product>({
     articleNumber: "",
     name: "",
@@ -24,100 +24,84 @@ export default function AddProduct() {
     discount: 0,
     description: "",
     imageUrls: [],
+    isActive: true,
     sizes: [],
   });
-
-  // Окремий стан для введення URL зображень (як рядок, де URL розділено комами)
   const [imageUrlsInput, setImageUrlsInput] = useState<string>("");
-
-  // Стан для введення нового розміру та кількості
   const [newSize, setNewSize] = useState<string>("");
   const [newStock, setNewStock] = useState<number>(0);
-
-  // Режим введення знижки: "percent" (відсотки) або "amount" (гривні)
   const [discountMode, setDiscountMode] = useState<"percent" | "amount">(
     "percent"
   );
-
-  // Стан для завантажених брендів та категорій
   const [brands, setBrands] = useState<Brand[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
 
-  // Завантаження брендів та категорій при монтуванні компонента
   useEffect(() => {
     fetchBrands()
       .then((data) => setBrands(data))
-      .catch((error) => console.error(error));
-
+      .catch((error) => console.error("Error fetching brands:", error));
     fetchCategories()
       .then((data) => setCategories(data))
-      .catch((error) => console.error(error));
+      .catch((error) => console.error("Error fetching categories:", error));
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    // Для числових полів перетворюємо значення у Number
-    if (
-      name === "brandId" ||
-      name === "price" ||
-      name === "discount" ||
-      name === "categoryId"
-    ) {
-      setForm({ ...form, [name]: Number(value) });
-    } else {
-      setForm({ ...form, [name]: value });
-    }
-  };
+    setForm((prev) => ({
+      ...prev,
+      [name]:
+        name === "brandId" ||
+        name === "price" ||
+        name === "discount" ||
+        name === "categoryId"
+          ? Number(value)
+          : value,
+    }));
+  }, []);
 
-  // Додаємо пару розмір/кількість до масиву form.sizes
-  const handleAddSize = () => {
+  const handleAddSize = useCallback(() => {
     if (newSize.trim() === "" || newStock < 0) {
       alert("Будь ласка, введіть коректний розмір та кількість");
       return;
     }
-    setForm({
-      ...form,
-      sizes: [...form.sizes, { size: newSize.trim(), stock: newStock }],
-    });
+    setForm((prev) => ({
+      ...prev,
+      sizes: [...prev.sizes, { size: newSize.trim(), stock: newStock }],
+    }));
     setNewSize("");
     setNewStock(0);
-  };
+  }, [newSize, newStock]);
 
-  // Видалення доданого розміру за індексом
-  const handleRemoveSize = (index: number) => {
-    const updatedSizes = form.sizes.filter((_, i) => i !== index);
-    setForm({ ...form, sizes: updatedSizes });
-  };
+  const handleRemoveSize = useCallback((index: number) => {
+    setForm((prev) => ({
+      ...prev,
+      sizes: prev.sizes.filter((_, i) => i !== index),
+    }));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Розбиваємо введений рядок URL за комами, обрізаємо пробіли та фільтруємо порожні рядки
     const imageUrls = imageUrlsInput
       .split(",")
-      .map((url: string) => url.trim())
+      .map((url) => url.trim())
       .filter((url) => url !== "");
 
-    // Якщо режим введення знижки "amount", конвертуємо її у відсотки
     let discountPercent = form.discount;
-    if (discountMode === "amount") {
-      if (form.price > 0) {
-        discountPercent = (form.discount / form.price) * 100;
-      } else {
-        discountPercent = 0;
-      }
+    if (discountMode === "amount" && form.price > 0) {
+      discountPercent = (form.discount / form.price) * 100;
     }
 
     const productToAdd: Product = {
       ...form,
       discount: discountPercent,
-      imageUrls: imageUrls, // Зберігаємо масив URL
+      imageUrls,
     };
 
     await addProduct(productToAdd);
     alert("Товар додано!");
 
-    // Очищуємо форму та поле введення URL
+    // Очищення форми
     setForm({
       articleNumber: "",
       name: "",
@@ -127,6 +111,7 @@ export default function AddProduct() {
       discount: 0,
       description: "",
       imageUrls: [],
+      isActive: true,
       sizes: [],
     });
     setImageUrlsInput("");
@@ -153,7 +138,6 @@ export default function AddProduct() {
         />
       </label>
 
-      {/* Поле для введення назви товару */}
       <label className="flex flex-col">
         <span className="text-sm font-medium text-gray-700">Назва товару:</span>
         <input
@@ -166,13 +150,12 @@ export default function AddProduct() {
         />
       </label>
 
-      {/* Випадаюче меню для вибору бренду */}
       <label className="flex flex-col">
         <span className="text-sm font-medium text-gray-700">Бренд:</span>
         <Select
           value={String(form.brandId)}
           onValueChange={(value) =>
-            setForm({ ...form, brandId: Number(value) })
+            setForm((prev) => ({ ...prev, brandId: Number(value) }))
           }
         >
           <SelectTrigger className="border p-2 rounded-md">
@@ -188,13 +171,12 @@ export default function AddProduct() {
         </Select>
       </label>
 
-      {/* Випадаюче меню для вибору категорії */}
       <label className="flex flex-col">
         <span className="text-sm font-medium text-gray-700">Категорія:</span>
         <Select
           value={String(form.categoryId)}
           onValueChange={(value) =>
-            setForm({ ...form, categoryId: Number(value) })
+            setForm((prev) => ({ ...prev, categoryId: Number(value) }))
           }
         >
           <SelectTrigger className="border p-2 rounded-md">
@@ -226,7 +208,6 @@ export default function AddProduct() {
         />
       </label>
 
-      {/* Рядок з полем для знижки та перемикачем режимів */}
       <div className="flex items-start gap-4">
         <div className="flex-1">
           <label className="flex flex-col">
@@ -264,11 +245,11 @@ export default function AddProduct() {
             }
             className="flex space-x-4 mt-1"
           >
-            <div className="flex items-center space-x-2 mt-1">
+            <div className="flex items-center space-x-2">
               <RadioGroupItem value="percent" id="discount-percent" />
               <label htmlFor="discount-percent">%</label>
             </div>
-            <div className="flex items-center space-x-2 mt-1">
+            <div className="flex items-center space-x-2">
               <RadioGroupItem value="amount" id="discount-amount" />
               <label htmlFor="discount-amount">₴</label>
             </div>
@@ -288,7 +269,6 @@ export default function AddProduct() {
         />
       </label>
 
-      {/* Поле для введення URL зображень через кому */}
       <label className="flex flex-col">
         <span className="text-sm font-medium text-gray-700">
           URL зображень (через кому):
@@ -304,7 +284,6 @@ export default function AddProduct() {
         />
       </label>
 
-      {/* Блок для додавання розмірів */}
       <div className="border p-4 rounded-md">
         <h3 className="text-md font-medium text-gray-700 mb-2">
           Додати розмір та кількість
@@ -360,4 +339,6 @@ export default function AddProduct() {
       </button>
     </form>
   );
-}
+};
+
+export default AddProduct;

@@ -1,16 +1,23 @@
-
 "use client";
-import ProtectedRoute from "../../page";
+import React, { useRef } from "react";
+import { useCheckRole } from "@/lib/hooks/auth";
 
-const ProtectedPage = () => {
-  return (
-    <ProtectedRoute>
-      <div>
-        <h1>Protected Page</h1>
-        <p>Вітаємо! У вас є доступ до цієї сторінки.</p>
-      </div>
-    </ProtectedRoute>
-  );
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+}
+
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { hasAccess, loading } = useCheckRole();
+
+  if (loading) {
+    return <div>Перевірка доступу...</div>;
+  }
+  if (!hasAccess) {
+    return <div>Доступ заборонено. Будь ласка, увійдіть як адміністратор.</div>;
+  }
+
+  return <div ref={containerRef}>{children}</div>;
 };
 
-export default ProtectedPage;
+export default ProtectedRoute;

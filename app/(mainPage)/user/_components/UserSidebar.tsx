@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { deleteUser } from "@/lib/api/user-service";
@@ -11,8 +12,7 @@ interface UserSidebarProps {
   isMobile?: boolean;
 }
 
-export const UserSidebar = ({ isMobile }: UserSidebarProps) => {
-  // Додаткова перевірка для екранів шириною до 415 пікселів
+export const UserSidebar: React.FC<UserSidebarProps> = ({ isMobile }) => {
   const isSmallScreen = useMedia({ maxWidth: "415px" });
 
   const handleLogout = () => {
@@ -47,14 +47,12 @@ export const UserSidebar = ({ isMobile }: UserSidebarProps) => {
         isMobile ? "h-auto" : "h-full"
       } shadow-lg`}
     >
-      {/* Заголовок відображається лише для десктопної версії */}
       {!isMobile && (
         <h2 className="text-xl font-semibold mb-6 text-center">
           Меню Користувача
         </h2>
       )}
 
-      {/* Навігаційні кнопки */}
       <nav
         className={isMobile ? "grid grid-cols-2 gap-4" : "flex flex-col gap-4"}
       >
@@ -98,7 +96,6 @@ export const UserSidebar = ({ isMobile }: UserSidebarProps) => {
         </Link>
       </nav>
 
-      {/* Кнопки виходу та видалення акаунту */}
       <div
         className={
           isMobile

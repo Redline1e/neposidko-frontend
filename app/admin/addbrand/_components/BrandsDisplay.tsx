@@ -1,11 +1,11 @@
 "use client";
-import { useEffect, useState } from "react";
-import { BrandItem } from "./BrandItem";
+import React, { useEffect, useState } from "react";
 import { Brand } from "@/utils/types";
 import { fetchBrands } from "@/lib/api/brands-service";
+import { BrandItem } from "./BrandItem";
 
-export const BrandsDisplay = () => {
-  const [Brands, setBrands] = useState<Brand[]>([]);
+export const BrandsDisplay: React.FC = () => {
+  const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -14,10 +14,9 @@ export const BrandsDisplay = () => {
       try {
         const data = await fetchBrands();
         setBrands(data);
-        console.log(data);
       } catch (err) {
-        console.error("Помилка завантаження категорій:", err);
-        setError("Не вдалося завантажити категорії");
+        console.error("Помилка завантаження брендів:", err);
+        setError("Не вдалося завантажити бренди");
       } finally {
         setLoading(false);
       }
@@ -27,9 +26,7 @@ export const BrandsDisplay = () => {
   }, []);
 
   if (loading) {
-    return (
-      <div className="text-center text-gray-500">Завантаження категорій...</div>
-    );
+    return <div className="text-center text-gray-500">Завантаження брендів...</div>;
   }
 
   if (error) {
@@ -40,8 +37,8 @@ export const BrandsDisplay = () => {
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold text-center mb-6">Бренди</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {Brands.map((brand, id) => (
-          <BrandItem key={id} brand={brand} />
+        {brands.map((brand) => (
+          <BrandItem key={brand.brandId} brand={brand} />
         ))}
       </div>
     </div>

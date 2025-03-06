@@ -1,13 +1,17 @@
 "use client";
 
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCheckRole } from "@/lib/hooks/auth";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AdminSidebar } from "./_components/AdminSidebar";
 import { Loader2 } from "lucide-react";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+const AdminLayout: React.FC<LayoutProps> = ({ children }) => {
   const { hasAccess, loading } = useCheckRole();
   const router = useRouter();
 
@@ -24,7 +28,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
-
   if (!hasAccess) {
     return null;
   }
@@ -40,4 +43,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </div>
     </SidebarProvider>
   );
-}
+};
+
+export default AdminLayout;

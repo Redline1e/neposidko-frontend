@@ -1,17 +1,9 @@
 "use client";
-import { useEffect, useState } from "react";
-import { Product } from "@/utils/types";
-import { CategoriesDisplay } from "./_components/CategoriesDisplay";
-import { fetchProducts } from "@/lib/api/product-service";
+import React from "react";
 import AddCategory from "./_components/AddCategory";
+import { CategoriesDisplay } from "./_components/CategoriesDisplay";
 
-export default function Home() {
-  const [products, setProducts] = useState<Product[]>([]);
-
-  useEffect(() => {
-    fetchProducts().then(setProducts);
-  }, []);
-
+const CategoriesHome: React.FC = () => {
   return (
     <div className="mt-5 flex flex-col gap-4">
       <div className="flex justify-center">
@@ -22,4 +14,6 @@ export default function Home() {
       </div>
     </div>
   );
-}
+};
+
+export default CategoriesHome;

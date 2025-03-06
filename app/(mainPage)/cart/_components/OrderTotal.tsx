@@ -1,19 +1,26 @@
+import React, { useMemo } from "react";
 import { OrderItemData } from "@/utils/types";
 
-type Props = {
+interface OrderTotalProps {
   orderItems: OrderItemData[];
-};
+}
 
-export default function OrderTotal({ orderItems }: Props) {
-  const totalOriginalPrice = orderItems.reduce(
-    (sum, item) => sum + (item.price + item.discount) * item.quantity,
-    0
-  );
-  const totalPrice = orderItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-  const totalDiscount = totalOriginalPrice - totalPrice;
+const OrderTotal: React.FC<OrderTotalProps> = ({ orderItems }) => {
+  const { totalOriginalPrice, totalPrice, totalDiscount } = useMemo(() => {
+    const totalOriginalPrice = orderItems.reduce(
+      (sum, item) => sum + (item.price + item.discount) * item.quantity,
+      0
+    );
+    const totalPrice = orderItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+    return {
+      totalOriginalPrice,
+      totalPrice,
+      totalDiscount: totalOriginalPrice - totalPrice,
+    };
+  }, [orderItems]);
 
   return (
     <div className="bg-blue-50 p-6 rounded-lg w-full md:w-80 h-[200px]">
@@ -35,4 +42,6 @@ export default function OrderTotal({ orderItems }: Props) {
       </button>
     </div>
   );
-}
+};
+
+export default OrderTotal;

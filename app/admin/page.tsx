@@ -1,7 +1,5 @@
-// app/admin/products/page.tsx
 "use client";
-import { useEffect, useRef, useState } from "react";
-import { useCheckRole } from "@/lib/hooks/auth";
+import React, { useState, useEffect, useCallback } from "react";
 import { Product } from "@/utils/types";
 import {
   searchProducts,
@@ -13,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { ProductItem } from "./addproduct/_components/ProductItem";
 import { Button } from "@/components/ui/button";
-import { Filter, X } from "lucide-react";
+import { Filter, X, Frown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
@@ -24,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { fetchBrands } from "@/lib/api/brands-service";
 import { fetchCategories } from "@/lib/api/category-service";
-import { Frown } from "lucide-react";
+
 
 interface Category {
   categoryId: number;
@@ -36,32 +34,25 @@ interface Brand {
   name: string;
 }
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { hasAccess, loading } = useCheckRole();
+interface ProductFilters {
+  categories: string[];
+  brands: string[];
+  active: "active" | "inactive" | "all";
+}
 
-  if (loading) {
-    return <div>Перевірка доступу...</div>;
-  }
-  if (!hasAccess) {
-    return <div>Доступ заборонено. Будь-ласка, увійдіть як адміністратор.</div>;
-  }
-
-  return <div ref={containerRef}>{children}</div>;
-};
-
-const AdminProductsPage = () => {
-  const [query, setQuery] = useState("");
+const AdminProductsPage: React.FC = () => {
+  const [query, setQuery] = useState<string>("");
   const [results, setResults] = useState<Product[]>([]);
-  const [filters, setFilters] = useState({
-    categories: [] as string[],
-    brands: [] as string[],
-    active: "all" as "active" | "inactive" | "all",
+  const [filters, setFilters] = useState<ProductFilters>({
+    categories: [],
+    brands: [],
+    active: "all",
   });
   const [allCategories, setAllCategories] = useState<Category[]>([]);
   const [allBrands, setAllBrands] = useState<Brand[]>([]);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
 
+  // Завантаження даних для фільтрів
   useEffect(() => {
     const loadFiltersData = async () => {
       try {
@@ -74,7 +65,6 @@ const AdminProductsPage = () => {
             name: c.name,
           }))
         );
-
         setAllBrands(
           brands.map((b) => ({
             brandId: Number(b.brandId),
@@ -88,7 +78,7 @@ const AdminProductsPage = () => {
     loadFiltersData();
   }, []);
 
-  const loadProducts = async () => {
+  const loadProducts = useCallback(async () => {
     try {
       let products: Product[];
       if (filters.active === "active") {
@@ -102,76 +92,80 @@ const AdminProductsPage = () => {
       const filtered = products.filter((product) => {
         const categoryId = product.categoryId?.toString() ?? "";
         const brandId = product.brandId?.toString() ?? "";
-
         return (
           (filters.categories.length === 0 ||
             filters.categories.includes(categoryId)) &&
           (filters.brands.length === 0 || filters.brands.includes(brandId))
         );
       });
-
       setResults(filtered);
     } catch (error) {
       console.error("Error loading products:", error);
     }
-  };
+  }, [filters, query]);
 
+  // Debounce для пошукового запиту або зміни фільтрів
   useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
+    const debounceTimer = setTimeout(() => {
       if (query.trim().length >= 3 || filters.active !== "all") {
         loadProducts();
       }
     }, 300);
-    return () => clearTimeout(delayDebounceFn);
-  }, [query, filters]);
+    return () => clearTimeout(debounceTimer);
+  }, [query, filters, loadProducts]);
 
-  const handleCategoryChange = (categoryId: string) => {
+  const handleCategoryChange = useCallback((categoryId: string) => {
     setFilters((prev) => ({
       ...prev,
       categories: prev.categories.includes(categoryId)
         ? prev.categories.filter((c) => c !== categoryId)
         : [...prev.categories, categoryId],
     }));
-  };
+  }, []);
 
-  const handleBrandChange = (brandId: string) => {
+  const handleBrandChange = useCallback((brandId: string) => {
     setFilters((prev) => ({
       ...prev,
       brands: prev.brands.includes(brandId)
         ? prev.brands.filter((b) => b !== brandId)
         : [...prev.brands, brandId],
     }));
-  };
+  }, []);
 
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     setQuery("");
-    setFilters({
-      categories: [],
-      brands: [],
-      active: "all",
-    });
-  };
+    setFilters({ categories: [], brands: [], active: "all" });
+  }, []);
 
-  const handleStatusChange = async (product: Product) => {
-    try {
-      await updateProductActiveStatus(product.articleNumber, !product.isActive);
-      await loadProducts();
-    } catch (error) {
-      console.error("Error updating product status:", error);
-    }
-  };
+  const handleStatusChange = useCallback(
+    async (product: Product) => {
+      try {
+        await updateProductActiveStatus(
+          product.articleNumber,
+          !product.isActive
+        );
+        await loadProducts();
+      } catch (error) {
+        console.error("Error updating product status:", error);
+      }
+    },
+    [loadProducts]
+  );
 
-  const handleDelete = async (product: Product) => {
-    try {
-      await deleteProduct(product);
-      await loadProducts();
-    } catch (error) {
-      console.error("Error deleting product:", error);
-    }
-  };
+  const handleDelete = useCallback(
+    async (product: Product) => {
+      try {
+        // Припустимо, deleteProduct очікує articleNumber (string)
+        await deleteProduct(product.articleNumber);
+        await loadProducts();
+      } catch (error) {
+        console.error("Error deleting product:", error);
+      }
+    },
+    [loadProducts]
+  );
 
   return (
-    <ProtectedRoute>
       <div className="mx-auto mt-20 max-w-7xl px-4">
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="flex-1 relative">
@@ -191,10 +185,9 @@ const AdminProductsPage = () => {
               </Button>
             )}
           </div>
-
           <Button
             variant="outline"
-            onClick={() => setIsFilterOpen(!isFilterOpen)}
+            onClick={() => setIsFilterOpen((prev) => !prev)}
             className="md:w-48"
           >
             <Filter className="mr-2 h-4 w-4" /> Фільтри
@@ -204,6 +197,7 @@ const AdminProductsPage = () => {
         {isFilterOpen && (
           <div className="mb-6 p-4 border rounded-lg bg-gray-50">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Фільтр за категоріями */}
               <div>
                 <h3 className="font-medium mb-2">Категорії</h3>
                 <div className="space-y-2">
@@ -225,7 +219,7 @@ const AdminProductsPage = () => {
                   ))}
                 </div>
               </div>
-
+              {/* Фільтр за брендами */}
               <div>
                 <h3 className="font-medium mb-2">Бренди</h3>
                 <div className="space-y-2">
@@ -247,7 +241,7 @@ const AdminProductsPage = () => {
                   ))}
                 </div>
               </div>
-
+              {/* Фільтр за статусом */}
               <div>
                 <h3 className="font-medium mb-2">Статус</h3>
                 <Select
@@ -333,7 +327,6 @@ const AdminProductsPage = () => {
               ))}
             </tbody>
           </table>
-
           {results.length === 0 && (
             <div className="p-8 text-center text-gray-500">
               <Frown className="mx-auto h-8 w-8 mb-2" />
@@ -342,7 +335,6 @@ const AdminProductsPage = () => {
           )}
         </div>
       </div>
-    </ProtectedRoute>
   );
 };
 

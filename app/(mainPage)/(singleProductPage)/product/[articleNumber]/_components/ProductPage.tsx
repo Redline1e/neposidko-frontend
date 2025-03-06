@@ -75,6 +75,8 @@ export const ProductPage: React.FC = () => {
         articleNumber: product.articleNumber,
         size: selectedSize,
         quantity: 1,
+        orderId: 0, // Added missing property
+        productOrderId: 0, // Added missing property
       };
 
       await addOrderItem(cartItem);
@@ -117,7 +119,7 @@ export const ProductPage: React.FC = () => {
           description={product.description}
           price={product.price}
           discount={product.discount}
-          sizes={product.sizes}
+          sizes={product.sizes.map((s) => s.size)} 
           onAddToCart={handleAddToCart}
           onSizeSelect={handleSizeSelect}
           onToggleWishlist={handleToggleWishlist}

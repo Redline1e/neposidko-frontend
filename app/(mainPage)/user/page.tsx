@@ -1,20 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { fetchUser } from "@/lib/api/user-service";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-type User = {
+export type User = {
   name: string;
   email: string;
   telephone?: string;
   deliveryAddress?: string;
 };
 
-export default function Page() {
+const UserProfilePage: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -23,16 +23,12 @@ export default function Page() {
       return;
     }
     fetchUser(token)
-      .then((data: User) => {
-        setUser(data);
-      })
+      .then((data: User) => setUser(data))
       .catch((error) => {
         console.error("Error fetching user data:", error);
         toast.error("Не вдалося завантажити дані користувача");
       })
-      .finally(() => {
-        setLoading(false);
-      });
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
@@ -49,4 +45,6 @@ export default function Page() {
       <p className="text-lg">Ласкаво просимо на вашу особисту сторінку.</p>
     </div>
   );
-}
+};
+
+export default UserProfilePage;

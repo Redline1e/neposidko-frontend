@@ -1,11 +1,12 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import React, { useEffect, useState } from "react";
 import { Product } from "@/utils/types";
 import AddProduct from "./_components/AddProduct";
 import { ProductDisplay } from "./_components/ProductDisplay";
 import { fetchProducts } from "@/lib/api/product-service";
 
-export default function Home() {
+const Home: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
@@ -22,4 +23,6 @@ export default function Home() {
       </div>
     </div>
   );
-}
+};
+
+export default Home;

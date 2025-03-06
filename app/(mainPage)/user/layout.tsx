@@ -1,14 +1,15 @@
 "use client";
 
+import React from "react";
 import { useMedia } from "use-media";
 import { UserSidebar } from "./_components/UserSidebar";
-import { AuthCheck } from "./_components/AuthCheck";
+import AuthCheck from "./_components/AuthCheck";
 
 interface UserLayoutProps {
   children: React.ReactNode;
 }
 
-export default function UserLayout({ children }: UserLayoutProps) {
+const UserLayout: React.FC<UserLayoutProps> = ({ children }) => {
   const isMobile = useMedia({ maxWidth: "1000px" });
 
   return (
@@ -19,4 +20,6 @@ export default function UserLayout({ children }: UserLayoutProps) {
       </div>
     </AuthCheck>
   );
-}
+};
+
+export default UserLayout;

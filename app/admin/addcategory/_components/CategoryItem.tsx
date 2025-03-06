@@ -58,7 +58,7 @@ export const CategoriesItem: React.FC<{ category: Category }> = ({
       renderCard={renderCategoryCard}
       renderEditForm={renderCategoryEditForm}
       onSave={updateCategory}
-      onDelete={deleteCategory}
+      onDelete={(item) => deleteCategory(item.categoryId)}
     />
   );
 };

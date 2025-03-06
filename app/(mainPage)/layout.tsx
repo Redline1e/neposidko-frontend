@@ -1,12 +1,13 @@
+import React from "react";
 import { Navbar } from "./_components/navbar";
 import { Footer } from "./_components/footer";
 import { Toaster } from "sonner";
 
-export default function BrowseLayout({
-  children,
-}: {
+interface BrowseLayoutProps {
   children: React.ReactNode;
-}) {
+}
+
+const BrowseLayout: React.FC<BrowseLayoutProps> = ({ children }) => {
   return (
     <div className="flex flex-col min-h-screen">
       <Toaster />
@@ -15,4 +16,6 @@ export default function BrowseLayout({
       <Footer />
     </div>
   );
-}
+};
+
+export default BrowseLayout;

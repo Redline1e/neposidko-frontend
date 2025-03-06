@@ -1,6 +1,11 @@
+import React from "react";
 import { Mail, Phone, Pin } from "lucide-react";
 
-export default function Contacts({ children }: { children: React.ReactNode }) {
+interface ContactsProps {
+  children: React.ReactNode;
+}
+
+const Contacts: React.FC<ContactsProps> = ({ children }) => {
   return (
     <div className="container mx-auto px-4 py-10">
       <h1 className="text-3xl font-bold mb-6">Контакти</h1>
@@ -18,8 +23,9 @@ export default function Contacts({ children }: { children: React.ReactNode }) {
           <Mail /> Email: neposidko@ukr.net
         </li>
       </ul>
-
       <div>{children}</div>
     </div>
   );
-}
+};
+
+export default Contacts;

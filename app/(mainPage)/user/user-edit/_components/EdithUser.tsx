@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Loader2 } from "lucide-react";
 import { fetchUser, updateUser } from "@/lib/api/user-service";
@@ -20,8 +20,8 @@ const redirectToLogin = () => {
   window.location.href = "/login";
 };
 
-export const EdithUser = () => {
-  const [loading, setLoading] = useState(true);
+const EditUser: React.FC = () => {
+  const [loading, setLoading] = useState<boolean>(true);
   const { control, handleSubmit, reset } = useForm<FormData>({
     defaultValues: {
       name: "",
@@ -135,3 +135,5 @@ export const EdithUser = () => {
     </Card>
   );
 };
+
+export default EditUser;

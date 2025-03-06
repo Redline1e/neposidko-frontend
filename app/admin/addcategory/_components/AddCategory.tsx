@@ -1,28 +1,22 @@
 "use client";
-import { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { Category } from "@/utils/types";
 import { addCategory } from "@/lib/api/category-service";
 
-export default function AddCategory() {
-  const [form, setForm] = useState<Category>({
-    name: "",
-    imageUrl: "",
-  });
+const AddCategory: React.FC = () => {
+  const [form, setForm] = useState<Category>({categoryId: 0, name: "", imageUrl: "" });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
-  };
+    setForm((prev) => ({ ...prev, [name]: value }));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await addCategory(form);
       alert("Категорію додано!");
-      setForm({
-        name: "",
-        imageUrl: "",
-      });
+      setForm({categoryId: 0, name: "", imageUrl: "" });
     } catch (error) {
       console.error("Помилка при додаванні категорії:", error);
       alert("Не вдалося додати категорію");
@@ -35,7 +29,6 @@ export default function AddCategory() {
       className="bg-white p-6 shadow-md rounded-lg flex flex-col gap-4 w-full max-w-md mx-auto"
     >
       <h2 className="text-lg font-semibold text-center">Додати категорію</h2>
-
       <label className="flex flex-col">
         <span className="text-sm font-medium text-gray-700">
           Назва категорії:
@@ -50,7 +43,6 @@ export default function AddCategory() {
           className="border p-2 rounded-md"
         />
       </label>
-
       <label className="flex flex-col">
         <span className="text-sm font-medium text-gray-700">
           URL зображення:
@@ -65,7 +57,6 @@ export default function AddCategory() {
           className="border p-2 rounded-md"
         />
       </label>
-
       <button
         type="submit"
         className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
@@ -74,4 +65,6 @@ export default function AddCategory() {
       </button>
     </form>
   );
-}
+};
+
+export default AddCategory;

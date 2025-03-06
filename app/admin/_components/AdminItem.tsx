@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState } from "react";
 import {
   ContextMenu,
@@ -29,27 +28,14 @@ import { Switch } from "@/components/ui/switch";
 
 interface AdminItemProps<T extends object> {
   item: T;
-  /** Функція для рендерингу картки (UI відображення сутності) */
   renderCard: (item: T) => React.ReactNode;
-  /**
-   * Функція для рендерингу форми редагування
-   * @param item – актуальні дані сутності
-   * @param onChange – callback для оновлення даних форми
-   */
   renderEditForm: (
     item: T,
     onChange: (changed: Partial<T>) => void
   ) => React.ReactNode;
-  /** Callback для збереження відредагованих даних (наприклад, виклик API) */
   onSave: (item: T) => Promise<void>;
-  /** Callback для видалення сутності */
   onDelete: (item: T) => Promise<void>;
-  /** Текстова мітка сутності (наприклад, "товар", "категорія", "бренд") */
   itemLabel: string;
-  /**
-   * Callback для зміни стану активності.
-   * Якщо передано, у картці буде відображено перемикач (switch)
-   */
   onToggleActive?: (item: T, newStatus: boolean) => Promise<void>;
 }
 
@@ -61,24 +47,21 @@ export function AdminItem<T extends object>({
   onDelete,
   itemLabel,
   onToggleActive,
-}: AdminItemProps<T>) {
+}: AdminItemProps<T>): React.JSX.Element {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [formData, setFormData] = useState<T>(item);
 
-  // Додано: Функція для збереження змінених даних
   const handleSave = async () => {
     await onSave(formData);
     setIsEditOpen(false);
   };
 
-  // Додано: Функція для видалення сутності
   const handleDelete = async () => {
     await onDelete(item);
     setIsDeleteOpen(false);
   };
 
-  // Функція перемикання активності
   const handleToggleActive = async (checked?: boolean) => {
     if (!("isActive" in formData)) return;
     const currentStatus = (formData as any).isActive;
@@ -91,7 +74,6 @@ export function AdminItem<T extends object>({
     }
   };
 
-  // Функція оновлення даних форми
   const handleFormChange = (changed: Partial<T>) => {
     setFormData((prev) => ({ ...prev, ...changed }));
   };
@@ -101,7 +83,6 @@ export function AdminItem<T extends object>({
       <ContextMenu>
         <ContextMenuTrigger asChild>
           <div className="relative">
-            {/* Рендеримо картку з актуальними даними */}
             {renderCard(formData)}
             {onToggleActive && "isActive" in formData && (
               <div className="absolute top-2 right-2">
@@ -118,7 +99,6 @@ export function AdminItem<T extends object>({
             )}
           </div>
         </ContextMenuTrigger>
-
         <ContextMenuContent>
           <ContextMenuItem
             onSelect={() => setIsEditOpen(true)}
@@ -149,7 +129,6 @@ export function AdminItem<T extends object>({
         </ContextMenuContent>
       </ContextMenu>
 
-      {/* Діалог редагування */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent className="w-[800px] max-w-full">
           <DialogHeader>
@@ -173,7 +152,6 @@ export function AdminItem<T extends object>({
         </DialogContent>
       </Dialog>
 
-      {/* AlertDialog для підтвердження видалення */}
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
