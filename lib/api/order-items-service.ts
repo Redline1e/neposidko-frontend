@@ -3,14 +3,16 @@ import { OrderItem, OrderItemSchema } from "@/utils/types";
 import { z } from "zod";
 import axios from "axios";
 
-export const fetchOrderItems = async (): Promise<OrderItem[]> => {
+import { OrderItemDataSchema, OrderItemData } from "@/utils/types"; // переконайтеся, що експортуєте OrderItemDataSchema
+
+export const fetchOrderItems = async (): Promise<OrderItemData[]> => {
   try {
     const token = localStorage.getItem("token");
     if (!token) return [];
     const response = await apiClient.get("/order-items", {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return z.array(OrderItemSchema).parse(response.data);
+    return z.array(OrderItemDataSchema).parse(response.data);
   } catch (error: any) {
     if (axios.isAxiosError(error) && error.response?.status === 403) {
       return [];

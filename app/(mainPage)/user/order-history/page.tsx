@@ -80,9 +80,7 @@ const OrderHistory: React.FC = () => {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-center">
-        Історія замовлень
-      </h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">Історія замовлень</h1>
       {orders.length === 0 ? (
         <p className="text-gray-500 text-center">У вас ще немає замовлень.</p>
       ) : (
@@ -106,7 +104,8 @@ const OrderHistory: React.FC = () => {
             {order.userName && (
               <div className="mb-4 text-gray-700">
                 <p>
-                  <span className="font-medium">Замовник:</span> {order.userName}
+                  <span className="font-medium">Замовник:</span>{" "}
+                  {order.userName}
                 </p>
               </div>
             )}
@@ -132,6 +131,9 @@ const OrderHistory: React.FC = () => {
                         />
                         <div>
                           <p className="font-semibold">{productName}</p>
+                          <p className="text-gray-600 text-sm">
+                            Артикул: {item.articleNumber}
+                          </p>
                           {item.size && (
                             <p className="text-gray-600 text-sm">
                               Розмір: {item.size}
