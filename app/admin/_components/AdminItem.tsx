@@ -53,24 +53,33 @@ export function AdminItem<T extends object>({
   const [formData, setFormData] = useState<T>(item);
 
   const handleSave = async () => {
-    await onSave(formData);
-    setIsEditOpen(false);
+    try {
+      await onSave(formData);
+      setIsEditOpen(false);
+    } catch (error) {
+      console.error(`Помилка збереження ${itemLabel}:`, error);
+      alert(`Не вдалося зберегти ${itemLabel}`);
+    }
   };
 
   const handleDelete = async () => {
-    await onDelete(item);
-    setIsDeleteOpen(false);
+    try {
+      await onDelete(item);
+      setIsDeleteOpen(false);
+    } catch (error) {
+      console.error(`Помилка видалення ${itemLabel}:`, error);
+      alert(`Не вдалося видалити ${itemLabel}`);
+    }
   };
 
-  const handleToggleActive = async (checked?: boolean) => {
-    if (!("isActive" in formData)) return;
-    const currentStatus = (formData as any).isActive;
-    const newStatus = typeof checked === "boolean" ? checked : !currentStatus;
+  const handleToggleActive = async (checked: boolean) => {
+    if (!onToggleActive || !("isActive" in formData)) return;
     try {
-      await onToggleActive?.(formData, newStatus);
-      setFormData((prev) => ({ ...prev, isActive: newStatus }));
+      await onToggleActive(formData, checked);
+      setFormData((prev) => ({ ...prev, isActive: checked } as T));
     } catch (error) {
-      console.error("Error toggling active status:", error);
+      console.error("Помилка зміни статусу:", error);
+      alert("Не вдалося змінити статус");
     }
   };
 
@@ -93,7 +102,7 @@ export function AdminItem<T extends object>({
                       : "text-red-600"
                   }`}
                 >
-                  {(formData as any).isActive ? "Активний" : "Не активний"}
+                  {(formData as any).isActive ? "Активний" : "Неактивний"}
                 </span>
               </div>
             )}
@@ -106,7 +115,7 @@ export function AdminItem<T extends object>({
           >
             <Pen size={17} /> Відредагувати {itemLabel}
           </ContextMenuItem>
-          {onToggleActive && (
+          {onToggleActive && "isActive" in formData && (
             <ContextMenuItem
               onPointerDown={(e) => e.stopPropagation()}
               className="gap-x-2"
@@ -116,7 +125,7 @@ export function AdminItem<T extends object>({
                 onCheckedChange={handleToggleActive}
               />
               <span>
-                {(formData as any).isActive ? "Активний" : "Не активний"}
+                {(formData as any).isActive ? "Активний" : "Неактивний"}
               </span>
             </ContextMenuItem>
           )}
@@ -141,11 +150,14 @@ export function AdminItem<T extends object>({
           <DialogFooter className="mt-4 flex justify-end gap-2">
             <button
               onClick={() => setIsEditOpen(false)}
-              className="btn-secondary"
+              className="btn-secondary px-4 py-2 rounded"
             >
               Відмінити
             </button>
-            <button onClick={handleSave} className="btn-primary">
+            <button
+              onClick={handleSave}
+              className="btn-primary px-4 py-2 rounded bg-blue-500 text-white"
+            >
               Зберегти
             </button>
           </DialogFooter>
@@ -162,10 +174,13 @@ export function AdminItem<T extends object>({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex justify-end gap-2 mt-4">
-            <AlertDialogCancel className="btn-secondary">
+            <AlertDialogCancel className="btn-secondary px-4 py-2 rounded">
               Скасувати
             </AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="btn-danger">
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="btn-danger px-4 py-2 rounded bg-red-500 text-white"
+            >
               Видалити
             </AlertDialogAction>
           </div>

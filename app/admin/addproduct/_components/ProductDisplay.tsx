@@ -1,46 +1,63 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Product } from "@/utils/types";
-import { fetchProducts } from "@/lib/api/product-service";
+import {
+  fetchProducts,
+  deleteProduct,
+  updateProductActiveStatus,
+} from "@/lib/api/product-service";
 import { ProductItem } from "./ProductItem";
 
 export const ProductDisplay = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    data: products,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["products"],
+    queryFn: fetchProducts,
+  });
 
-  useEffect(() => {
-    const getProducts = async () => {
-      try {
-        const data = await fetchProducts();
-        setProducts(data);
-      } catch (error) {
-        setError("Не вдалося завантажити товари");
-      } finally {
-        setLoading(false);
-      }
-    };
-    getProducts();
-  }, []);
-
-  if (loading)
+  if (isLoading)
     return <p className="text-center text-xl font-semibold">Завантаження...</p>;
   if (error)
     return (
-      <p className="text-center text-xl font-semibold text-red-500">{error}</p>
+      <p className="text-center text-xl font-semibold text-red-500">
+        {error.message}
+      </p>
     );
+
+  const handleDelete = async (product: Product) => {
+    try {
+      await deleteProduct(product.articleNumber);
+      refetch(); // Оновлюємо список продуктів після видалення
+    } catch (error) {
+      console.error("Error deleting product:", error);
+    }
+  };
+
+  const handleStatusChange = async (product: Product) => {
+    try {
+      await updateProductActiveStatus(product.articleNumber, !product.isActive);
+      refetch(); // Оновлюємо список продуктів після зміни статусу
+    } catch (error) {
+      console.error("Error updating product status:", error);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-8">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-        {products.map((product) => (
-          <ProductItem
-            key={product.articleNumber}
-            product={product}
-            onDelete={async () => {}}
-            onStatusChange={async () => {}}
-          />
-        ))}
+        {products &&
+          products.map((product) => (
+            <ProductItem
+              key={product.articleNumber}
+              product={product}
+              onDelete={() => handleDelete(product)}
+              onStatusChange={() => handleStatusChange(product)}
+            />
+          ))}
       </div>
     </div>
   );

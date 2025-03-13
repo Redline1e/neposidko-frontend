@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
-import { Product } from "@/utils/types";
+import { Brand, Category, Product } from "@/utils/types";
 import {
   searchProducts,
   fetchInactiveProducts,
@@ -24,16 +24,6 @@ import {
 import { fetchBrands } from "@/lib/api/brands-service";
 import { fetchCategories } from "@/lib/api/category-service";
 
-interface Category {
-  categoryId: number;
-  name: string;
-}
-
-interface Brand {
-  brandId: number;
-  name: string;
-}
-
 interface ProductFilters {
   categories: string[];
   brands: string[];
@@ -52,24 +42,20 @@ const AdminProductsPage: React.FC = () => {
   const [allBrands, setAllBrands] = useState<Brand[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
 
-  // Завантаження даних для фільтрів
   useEffect(() => {
     const loadFiltersData = async () => {
       try {
         const categories = await fetchCategories();
         const brands = await fetchBrands();
-
         setAllCategories(
           categories.map((c) => ({
             categoryId: Number(c.categoryId),
             name: c.name,
+            imageUrl: c.imageUrl || "",
           }))
         );
         setAllBrands(
-          brands.map((b) => ({
-            brandId: Number(b.brandId),
-            name: b.name,
-          }))
+          brands.map((b) => ({ brandId: Number(b.brandId), name: b.name }))
         );
       } catch (error) {
         console.error("Error loading filter data:", error);
@@ -78,25 +64,19 @@ const AdminProductsPage: React.FC = () => {
     loadFiltersData();
   }, []);
 
-  // Зміни у функції loadProducts:
   const loadProducts = useCallback(async () => {
     try {
       let products: Product[];
-
       if (filters.active === "active") {
         products = await fetchActiveProducts();
       } else if (filters.active === "inactive") {
         products = await fetchInactiveProducts();
       } else {
-        // Якщо є пошуковий запит, виконуємо пошук, інакше завантажуємо всі товари
-        if (query.trim().length > 0) {
-          products = await searchProducts(query);
-        } else {
-          products = await fetchProducts();
-        }
+        products =
+          query.trim().length > 0
+            ? await searchProducts(query)
+            : await fetchProducts();
       }
-
-      // Застосування фільтрів за категоріями та брендами
       const filtered = products.filter((product) => {
         const categoryId = product.categoryId?.toString() ?? "";
         const brandId = product.brandId?.toString() ?? "";
@@ -106,14 +86,12 @@ const AdminProductsPage: React.FC = () => {
           (filters.brands.length === 0 || filters.brands.includes(brandId))
         );
       });
-
       setResults(filtered);
     } catch (error) {
       console.error("Error loading products:", error);
     }
   }, [filters, query]);
 
-  // Виклик loadProducts при кожній зміні пошукового запиту чи фільтрів:
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
       loadProducts();
@@ -162,7 +140,6 @@ const AdminProductsPage: React.FC = () => {
   const handleDelete = useCallback(
     async (product: Product) => {
       try {
-        // Припустимо, deleteProduct очікує articleNumber (string)
         await deleteProduct(product.articleNumber);
         await loadProducts();
       } catch (error) {
@@ -204,7 +181,6 @@ const AdminProductsPage: React.FC = () => {
       {isFilterOpen && (
         <div className="mb-6 p-4 border rounded-lg bg-gray-50">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Фільтр за категоріями */}
             <div>
               <h3 className="font-medium mb-2">Категорії</h3>
               <div className="space-y-2">
@@ -226,7 +202,6 @@ const AdminProductsPage: React.FC = () => {
                 ))}
               </div>
             </div>
-            {/* Фільтр за брендами */}
             <div>
               <h3 className="font-medium mb-2">Бренди</h3>
               <div className="space-y-2">
@@ -248,7 +223,6 @@ const AdminProductsPage: React.FC = () => {
                 ))}
               </div>
             </div>
-            {/* Фільтр за статусом */}
             <div>
               <h3 className="font-medium mb-2">Статус</h3>
               <Select

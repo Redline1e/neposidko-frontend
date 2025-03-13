@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, LabelList } from "recharts";
 import {
   ChartContainer,
   ChartTooltip,
@@ -65,7 +65,11 @@ const ChartComponent: React.FC = () => {
           return acc;
         }, {} as Record<string, OrderChartData>);
 
-        setChartData(Object.values(dataMap));
+        // Сортуємо дані за порядком місяців
+        const sortedData = Object.values(dataMap).sort(
+          (a, b) => monthNames.indexOf(a.month) - monthNames.indexOf(b.month)
+        );
+        setChartData(sortedData);
       } catch (error) {
         console.error("Помилка завантаження замовлень:", error);
       }
@@ -77,6 +81,10 @@ const ChartComponent: React.FC = () => {
 
   return (
     <div className="container mx-auto p-4 mt-20">
+      {/* Заголовок */}
+      <h1 className="text-center text-2xl font-bold mb-4">
+        Статистика замовлень
+      </h1>
       <ChartContainer className="h-[300px] w-full" config={chartConfig}>
         <BarChart data={chartData}>
           <CartesianGrid vertical={false} />
@@ -94,10 +102,27 @@ const ChartComponent: React.FC = () => {
               stackId="a"
               fill={colorPalette[index % colorPalette.length]}
               radius={4}
-            />
+            >
+              {/* Відображення числових значень на стовпцях */}
+              <LabelList dataKey={status} position="inside" fill="#fff" />
+            </Bar>
           ))}
         </BarChart>
       </ChartContainer>
+      {/* Легенда */}
+      <div className="flex justify-center mt-4 space-x-4">
+        {statuses.map((status, index) => (
+          <div key={status} className="flex items-center">
+            <span
+              className="w-4 h-4 rounded-full"
+              style={{
+                backgroundColor: colorPalette[index % colorPalette.length],
+              }}
+            ></span>
+            <span className="ml-2">{status}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

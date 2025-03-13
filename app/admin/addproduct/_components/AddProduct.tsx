@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useCallback, useEffect } from "react";
 import { Product, Brand, Category } from "@/utils/types";
-import { addProduct } from "@/lib/api/product-service";
+import { useDropzone } from "react-dropzone";
 import { Plus } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
@@ -27,7 +27,8 @@ const AddProduct: React.FC = () => {
     isActive: true,
     sizes: [],
   });
-  const [imageUrlsInput, setImageUrlsInput] = useState<string>("");
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [newSize, setNewSize] = useState<string>("");
   const [newStock, setNewStock] = useState<number>(0);
   const [discountMode, setDiscountMode] = useState<"percent" | "amount">(
@@ -37,31 +38,21 @@ const AddProduct: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
-    fetchBrands()
-      .then((data) => setBrands(data))
-      .catch((error) => console.error("Error fetching brands:", error));
-    fetchCategories()
-      .then((data) => setCategories(data))
-      .catch((error) => console.error("Error fetching categories:", error));
+    fetchBrands().then(setBrands).catch(console.error);
+    fetchCategories().then(setCategories).catch(console.error);
   }, []);
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,
-      [name]:
-        name === "brandId" ||
-        name === "price" ||
-        name === "discount" ||
-        name === "categoryId"
-          ? Number(value)
-          : value,
+      [name]: name === "price" || name === "discount" ? Number(value) : value,
     }));
   }, []);
 
   const handleAddSize = useCallback(() => {
-    if (newSize.trim() === "" || newStock < 0) {
-      alert("Будь ласка, введіть коректний розмір та кількість");
+    if (!newSize.trim() || newStock < 0) {
+      alert("Введіть коректний розмір та кількість");
       return;
     }
     setForm((prev) => ({
@@ -79,42 +70,73 @@ const AddProduct: React.FC = () => {
     }));
   }, []);
 
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    setImageFiles(acceptedFiles);
+    setPreviewUrls(acceptedFiles.map((file) => URL.createObjectURL(file)));
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop: (acceptedFiles) => {
+      setImageFiles(acceptedFiles);
+    },
+    accept: { "image/*": [".jpeg", ".jpg", ".png", ".webp"] },
+    multiple: true,
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const imageUrls = imageUrlsInput
-      .split(",")
-      .map((url) => url.trim())
-      .filter((url) => url !== "");
-
-    let discountPercent = form.discount;
-    if (discountMode === "amount" && form.price > 0) {
-      discountPercent = (form.discount / form.price) * 100;
+    if (!form.articleNumber || !form.name || !form.price || !form.description) {
+      alert("Заповніть усі обов’язкові поля");
+      return;
+    }
+    if (imageFiles.length === 0) {
+      alert("Завантажте хоча б одне зображення");
+      return;
     }
 
-    const productToAdd: Product = {
-      ...form,
-      discount: discountPercent,
-      imageUrls,
-    };
+    const discountPercent =
+      discountMode === "amount" && form.price > 0
+        ? (form.discount / form.price) * 100
+        : form.discount;
 
-    await addProduct(productToAdd);
-    alert("Товар додано!");
+    const formData = new FormData();
+    imageFiles.forEach((file) => formData.append("images", file));
+    formData.append("articleNumber", form.articleNumber);
+    formData.append("name", form.name);
+    formData.append("brandId", String(form.brandId));
+    formData.append("categoryId", String(form.categoryId));
+    formData.append("price", String(form.price));
+    formData.append("discount", String(discountPercent));
+    formData.append("description", form.description);
+    formData.append("sizes", JSON.stringify(form.sizes));
+    imageFiles.forEach((file) => formData.append("images", file));
 
-    // Очищення форми
-    setForm({
-      articleNumber: "",
-      name: "",
-      brandId: 1,
-      categoryId: 1,
-      price: 0,
-      discount: 0,
-      description: "",
-      imageUrls: [],
-      isActive: true,
-      sizes: [],
-    });
-    setImageUrlsInput("");
+    try {
+      const response = await fetch("http://localhost:5000/products", {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) throw new Error("Не вдалося додати продукт");
+      await response.json();
+      alert("Товар успішно додано!");
+      setForm({
+        articleNumber: "",
+        name: "",
+        brandId: 1,
+        categoryId: 1,
+        price: 0,
+        discount: 0,
+        description: "",
+        imageUrls: [],
+        isActive: true,
+        sizes: [],
+      });
+      setImageFiles([]);
+      setPreviewUrls([]);
+    } catch (error) {
+      console.error("Помилка додавання товару:", error);
+      alert("Не вдалося додати товар");
+    }
   };
 
   return (
@@ -124,10 +146,10 @@ const AddProduct: React.FC = () => {
     >
       <h2 className="text-lg font-semibold text-center">Додати товар</h2>
 
-      <label className="flex flex-col">
-        <span className="text-sm font-medium text-gray-700">
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-gray-700">
           Номер артикулу:
-        </span>
+        </label>
         <input
           type="text"
           name="articleNumber"
@@ -136,10 +158,12 @@ const AddProduct: React.FC = () => {
           required
           className="border p-2 rounded-md"
         />
-      </label>
+      </div>
 
-      <label className="flex flex-col">
-        <span className="text-sm font-medium text-gray-700">Назва товару:</span>
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-gray-700">
+          Назва товару:
+        </label>
         <input
           type="text"
           name="name"
@@ -148,10 +172,10 @@ const AddProduct: React.FC = () => {
           required
           className="border p-2 rounded-md"
         />
-      </label>
+      </div>
 
-      <label className="flex flex-col">
-        <span className="text-sm font-medium text-gray-700">Бренд:</span>
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-gray-700">Бренд:</label>
         <Select
           value={String(form.brandId)}
           onValueChange={(value) =>
@@ -169,10 +193,10 @@ const AddProduct: React.FC = () => {
             ))}
           </SelectContent>
         </Select>
-      </label>
+      </div>
 
-      <label className="flex flex-col">
-        <span className="text-sm font-medium text-gray-700">Категорія:</span>
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-gray-700">Категорія:</label>
         <Select
           value={String(form.categoryId)}
           onValueChange={(value) =>
@@ -193,72 +217,60 @@ const AddProduct: React.FC = () => {
             ))}
           </SelectContent>
         </Select>
-      </label>
+      </div>
 
-      <label className="flex flex-col">
-        <span className="text-sm font-medium text-gray-700">Ціна:</span>
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-gray-700">Ціна:</label>
         <input
           type="number"
           name="price"
           value={form.price}
           onChange={handleChange}
-          placeholder="Введіть ціну"
           required
           className="border p-2 rounded-md"
         />
-      </label>
+      </div>
 
       <div className="flex items-start gap-4">
-        <div className="flex-1">
-          <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-700">
-              {discountMode === "percent" ? "Знижка (%)" : "Знижка (₴)"}
-            </span>
-            <input
-              type="number"
-              name="discount"
-              value={form.discount}
-              onChange={handleChange}
-              placeholder={
-                discountMode === "percent"
-                  ? "Введіть відсоток знижки"
-                  : "Введіть знижку в гривнях"
-              }
-              required
-              className="border p-2 rounded-md"
-            />
-            {discountMode === "amount" && form.price > 0 && (
-              <span className="text-xs text-gray-500">
-                Це відповідає {((form.discount / form.price) * 100).toFixed(2)}%
-              </span>
-            )}
+        <div className="flex-1 flex flex-col gap-2">
+          <label className="text-sm font-medium text-gray-700">
+            {discountMode === "percent" ? "Знижка (%)" : "Знижка (₴)"}
           </label>
+          <input
+            type="number"
+            name="discount"
+            value={form.discount}
+            onChange={handleChange}
+            className="border p-2 rounded-md"
+          />
         </div>
-        <div className="flex flex-col">
-          <span className="text-sm font-medium text-gray-700">
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium text-gray-700">
             Режим знижки:
-          </span>
+          </label>
           <RadioGroup
             value={discountMode}
             onValueChange={(value) =>
               setDiscountMode(value as "percent" | "amount")
             }
-            className="flex space-x-4 mt-1"
+            className="flex space-x-4"
           >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="percent" id="discount-percent" />
-              <label htmlFor="discount-percent">%</label>
+            <div className="flex items-center gap-2">
+              <RadioGroupItem value="percent" id="percent" />
+              <label htmlFor="percent">%</label>
             </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="amount" id="discount-amount" />
-              <label htmlFor="discount-amount">₴</label>
+            <div className="flex items-center gap-2">
+              <RadioGroupItem value="amount" id="amount" />
+              <label htmlFor="amount">₴</label>
             </div>
           </RadioGroup>
         </div>
       </div>
 
-      <label className="flex flex-col">
-        <span className="text-sm font-medium text-gray-700">Опис товару:</span>
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-gray-700">
+          Опис товару:
+        </label>
         <input
           type="text"
           name="description"
@@ -267,25 +279,42 @@ const AddProduct: React.FC = () => {
           required
           className="border p-2 rounded-md"
         />
-      </label>
+      </div>
 
-      <label className="flex flex-col">
-        <span className="text-sm font-medium text-gray-700">
-          URL зображень (через кому):
-        </span>
-        <input
-          type="text"
-          name="imageUrls"
-          value={imageUrlsInput}
-          onChange={(e) => setImageUrlsInput(e.target.value)}
-          required
-          placeholder="https://example.com/img1.jpg, https://example.com/img2.jpg"
-          className="border p-2 rounded-md"
-        />
-      </label>
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-gray-700">
+          Зображення (обов’язково):
+        </label>
+        <div
+          {...getRootProps()}
+          className={`border p-4 rounded-md text-center cursor-pointer ${
+            isDragActive ? "bg-blue-50 border-blue-500" : "border-gray-300"
+          }`}
+        >
+          <input {...getInputProps()} />
+          {isDragActive ? (
+            <p>Відпустіть файли тут...</p>
+          ) : (
+            <p>Перетягніть файли або клікніть для вибору</p>
+          )}
+        </div>
+        {previewUrls.length > 0 && (
+          <div className="grid grid-cols-3 gap-2 mt-2">
+            {previewUrls.map((url, index) => (
+              <img
+                key={index}
+                src={url}
+                alt={`Preview ${index}`}
+                className="h-24 w-full object-cover rounded"
+                onError={(e) => (e.currentTarget.src = "/fallback.jpg")}
+              />
+            ))}
+          </div>
+        )}
+      </div>
 
-      <div className="border p-4 rounded-md">
-        <h3 className="text-md font-medium text-gray-700 mb-2">
+      <div className="border p-4 rounded-md flex flex-col gap-2">
+        <h3 className="text-md font-medium text-gray-700">
           Додати розмір та кількість
         </h3>
         <div className="flex gap-2 items-center">
@@ -293,7 +322,7 @@ const AddProduct: React.FC = () => {
             type="text"
             value={newSize}
             onChange={(e) => setNewSize(e.target.value)}
-            placeholder="Розмір (наприклад, 36)"
+            placeholder="Розмір"
             className="border p-2 rounded-md flex-1"
           />
           <input
@@ -306,7 +335,7 @@ const AddProduct: React.FC = () => {
           <button
             type="button"
             onClick={handleAddSize}
-            className="bg-green-500 text-white px-1 py-1 rounded-md"
+            className="bg-green-500 text-white px-2 py-2 rounded-md"
           >
             <Plus />
           </button>

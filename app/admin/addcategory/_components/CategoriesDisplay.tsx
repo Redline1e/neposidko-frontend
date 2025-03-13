@@ -26,7 +26,9 @@ export const CategoriesDisplay: React.FC = () => {
   }, []);
 
   if (loading) {
-    return <div className="text-center text-gray-500">Завантаження категорій...</div>;
+    return (
+      <div className="text-center text-gray-500">Завантаження категорій...</div>
+    );
   }
 
   if (error) {
