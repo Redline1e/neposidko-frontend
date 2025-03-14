@@ -115,11 +115,12 @@ export const ProductPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-[50px]">
         <ProductImageGallery images={product.imageUrls} />
         <ProductDetails
+          articleNumber={product.articleNumber}
           title={product.name}
           description={product.description}
           price={product.price}
           discount={product.discount}
-          sizes={product.sizes.map((s) => s.size)} 
+          sizes={product.sizes.map((s) => s.size)}
           onAddToCart={handleAddToCart}
           onSizeSelect={handleSizeSelect}
           onToggleWishlist={handleToggleWishlist}

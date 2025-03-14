@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useCallback, useEffect } from "react";
 import { Product, Brand, Category } from "@/utils/types";
 import { useDropzone } from "react-dropzone";
@@ -22,7 +23,7 @@ const AddProduct: React.FC = () => {
     categoryId: 1,
     price: 0,
     discount: 0,
-    description: "",
+    description: `Категорія:   Бренд:    Колір:    Сезон:    Країна виробник:    Матеріал верху:    Матеріал підкладки:`,
     imageUrls: [],
     isActive: true,
     sizes: [],
@@ -51,8 +52,8 @@ const AddProduct: React.FC = () => {
   }, []);
 
   const handleAddSize = useCallback(() => {
-    if (!newSize.trim() || newStock < 0) {
-      alert("Введіть коректний розмір та кількість");
+    if (!newSize.trim() || newStock <= 0) {
+      alert("Введіть коректний розмір та кількість (кількість > 0)");
       return;
     }
     setForm((prev) => ({
@@ -70,29 +71,60 @@ const AddProduct: React.FC = () => {
     }));
   }, []);
 
+  // Оновлена функція onDrop – додаємо файли до існуючих масивів
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    setImageFiles(acceptedFiles);
-    setPreviewUrls(acceptedFiles.map((file) => URL.createObjectURL(file)));
+    setImageFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
+    setPreviewUrls((prevUrls) => [
+      ...prevUrls,
+      ...acceptedFiles.map((file) => URL.createObjectURL(file)),
+    ]);
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop: (acceptedFiles) => {
-      setImageFiles(acceptedFiles);
-    },
+    onDrop,
     accept: { "image/*": [".jpeg", ".jpg", ".png", ".webp"] },
     multiple: true,
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.articleNumber || !form.name || !form.price || !form.description) {
-      alert("Заповніть усі обов’язкові поля");
-      return;
+  const validateForm = (): boolean => {
+    if (!form.articleNumber.trim()) {
+      alert("Номер артикулу є обов’язковим");
+      return false;
+    }
+    if (!form.name.trim()) {
+      alert("Назва товару є обов’язковою");
+      return false;
+    }
+    if (!form.price || form.price <= 0) {
+      alert("Ціна повинна бути більше 0");
+      return false;
+    }
+    if (!form.description.trim()) {
+      alert("Опис товару є обов’язковим");
+      return false;
     }
     if (imageFiles.length === 0) {
       alert("Завантажте хоча б одне зображення");
-      return;
+      return false;
     }
+    if (discountMode === "percent") {
+      if (form.discount < 0 || form.discount > 100) {
+        alert("Знижка (%) повинна бути від 0 до 100");
+        return false;
+      }
+    }
+    if (discountMode === "amount" && form.price > 0) {
+      if (form.discount < 0 || form.discount > form.price) {
+        alert("Знижка (₴) повинна бути від 0 до ціни товару");
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
 
     const discountPercent =
       discountMode === "amount" && form.price > 0
@@ -100,7 +132,6 @@ const AddProduct: React.FC = () => {
         : form.discount;
 
     const formData = new FormData();
-    imageFiles.forEach((file) => formData.append("images", file));
     formData.append("articleNumber", form.articleNumber);
     formData.append("name", form.name);
     formData.append("brandId", String(form.brandId));
@@ -109,6 +140,8 @@ const AddProduct: React.FC = () => {
     formData.append("discount", String(discountPercent));
     formData.append("description", form.description);
     formData.append("sizes", JSON.stringify(form.sizes));
+
+    // Додаємо всі файли, що накопичились
     imageFiles.forEach((file) => formData.append("images", file));
 
     try {

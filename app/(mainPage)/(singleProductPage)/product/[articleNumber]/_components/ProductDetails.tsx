@@ -11,6 +11,7 @@ import {
 import { toast } from "sonner";
 
 interface ProductDetailsProps {
+  articleNumber: string;
   title: string;
   description: string;
   price: number;
@@ -23,6 +24,7 @@ interface ProductDetailsProps {
 }
 
 export const ProductDetails: React.FC<ProductDetailsProps> = ({
+  articleNumber,
   title,
   description,
   price,
@@ -52,6 +54,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
 
   return (
     <div className="flex flex-col">
+      <p className="text-md">{articleNumber}</p>
       <h1 className="text-3xl font-bold mb-4">{title}</h1>
       <div className="mb-5 flex flex-col-reverse relative">
         <span className="text-2xl font-semibold text-red-600 mr-2">

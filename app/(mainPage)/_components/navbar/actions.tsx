@@ -12,6 +12,8 @@ import {
 import Link from "next/link";
 import useMedia from "use-media";
 import { fetchFavorites } from "@/lib/api/favorites-service";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Dialog, DialogTitle } from "@radix-ui/react-dialog";
 
 interface ActionLink {
   name: string;
@@ -63,10 +65,7 @@ export const Actions = () => {
         </ul>
       ) : (
         <div className="flex items-center px-5 gap-5">
-          <div>
-            {/* Мобільне меню через Sheet */}
-            {/* При потребі можна розмістити компонент Sheet тут */}
-          </div>
+          {/* Обране */}
           <Link href="/favorite" className="flex items-center gap-2 relative">
             <Heart className="w-5 h-5" />
             {favoriteCount > 0 && (
@@ -75,9 +74,33 @@ export const Actions = () => {
               </span>
             )}
           </Link>
+
+          {/* Кошик */}
           <Link href="/cart" className="flex items-center gap-2">
             <ShoppingCart className="w-5 h-5" />
           </Link>
+
+          {/* Бургер-меню (відкривається справа) */}
+          <Sheet>
+            <SheetTrigger className="p-2 rounded-md border-none focus:outline-none">
+              <Menu className="w-6 h-6" />
+            </SheetTrigger>
+            <SheetContent side="right" className="w-64">
+              <ul className="flex flex-col gap-4 mt-4">
+                {actionLinks.map((link, index) => (
+                  <li key={index}>
+                    <Link
+                      href={link.href}
+                      className="flex items-center gap-3 text-lg font-medium"
+                    >
+                      <link.icon className="w-6 h-6" />
+                      <span>{link.name}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </SheetContent>
+          </Sheet>
         </div>
       )}
     </>

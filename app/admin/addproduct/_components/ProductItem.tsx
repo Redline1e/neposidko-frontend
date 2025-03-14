@@ -19,6 +19,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { Product } from "@/utils/types";
 import { AdminItem } from "../../_components/AdminItem";
+import { GripVertical } from "lucide-react";
 
 interface SortableImageProps {
   image: string;
@@ -31,21 +32,27 @@ const SortableImage: React.FC<SortableImageProps> = ({
   index,
   onDelete,
 }) => {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: image });
-  const style = {
-    transform: CSS.Transform.toString(transform),
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
     transition,
-  };
+    setActivatorNodeRef,
+  } = useSortable({ id: image });
+  const style = { transform: CSS.Transform.toString(transform), transition };
 
   return (
     <div
       ref={setNodeRef}
       style={style}
       {...attributes}
-      {...listeners}
       className="flex items-center space-x-2 p-2 border rounded"
     >
+      {/* Область для перетягування (drag handle) */}
+      <div ref={setActivatorNodeRef} {...listeners} className="cursor-grab p-1">
+        <GripVertical size={20} />
+      </div>
       <Image
         src={image}
         alt={`Зображення ${index + 1}`}
@@ -56,7 +63,10 @@ const SortableImage: React.FC<SortableImageProps> = ({
       />
       <button
         type="button"
-        onClick={() => onDelete(index)}
+        onClick={(e) => {
+          e.stopPropagation(); // Додатковий захист від поширення події
+          onDelete(index);
+        }}
         className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
       >
         Видалити
@@ -131,8 +141,9 @@ const renderProductEditForm = (
       const newFiles = [...imageFiles, ...acceptedFiles];
       setImageFiles(newFiles);
       const newUrls = acceptedFiles.map((file) => URL.createObjectURL(file));
-      setPreviewUrls((prev) => [...prev, ...newUrls]);
-      onChange({ imageUrls: [...previewUrls, ...newUrls] });
+      const updatedUrls = [...previewUrls, ...newUrls];
+      setPreviewUrls(updatedUrls);
+      onChange({ imageUrls: updatedUrls });
     },
     [imageFiles, previewUrls, onChange]
   );
@@ -165,6 +176,7 @@ const renderProductEditForm = (
 
   return (
     <div className="space-y-4">
+      {/* Інші поля форми */}
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium text-gray-700">Артикул:</label>
         <input
@@ -213,6 +225,8 @@ const renderProductEditForm = (
           className="border p-2 rounded-md"
         />
       </div>
+
+      {/* Завантаження та сортування зображень */}
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium text-gray-700">Зображення:</label>
         <div

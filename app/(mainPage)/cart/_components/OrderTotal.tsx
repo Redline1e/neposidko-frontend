@@ -7,14 +7,22 @@ interface OrderTotalProps {
 
 const OrderTotal: React.FC<OrderTotalProps> = ({ orderItems }) => {
   const { totalOriginalPrice, totalPrice, totalDiscount } = useMemo(() => {
-    const totalOriginalPrice = orderItems.reduce(
-      (sum, item) => sum + (item.price + item.discount) * item.quantity,
-      0
-    );
+    const totalOriginalPrice = orderItems.reduce((sum, item) => {
+      const salePrice = item.price;
+      const discountPercent = item.discount;
+      // Якщо є знижка, обчислюємо оригінальну ціну
+      const originalPrice =
+        discountPercent > 0
+          ? salePrice / (1 - discountPercent / 100)
+          : salePrice;
+      return sum + originalPrice * item.quantity;
+    }, 0);
+
     const totalPrice = orderItems.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0
     );
+
     return {
       totalOriginalPrice,
       totalPrice,
@@ -26,16 +34,16 @@ const OrderTotal: React.FC<OrderTotalProps> = ({ orderItems }) => {
     <div className="bg-blue-50 p-6 rounded-lg w-full md:w-80 h-[200px]">
       <p className="flex justify-between text-gray-700">
         <span>Сума замовлення:</span>
-        <span>{totalOriginalPrice} грн.</span>
+        <span>{totalOriginalPrice.toFixed(0)} грн.</span>
       </p>
       <p className="flex justify-between text-red-500">
         <span>Знижка:</span>
-        <span>-{totalDiscount} грн.</span>
+        <span>-{totalDiscount.toFixed(0)} грн.</span>
       </p>
       <hr className="my-2" />
       <p className="flex justify-between text-lg font-semibold">
         <span>Разом:</span>
-        <span>{totalPrice} грн.</span>
+        <span>{totalPrice.toFixed(0)} грн.</span>
       </p>
       <button className="w-full mt-4 bg-green-500 text-white py-2 rounded-lg">
         ОФОРМИТИ ЗАМОВЛЕННЯ

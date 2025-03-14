@@ -22,7 +22,12 @@ const redirectToLogin = () => {
 
 const EditUser: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
-  const { control, handleSubmit, reset } = useForm<FormData>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<FormData>({
     defaultValues: {
       name: "",
       email: "",
@@ -100,7 +105,17 @@ const EditUser: React.FC = () => {
             <Controller
               control={control}
               name="name"
-              render={({ field }) => <Input {...field} required />}
+              rules={{ required: "Ім'я є обов'язковим" }}
+              render={({ field }) => (
+                <>
+                  <Input {...field} />
+                  {errors.name && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.name.message}
+                    </p>
+                  )}
+                </>
+              )}
             />
           </div>
           <div>
@@ -108,7 +123,23 @@ const EditUser: React.FC = () => {
             <Controller
               control={control}
               name="email"
-              render={({ field }) => <Input {...field} type="email" required />}
+              rules={{
+                required: "Email є обов'язковим",
+                pattern: {
+                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message: "Введіть коректний email",
+                },
+              }}
+              render={({ field }) => (
+                <>
+                  <Input {...field} type="email" />
+                  {errors.email && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.email.message}
+                    </p>
+                  )}
+                </>
+              )}
             />
           </div>
           <div>
@@ -116,7 +147,22 @@ const EditUser: React.FC = () => {
             <Controller
               control={control}
               name="telephone"
-              render={({ field }) => <Input {...field} />}
+              rules={{
+                validate: (value) =>
+                  !value ||
+                  /^[0-9+\s()-]+$/.test(value) ||
+                  "Введіть коректний номер телефону",
+              }}
+              render={({ field }) => (
+                <>
+                  <Input {...field} />
+                  {errors.telephone && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.telephone.message}
+                    </p>
+                  )}
+                </>
+              )}
             />
           </div>
           <div>

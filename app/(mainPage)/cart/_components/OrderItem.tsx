@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -107,6 +105,10 @@ const OrderItem: React.FC<OrderItemProps> = ({
     return () => clearTimeout(timer);
   }, [selectedSize, selectedQuantity]);
 
+  // Обчислюємо оригінальну ціну для відображення
+  const originalPrice =
+    item.discount > 0 ? item.price / (1 - item.discount / 100) : item.price;
+
   return (
     <div className="flex items-start border-b pb-4 w-full">
       <Link href={`/product/${item.articleNumber}`} className="block">
@@ -132,12 +134,16 @@ const OrderItem: React.FC<OrderItemProps> = ({
         {item.discount > 0 ? (
           <div>
             <p className="text-gray-500 line-through text-sm">
-              {item.price + item.discount} грн.
+              {originalPrice.toFixed(0)} грн.
             </p>
-            <p className="text-red-500 font-semibold">{item.price} грн.</p>
+            <p className="text-red-500 font-semibold">
+              {item.price.toFixed(0)} грн.
+            </p>
           </div>
         ) : (
-          <p className="text-red-500 font-semibold">{item.price} грн.</p>
+          <p className="text-red-500 font-semibold">
+            {item.price.toFixed(0)} грн.
+          </p>
         )}
         <div className="mt-2 flex flex-col md:flex-row md:items-center gap-4">
           {/* Селектор розміру */}
