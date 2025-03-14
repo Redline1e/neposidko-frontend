@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import Image from "next/image";
 import { useDropzone } from "react-dropzone";
 import {
@@ -20,6 +20,37 @@ import { CSS } from "@dnd-kit/utilities";
 import { Product } from "@/utils/types";
 import { AdminItem } from "../../_components/AdminItem";
 import { GripVertical } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { toast } from "sonner";
+
+// Схема валідації без кастомних повідомлень для знижки
+const createProductEditSchema = (
+  discountMode: "percent" | "amount",
+  price: number
+) => {
+  return z.object({
+    name: z.string().min(1, "Назва товару є обов'язковою"),
+    description: z.string().min(1, "Опис товару є обов'язковим"),
+    price: z.number().min(0.01, "Ціна повинна бути більше 0"),
+    discount: z
+      .number()
+      .min(0)
+      .max(discountMode === "percent" ? 100 : price),
+    imageUrls: z.array(z.string()).min(1, "Додайте хоча б одне зображення"),
+    sizes: z
+      .array(
+        z.object({
+          size: z.string().min(1, "Розмір є обов'язковим"),
+          stock: z.number().min(0, "Кількість не може бути від'ємною"),
+        })
+      )
+      .optional(),
+  });
+};
+
+type FormData = z.infer<ReturnType<typeof createProductEditSchema>>;
 
 interface SortableImageProps {
   image: string;
@@ -49,7 +80,6 @@ const SortableImage: React.FC<SortableImageProps> = ({
       {...attributes}
       className="flex items-center space-x-2 p-2 border rounded"
     >
-      {/* Область для перетягування (drag handle) */}
       <div ref={setActivatorNodeRef} {...listeners} className="cursor-grab p-1">
         <GripVertical size={20} />
       </div>
@@ -63,8 +93,9 @@ const SortableImage: React.FC<SortableImageProps> = ({
       />
       <button
         type="button"
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
-          e.stopPropagation(); // Додатковий захист від поширення події
+          e.stopPropagation();
           onDelete(index);
         }}
         className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
@@ -131,21 +162,65 @@ const renderProductEditForm = (
   product: Product,
   onChange: (changed: Partial<Product>) => void
 ) => {
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [discountMode, setDiscountMode] = useState<"percent" | "amount">(
+    "percent"
+  );
   const [previewUrls, setPreviewUrls] = useState<string[]>(
     product.imageUrls || []
   );
 
+  const {
+    register,
+    formState: { errors },
+    setValue,
+    watch,
+    trigger,
+    reset,
+  } = useForm<FormData>({
+    resolver: zodResolver(createProductEditSchema(discountMode, product.price)),
+    defaultValues: {
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      discount: product.discount,
+      imageUrls: product.imageUrls,
+      sizes: product.sizes,
+    },
+  });
+
+  const currentPrice = watch("price") || product.price;
+
+  const handleDiscountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Number(e.target.value);
+    if (discountMode === "percent" && value > 100) {
+      setValue("discount", 100);
+      onChange({ discount: 100 });
+    } else if (discountMode === "amount" && value > currentPrice) {
+      setValue("discount", currentPrice);
+      onChange({ discount: currentPrice });
+    } else if (value < 0) {
+      setValue("discount", 0);
+      onChange({ discount: 0 });
+    } else {
+      setValue("discount", value);
+      onChange({ discount: value });
+    }
+  };
+
+  useEffect(() => {
+    reset({ ...watch() }, { keepDefaultValues: false });
+    trigger("discount");
+  }, [discountMode, currentPrice, trigger, reset, watch]);
+
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
-      const newFiles = [...imageFiles, ...acceptedFiles];
-      setImageFiles(newFiles);
       const newUrls = acceptedFiles.map((file) => URL.createObjectURL(file));
       const updatedUrls = [...previewUrls, ...newUrls];
       setPreviewUrls(updatedUrls);
+      setValue("imageUrls", updatedUrls);
       onChange({ imageUrls: updatedUrls });
     },
-    [imageFiles, previewUrls, onChange]
+    [setValue, previewUrls, onChange]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -161,6 +236,7 @@ const renderProductEditForm = (
       const newIndex = previewUrls.indexOf(over.id);
       const newImages = arrayMove(previewUrls, oldIndex, newIndex);
       setPreviewUrls(newImages);
+      setValue("imageUrls", newImages);
       onChange({ imageUrls: newImages });
     }
   };
@@ -168,66 +244,113 @@ const renderProductEditForm = (
   const handleImageDelete = (index: number) => {
     const newImages = previewUrls.filter((_, i) => i !== index);
     setPreviewUrls(newImages);
-    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setValue("imageUrls", newImages);
     onChange({ imageUrls: newImages });
   };
 
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
 
   return (
-    <div className="space-y-4">
-      {/* Інші поля форми */}
-      <div className="flex flex-col gap-2">
+    <form className="space-y-4">
+      <div>
         <label className="text-sm font-medium text-gray-700">Артикул:</label>
         <input
           type="text"
           value={product.articleNumber}
           readOnly
-          className="border p-2 rounded-md bg-gray-100"
+          className="border p-2 rounded-md bg-gray-100 w-full"
         />
       </div>
-      <div className="flex flex-col gap-2">
+      <div>
         <label className="text-sm font-medium text-gray-700">
           Назва товару:
         </label>
         <input
+          {...register("name")}
           type="text"
-          value={product.name}
+          className="border p-2 rounded-md w-full"
           onChange={(e) => onChange({ name: e.target.value })}
-          className="border p-2 rounded-md"
         />
+        {errors.name && (
+          <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+        )}
       </div>
-      <div className="flex flex-col gap-2">
+      <div>
         <label className="text-sm font-medium text-gray-700">
           Опис товару:
         </label>
         <textarea
-          value={product.description}
+          {...register("description")}
+          className="border p-2 rounded-md w-full"
           onChange={(e) => onChange({ description: e.target.value })}
-          className="border p-2 rounded-md"
         />
+        {errors.description && (
+          <p className="text-red-500 text-sm mt-1">
+            {errors.description.message}
+          </p>
+        )}
       </div>
-      <div className="flex flex-col gap-2">
+      <div>
         <label className="text-sm font-medium text-gray-700">Ціна:</label>
         <input
+          {...register("price", { valueAsNumber: true })}
           type="number"
-          value={product.price}
+          min={0.01}
+          step={0.01}
+          className="border p-2 rounded-md w-full"
           onChange={(e) => onChange({ price: Number(e.target.value) })}
-          className="border p-2 rounded-md"
         />
+        {errors.price && (
+          <p className="text-red-500 text-sm mt-1">{errors.price.message}</p>
+        )}
       </div>
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-gray-700">Знижка (%):</label>
-        <input
-          type="number"
-          value={product.discount}
-          onChange={(e) => onChange({ discount: Number(e.target.value) })}
-          className="border p-2 rounded-md"
-        />
+      <div className="flex items-start gap-4">
+        <div className="flex-1">
+          <label className="text-sm font-medium text-gray-700">
+            {discountMode === "percent" ? "Знижка (%)" : "Знижка (₴)"}
+          </label>
+          <input
+            {...register("discount", { valueAsNumber: true })}
+            type="number"
+            min={0}
+            max={discountMode === "percent" ? 100 : currentPrice}
+            step={discountMode === "percent" ? 1 : 0.01}
+            className="border p-2 rounded-md w-full"
+            onChange={handleDiscountChange}
+          />
+          {errors.discount && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.discount.message}
+            </p>
+          )}
+        </div>
+        <div>
+          <label className="text-sm font-medium text-gray-700">
+            Режим знижки:
+          </label>
+          <div className="flex gap-4">
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                value="percent"
+                checked={discountMode === "percent"}
+                onChange={() => setDiscountMode("percent")}
+              />
+              %
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                value="amount"
+                checked={discountMode === "amount"}
+                onChange={() => setDiscountMode("amount")}
+              />
+              ₴
+            </label>
+          </div>
+        </div>
       </div>
-
-      {/* Завантаження та сортування зображень */}
-      <div className="flex flex-col gap-2">
+      <div>
         <label className="text-sm font-medium text-gray-700">Зображення:</label>
         <div
           {...getRootProps()}
@@ -263,26 +386,42 @@ const renderProductEditForm = (
             </div>
           </SortableContext>
         </DndContext>
+        {errors.imageUrls && (
+          <p className="text-red-500 text-sm mt-1">
+            {errors.imageUrls.message}
+          </p>
+        )}
       </div>
-      <div className="flex flex-col gap-2">
+      <div>
         <label className="text-sm font-medium text-gray-700">
           Розміри (формат: розмір:кількість):
         </label>
         <input
           type="text"
-          value={product.sizes.map((s) => `${s.size}:${s.stock}`).join(", ")}
+          value={
+            watch("sizes")
+              ?.map((s) => `${s.size}:${s.stock}`)
+              .join(", ") || ""
+          }
           onChange={(e) => {
             const newSizes = e.target.value.split(",").map((item) => {
               const [size, stock] = item.split(":");
-              return { size: size.trim(), stock: Number(stock) || 0 };
+              return {
+                size: size.trim(),
+                stock: Math.max(0, Number(stock) || 0),
+              };
             });
+            setValue("sizes", newSizes);
             onChange({ sizes: newSizes });
           }}
-          className="border p-2 rounded-md"
+          className="border p-2 rounded-md w-full"
           placeholder="S:10, M:5"
         />
+        {errors.sizes && (
+          <p className="text-red-500 text-sm mt-1">{errors.sizes.message}</p>
+        )}
       </div>
-    </div>
+    </form>
   );
 };
 
@@ -294,7 +433,7 @@ const updateProductWithImages = async (product: Product) => {
   formData.append("name", product.name);
   formData.append("description", product.description);
   formData.append("categoryId", String(product.categoryId));
-  formData.append("sizes", JSON.stringify(product.sizes));
+  formData.append("sizes", JSON.stringify(product.sizes || []));
 
   const existingImages = product.imageUrls.filter(
     (url) => !url.startsWith("blob:")
@@ -308,15 +447,21 @@ const updateProductWithImages = async (product: Product) => {
     formData.append("images", blob, `image-${Date.now()}.jpg`);
   }
 
-  const response = await fetch(
-    `http://localhost:5000/product/${product.articleNumber}`,
-    {
-      method: "PUT",
-      body: formData,
-    }
-  );
-  if (!response.ok) throw new Error("Не вдалося оновити продукт");
-  return response.json();
+  try {
+    const response = await fetch(
+      `http://localhost:5000/product/${product.articleNumber}`,
+      {
+        method: "PUT",
+        body: formData,
+      }
+    );
+    if (!response.ok) throw new Error("Не вдалося оновити продукт");
+    await response.json();
+    toast.success("Продукт успішно оновлено!");
+  } catch (error) {
+    toast.error("Помилка оновлення продукту");
+    throw error;
+  }
 };
 
 export const ProductItem: React.FC<{

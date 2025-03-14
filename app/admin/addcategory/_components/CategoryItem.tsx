@@ -5,6 +5,24 @@ import { useDropzone } from "react-dropzone";
 import { Category } from "@/utils/types";
 import { deleteCategory, updateCategory } from "@/lib/api/category-service";
 import { AdminItem } from "../../_components/AdminItem";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { toast } from "sonner";
+
+// Схема валідації для категорії
+const categorySchema = z.object({
+  name: z.string().min(1, "Назва категорії є обов'язковою"),
+  image: z
+    .instanceof(File)
+    .optional()
+    .refine(
+      (file) => !file || file.size <= 5 * 1024 * 1024,
+      "Максимальний розмір файлу 5MB"
+    ),
+});
+
+type FormData = z.infer<typeof categorySchema>;
 
 const renderCategoryCard = (category: Category) => (
   <div className="bg-white shadow-lg rounded-xl overflow-hidden transform transition duration-300 hover:scale-105">
@@ -26,20 +44,27 @@ const renderCategoryEditForm = (
   category: Category,
   onChange: (changed: Partial<Category>) => void
 ) => {
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>(category.imageUrl || "");
+  const {
+    register,
+    formState: { errors },
+    setValue,
+  } = useForm<FormData>({
+    resolver: zodResolver(categorySchema),
+    defaultValues: { name: category.name },
+  });
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       const file = acceptedFiles[0];
       if (file) {
-        setImageFile(file);
+        setValue("image", file);
         const newUrl = URL.createObjectURL(file);
         setPreviewUrl(newUrl);
         onChange({ imageUrl: newUrl });
       }
     },
-    [onChange]
+    [setValue, onChange]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -50,19 +75,21 @@ const renderCategoryEditForm = (
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-2">
+      <div>
         <label className="text-sm font-medium text-gray-700">
           Назва категорії:
         </label>
         <input
+          {...register("name")}
           type="text"
-          value={category.name}
+          className="border p-2 rounded-md w-full"
           onChange={(e) => onChange({ name: e.target.value })}
-          className="border p-2 rounded-md"
-          placeholder="Назва категорії"
         />
+        {errors.name && (
+          <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+        )}
       </div>
-      <div className="flex flex-col gap-2">
+      <div>
         <label className="text-sm font-medium text-gray-700">Зображення:</label>
         <div
           {...getRootProps()}
@@ -87,6 +114,9 @@ const renderCategoryEditForm = (
             onError={(e) => (e.currentTarget.src = "/fallback.jpg")}
           />
         )}
+        {errors.image && (
+          <p className="text-red-500 text-sm mt-1">{errors.image.message}</p>
+        )}
       </div>
     </div>
   );
@@ -101,15 +131,21 @@ const updateCategoryWithImage = async (category: Category) => {
     formData.append("image", blob, "category-image.jpg");
   }
 
-  const response = await fetch(
-    `http://localhost:5000/categories/${category.categoryId}`,
-    {
-      method: "PUT",
-      body: formData,
-    }
-  );
-  if (!response.ok) throw new Error("Не вдалося оновити категорію");
-  return response.json();
+  try {
+    const response = await fetch(
+      `http://localhost:5000/categories/${category.categoryId}`,
+      {
+        method: "PUT",
+        body: formData,
+      }
+    );
+    if (!response.ok) throw new Error("Не вдалося оновити категорію");
+    await response.json();
+    toast.success("Категорію успішно оновлено!");
+  } catch (error) {
+    toast.error("Помилка оновлення категорії");
+    throw error;
+  }
 };
 
 export const CategoriesItem: React.FC<{ category: Category }> = ({

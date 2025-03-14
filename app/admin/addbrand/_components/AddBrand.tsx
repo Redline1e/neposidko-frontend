@@ -1,47 +1,57 @@
 "use client";
-import React, { useState, useCallback } from "react";
-import { Brand } from "@/utils/types";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { addBrand } from "@/lib/api/brands-service";
+import { toast } from "sonner";
 
-// Вкажемо brandId як 0 за замовчуванням, оскільки він обов'язковий
+// Схема валідації для бренду
+const brandSchema = z.object({
+  name: z.string().min(1, "Назва бренду є обов'язковою"),
+});
+
+type FormData = z.infer<typeof brandSchema>;
+
 const AddBrand: React.FC = () => {
-  const [form, setForm] = useState<Brand>({ name: "", brandId: 0 });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<FormData>({
+    resolver: zodResolver(brandSchema),
+  });
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  }, []);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: FormData) => {
     try {
-      await addBrand(form);
-      alert("Бренд додано!");
-      setForm({ name: "", brandId: 0 });
+      await addBrand({ name: data.name, brandId: 0 }); // brandId присвоюється на сервері
+      toast.success("Бренд успішно додано!");
+      reset();
     } catch (error) {
-      console.error("Помилка при додаванні бренду:", error);
-      alert("Не вдалося додати бренд");
+      toast.error("Не вдалося додати бренд");
     }
   };
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit(onSubmit)}
       className="bg-white p-6 shadow-md rounded-lg flex flex-col gap-4 w-full max-w-md mx-auto"
     >
       <h2 className="text-lg font-semibold text-center">Додати бренд</h2>
-      <label className="flex flex-col">
-        <span className="text-sm font-medium text-gray-700">Назва бренду:</span>
+      <div>
+        <label className="text-sm font-medium text-gray-700">
+          Назва бренду:
+        </label>
         <input
+          {...register("name")}
           type="text"
-          name="name"
-          value={form.name}
-          onChange={handleChange}
-          placeholder="Введіть назву бренду"
-          required
-          className="border p-2 rounded-md"
+          className="border p-2 rounded-md w-full"
         />
-      </label>
+        {errors.name && (
+          <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+        )}
+      </div>
       <button
         type="submit"
         className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"

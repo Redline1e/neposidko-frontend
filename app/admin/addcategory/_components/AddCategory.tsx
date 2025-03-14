@@ -1,24 +1,46 @@
 "use client";
 import React, { useState, useCallback } from "react";
-import { Category } from "@/utils/types";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useDropzone } from "react-dropzone";
+import { toast } from "sonner";
+
+// Схема валідації для категорії
+const categorySchema = z.object({
+  name: z.string().min(1, "Назва категорії є обов'язковою"),
+  image: z
+    .instanceof(File)
+    .refine(
+      (file) => file.size <= 5 * 1024 * 1024,
+      "Максимальний розмір файлу 5MB"
+    ),
+});
+
+type FormData = z.infer<typeof categorySchema>;
 
 const AddCategory: React.FC = () => {
-  const [form, setForm] = useState<Category>({
-    categoryId: 0,
-    name: "",
-    imageUrl: "",
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+  } = useForm<FormData>({
+    resolver: zodResolver(categorySchema),
   });
-  const [imageFile, setImageFile] = useState<File | null>(null);
+
   const [previewUrl, setPreviewUrl] = useState<string>("");
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (file) {
-      setImageFile(file);
-      setPreviewUrl(URL.createObjectURL(file));
-    }
-  }, []);
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      const file = acceptedFiles[0];
+      if (file) {
+        setValue("image", file);
+        setPreviewUrl(URL.createObjectURL(file));
+      }
+    },
+    [setValue]
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -26,25 +48,10 @@ const AddCategory: React.FC = () => {
     multiple: false,
   });
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  }, []);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.name) {
-      alert("Введіть назву категорії");
-      return;
-    }
-    if (!imageFile) {
-      alert("Завантажте зображення для категорії");
-      return;
-    }
-
+  const onSubmit = async (data: FormData) => {
     const formData = new FormData();
-    formData.append("name", form.name);
-    formData.append("image", imageFile);
+    formData.append("name", data.name);
+    formData.append("image", data.image);
 
     try {
       const response = await fetch("http://localhost:5000/categories", {
@@ -53,37 +60,33 @@ const AddCategory: React.FC = () => {
       });
       if (!response.ok) throw new Error("Не вдалося додати категорію");
       await response.json();
-      alert("Категорію успішно додано!");
-      setForm({ categoryId: 0, name: "", imageUrl: "" });
-      setImageFile(null);
+      toast.success("Категорію успішно додано!");
       setPreviewUrl("");
     } catch (error) {
-      console.error("Помилка додавання категорії:", error);
-      alert("Не вдалося додати категорію");
+      toast.error("Не вдалося додати категорію");
     }
   };
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit(onSubmit)}
       className="bg-white p-6 shadow-md rounded-lg flex flex-col gap-4 w-full max-w-md mx-auto"
     >
       <h2 className="text-lg font-semibold text-center">Додати категорію</h2>
-      <div className="flex flex-col gap-2">
+      <div>
         <label className="text-sm font-medium text-gray-700">
           Назва категорії:
         </label>
         <input
+          {...register("name")}
           type="text"
-          name="name"
-          value={form.name}
-          onChange={handleChange}
-          placeholder="Введіть назву"
-          required
-          className="border p-2 rounded-md"
+          className="border p-2 rounded-md w-full"
         />
+        {errors.name && (
+          <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+        )}
       </div>
-      <div className="flex flex-col gap-2">
+      <div>
         <label className="text-sm font-medium text-gray-700">
           Зображення (обов’язково):
         </label>
@@ -107,6 +110,9 @@ const AddCategory: React.FC = () => {
             className="mt-2 h-24 w-full object-cover rounded"
             onError={(e) => (e.currentTarget.src = "/fallback.jpg")}
           />
+        )}
+        {errors.image && (
+          <p className="text-red-500 text-sm mt-1">{errors.image.message}</p>
         )}
       </div>
       <button

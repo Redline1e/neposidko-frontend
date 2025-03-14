@@ -55,7 +55,9 @@ export const fetchProductByArticle = async (
 
 export const searchProducts = async (query: string): Promise<Product[]> => {
   try {
-    const response = await apiClient.get(`/search?q=${encodeURIComponent(query)}`);
+    const response = await apiClient.get(
+      `/search?q=${encodeURIComponent(query)}`
+    );
     return z.array(ProductSchema).parse(response.data);
   } catch (error: any) {
     console.error("Помилка при пошуку товарів:", error);

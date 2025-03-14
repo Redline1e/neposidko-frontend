@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Loader2 } from "lucide-react";
 import { fetchUser, updateUser } from "@/lib/api/user-service";
 import { Input } from "@/components/ui/input";
@@ -9,12 +11,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 
-type FormData = {
-  name: string;
-  email: string;
-  telephone: string;
-  deliveryAddress: string;
-};
+// Схема валідації для форми редагування користувача
+const userSchema = z.object({
+  name: z.string().min(1, "Ім'я є обов'язковим"),
+  email: z.string().email("Некоректний email"),
+  telephone: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || /^[0-9+\s()-]+$/.test(val),
+      "Введіть коректний номер телефону"
+    ),
+  deliveryAddress: z.string().optional(),
+});
+
+type FormData = z.infer<typeof userSchema>;
 
 const redirectToLogin = () => {
   window.location.href = "/login";
@@ -28,6 +39,7 @@ const EditUser: React.FC = () => {
     reset,
     formState: { errors },
   } = useForm<FormData>({
+    resolver: zodResolver(userSchema),
     defaultValues: {
       name: "",
       email: "",
@@ -105,7 +117,6 @@ const EditUser: React.FC = () => {
             <Controller
               control={control}
               name="name"
-              rules={{ required: "Ім'я є обов'язковим" }}
               render={({ field }) => (
                 <>
                   <Input {...field} />
@@ -123,13 +134,6 @@ const EditUser: React.FC = () => {
             <Controller
               control={control}
               name="email"
-              rules={{
-                required: "Email є обов'язковим",
-                pattern: {
-                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: "Введіть коректний email",
-                },
-              }}
               render={({ field }) => (
                 <>
                   <Input {...field} type="email" />
@@ -147,12 +151,6 @@ const EditUser: React.FC = () => {
             <Controller
               control={control}
               name="telephone"
-              rules={{
-                validate: (value) =>
-                  !value ||
-                  /^[0-9+\s()-]+$/.test(value) ||
-                  "Введіть коректний номер телефону",
-              }}
               render={({ field }) => (
                 <>
                   <Input {...field} />
