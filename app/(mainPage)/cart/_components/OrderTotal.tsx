@@ -1,11 +1,20 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
+import CheckoutDialog from "./CheckoutDialog";
 import { OrderItemData } from "@/utils/types";
 
 interface OrderTotalProps {
   orderItems: OrderItemData[];
+  orderId: string;
+  onCheckoutSuccess: () => void;
 }
 
-const OrderTotal: React.FC<OrderTotalProps> = ({ orderItems }) => {
+const OrderTotal: React.FC<OrderTotalProps> = ({
+  orderItems,
+  orderId,
+  onCheckoutSuccess,
+}) => {
+  const [dialogOpen, setDialogOpen] = useState(false);
+
   const { totalOriginalPrice, totalPrice, totalDiscount } = useMemo(() => {
     const totalOriginalPrice = orderItems.reduce((sum, item) => {
       const salePrice = item.price;
@@ -45,9 +54,22 @@ const OrderTotal: React.FC<OrderTotalProps> = ({ orderItems }) => {
         <span>Разом:</span>
         <span>{totalPrice.toFixed(0)} грн.</span>
       </p>
-      <button className="w-full mt-4 bg-green-500 text-white py-2 rounded-lg">
+      <button
+        onClick={() => setDialogOpen(true)}
+        className="w-full mt-4 bg-green-500 text-white py-2 rounded-lg"
+      >
         ОФОРМИТИ ЗАМОВЛЕННЯ
       </button>
+      {/* Відкриваємо CheckoutDialog */}
+      <CheckoutDialog
+        orderId={orderId}
+        onCheckoutSuccess={() => {
+          onCheckoutSuccess();
+          setDialogOpen(false);
+        }}
+        isOpen={dialogOpen}
+        onOpenChange={setDialogOpen}
+      />
     </div>
   );
 };

@@ -64,6 +64,7 @@ export const ProductPage: React.FC = () => {
     setSelectedSize(size);
   };
 
+  // ProductPage.tsx
   const handleAddToCart = async () => {
     if (!selectedSize || !product) {
       toast.error("Будь ласка, виберіть розмір перед додаванням в кошик!");
@@ -75,8 +76,8 @@ export const ProductPage: React.FC = () => {
         articleNumber: product.articleNumber,
         size: selectedSize,
         quantity: 1,
-        orderId: 0, // Added missing property
-        productOrderId: 0, // Added missing property
+        orderId: 0, // Сервер сам призначить
+        productOrderId: 0, // Сервер сам призначить
       };
 
       await addOrderItem(cartItem);

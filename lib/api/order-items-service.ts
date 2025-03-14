@@ -26,7 +26,11 @@ export const addOrderItem = async (
   orderItem: OrderItem
 ): Promise<OrderItem> => {
   try {
-    const response = await apiClient.post("/order-items", orderItem);
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("Не авторизовано");
+    const response = await apiClient.post("/order-items", orderItem, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return OrderItemSchema.parse(response.data);
   } catch (error: any) {
     console.error("Помилка при додаванні позиції замовлення:", error);

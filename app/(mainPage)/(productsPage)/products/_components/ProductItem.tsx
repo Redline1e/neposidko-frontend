@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Heart, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -9,7 +9,9 @@ import {
   removeFromFavorites,
   fetchFavorites,
 } from "@/lib/api/favorites-service";
-import { Product } from "@/utils/types";
+import { addOrderItem } from "@/lib/api/order-items-service";
+import { Product, OrderItem } from "@/utils/types";
+import { toast } from "sonner";
 
 interface SizeInfo {
   size: string;
@@ -21,18 +23,28 @@ interface ProductItemProps {
 }
 
 const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
-  const { articleNumber, price, discount, name, imageUrls, sizes = [] } = product;
+  const {
+    articleNumber,
+    price,
+    discount,
+    name,
+    imageUrls,
+    sizes = [],
+  } = product;
   const discountedPrice = discount
     ? Math.round(price * (1 - discount / 100))
     : price;
-  const imageSrc = imageUrls && imageUrls.length > 0 ? imageUrls[0] : "/fallback.jpg";
+  const imageSrc =
+    imageUrls && imageUrls.length > 0 ? imageUrls[0] : "/fallback.jpg";
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
   useEffect(() => {
     const checkFavoriteStatus = async () => {
       try {
         const favorites = await fetchFavorites();
-        setIsFavorite(favorites.some((fav) => fav.articleNumber === articleNumber));
+        setIsFavorite(
+          favorites.some((fav) => fav.articleNumber === articleNumber)
+        );
       } catch (error) {
         console.error("Помилка при перевірці улюблених:", error);
       }
@@ -41,7 +53,9 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
     checkFavoriteStatus();
   }, [articleNumber]);
 
-  const handleToggleFavorite = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleToggleFavorite = async (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -59,6 +73,32 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
       } catch (error) {
         console.error("Не вдалося видалити з улюблених:", error);
       }
+    }
+  };
+
+  const handleAddToCart = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Вибираємо найменший доступний розмір
+    const smallestSize = sizes[0]?.size;
+    if (!smallestSize) {
+      toast.error("Немає доступних розмірів");
+      return;
+    }
+
+    try {
+      const cartItem: OrderItem = {
+        articleNumber: product.articleNumber,
+        size: smallestSize,
+        quantity: 1,
+        orderId: 0, // Сервер сам призначить
+        productOrderId: 0, // Сервер сам призначить
+      };
+      await addOrderItem(cartItem);
+      toast.success("Товар додано до кошика!");
+    } catch (error) {
+      toast.error("Не вдалося додати товар до кошика");
     }
   };
 
@@ -88,10 +128,14 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
           </Button>
         </div>
         <div className="p-4">
-          <h2 className="text-lg font-semibold text-gray-800 truncate">{name}</h2>
+          <h2 className="text-lg font-semibold text-gray-800 truncate">
+            {name}
+          </h2>
           <div className="mt-2 flex items-center space-x-2">
             {discount > 0 && (
-              <span className="text-gray-400 line-through text-sm">{price} ₴</span>
+              <span className="text-gray-400 line-through text-sm">
+                {price} ₴
+              </span>
             )}
             <span className="text-red-500 font-semibold text-lg whitespace-nowrap">
               {discountedPrice} ₴
@@ -100,17 +144,17 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
           {sizes.length > 0 && (
             <div className="mt-3">
               <span className="text-gray-800 font-semibold whitespace-nowrap">
-                {sizes.slice(0, 2).map((sizeObj) => sizeObj.size).join(", ")}
+                {sizes
+                  .slice(0, 2)
+                  .map((sizeObj) => sizeObj.size)
+                  .join(", ")}
                 {sizes.length > 2 && "..."}
               </span>
             </div>
           )}
           <div className="mt-4">
             <Button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
+              onClick={handleAddToCart}
               className="w-full flex items-center justify-center bg-blue-700 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-200 gap-2"
             >
               <ShoppingCart size={18} /> Додати до кошика
