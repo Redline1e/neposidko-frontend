@@ -62,28 +62,32 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
   });
 
   const onSubmit = async (data: CheckoutFormData) => {
+    if (!orderId || isNaN(Number(orderId))) {
+      console.error("orderId is missing or not a number:", orderId);
+      toast.error("Помилка: orderId відсутній або не є числом");
+      return;
+    }
     console.log("orderId:", orderId, "form data:", data);
     try {
-      const response = await fetch("http://localhost:5000/order/checkout", {
+      const response = await fetch("http://localhost:5000/orders/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // Передаємо orderId як число, разом з іншими даними форми
-        body: JSON.stringify({ orderId, ...data }),
+        body: JSON.stringify({ orderId: Number(orderId), ...data }), // Явно перетворюємо в число
       });
       if (!response.ok) {
-        throw new Error("Не вдалося оформити замовлення");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Не вдалося оформити замовлення");
       }
       const result = await response.json();
       toast.success(result.message || "Замовлення оформлено успішно");
       setOpen(false);
       reset();
       onCheckoutSuccess();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast.error("Помилка оформлення замовлення");
+      toast.error(error.message || "Помилка оформлення замовлення");
     }
   };
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="w-full max-w-md">

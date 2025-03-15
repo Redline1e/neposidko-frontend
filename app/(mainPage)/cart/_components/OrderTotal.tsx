@@ -4,7 +4,7 @@ import { OrderItemData } from "@/utils/types";
 
 interface OrderTotalProps {
   orderItems: OrderItemData[];
-  orderId: string;
+  orderId: number;
   onCheckoutSuccess: () => void;
 }
 

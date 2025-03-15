@@ -73,3 +73,16 @@ export const deleteOrderItem = async (
     throw new Error("Не вдалося видалити позицію замовлення");
   }
 };
+
+export const fetchOrderHistoryItems = async (): Promise<OrderItem[]> => {
+  const response = await fetch("http://localhost:5000/order-items/history", {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error("Не вдалося завантажити позиції історії замовлень");
+  }
+  return response.json();
+};

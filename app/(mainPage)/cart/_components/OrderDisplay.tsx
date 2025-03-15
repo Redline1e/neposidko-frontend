@@ -17,7 +17,9 @@ export const OrderDisplay: React.FC = () => {
         const enrichedItems = await Promise.all(
           items.map(async (item) => {
             try {
-              const productData = await fetchProductByArticle(item.articleNumber);
+              const productData = await fetchProductByArticle(
+                item.articleNumber
+              );
               return {
                 productOrderId: item.productOrderId,
                 orderId: item.orderId,
@@ -69,6 +71,9 @@ export const OrderDisplay: React.FC = () => {
     );
   };
 
+  // Передаємо orderId з першого orderItem, якщо є
+  const orderId = orderItems.length > 0 ? orderItems[0].orderId : 0;
+
   return (
     <div className="flex flex-col md:flex-row gap-8">
       <div className="flex-1 space-y-4">
@@ -84,7 +89,15 @@ export const OrderDisplay: React.FC = () => {
           <p>Ваш кошик порожній.</p>
         )}
       </div>
-      <OrderTotal orderItems={orderItems} />
+      {orderItems.length > 0 && (
+        <OrderTotal
+          orderItems={orderItems}
+          orderId={orderId}
+          onCheckoutSuccess={() => {
+            setOrderItems([]); // Очищаємо кошик після успішного оформлення
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -2,8 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import { Order, OrderItem } from "@/utils/types";
-import { fetchOrders } from "@/lib/api/order-service";
-import { fetchOrderItems } from "@/lib/api/order-items-service";
+import {
+  fetchOrderHistory,
+} from "@/lib/api/order-service";
+import { fetchOrderHistoryItems } from "@/lib/api/order-items-service";
 
 interface ExtendedOrderItem extends OrderItem {
   name?: string;
@@ -12,40 +14,32 @@ interface ExtendedOrderItem extends OrderItem {
 
 interface ExtendedOrder extends Order {
   orderItems: ExtendedOrderItem[];
-  userName?: string;
 }
 
 const STATUS_STYLES: Record<number, string> = {
-  1: "bg-blue-100 text-blue-800",
   2: "bg-yellow-100 text-yellow-800",
   3: "bg-orange-100 text-orange-800",
   4: "bg-purple-100 text-purple-800",
   5: "bg-green-100 text-green-800",
-  6: "bg-red-100 text-red-800",
-  7: "bg-gray-100 text-gray-800",
-  8: "bg-black text-white",
 };
 
 const STATUS_LABELS: Record<number, string> = {
-  1: "Нове замовлення",
-  2: "В обробці",
-  3: "Очікує оплати",
-  4: "Відправлене",
-  5: "Доставлене",
-  6: "Повернене",
-  7: "Виконане",
-  8: "Відмінене",
+  2: "Нове замовлення",
+  3: "В обробці",
+  4: "Прямує до замовника",
+  5: "Виконане",
 };
 
 const OrderHistory: React.FC = () => {
   const [orders, setOrders] = useState<ExtendedOrder[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const ordersData = await fetchOrders();
-        const orderItemsData = await fetchOrderItems();
+        const ordersData = await fetchOrderHistory();
+        const orderItemsData = await fetchOrderHistoryItems();
 
         const orderItemsByOrderId = orderItemsData.reduce(
           (acc, item: ExtendedOrderItem) => {
@@ -66,6 +60,7 @@ const OrderHistory: React.FC = () => {
         setOrders(extendedOrders);
       } catch (error) {
         console.error("Помилка завантаження даних:", error);
+        setError("Не вдалося завантажити історію замовлень");
       } finally {
         setLoading(false);
       }
@@ -78,11 +73,17 @@ const OrderHistory: React.FC = () => {
     return <div className="text-center p-4">Завантаження...</div>;
   }
 
+  if (error) {
+    return <div className="text-center p-4 text-red-500">{error}</div>;
+  }
+
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold mb-6 text-center">Історія замовлень</h1>
       {orders.length === 0 ? (
-        <p className="text-gray-500 text-center">У вас ще немає замовлень.</p>
+        <p className="text-gray-500 text-center">
+          У вас ще немає виконаних замовлень.
+        </p>
       ) : (
         orders.map((order) => (
           <div
@@ -95,20 +96,12 @@ const OrderHistory: React.FC = () => {
               </h2>
               <span
                 className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  STATUS_STYLES[order.orderStatusId || 1]
+                  STATUS_STYLES[order.orderStatusId || 2]
                 }`}
               >
-                {STATUS_LABELS[order.orderStatusId || 1]}
+                {STATUS_LABELS[order.orderStatusId || 2]}
               </span>
             </div>
-            {order.userName && (
-              <div className="mb-4 text-gray-700">
-                <p>
-                  <span className="font-medium">Замовник:</span>{" "}
-                  {order.userName}
-                </p>
-              </div>
-            )}
             <div className="mt-2">
               <h3 className="font-semibold mb-2">Товари в замовленні:</h3>
               {order.orderItems && order.orderItems.length > 0 ? (

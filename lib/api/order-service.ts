@@ -1,5 +1,5 @@
 import { apiClient } from "@/utils/apiClient";
-import { Order, OrderSchema } from "@/utils/types";
+import { Order, OrderItem, OrderSchema } from "@/utils/types";
 import { z } from "zod";
 
 export const fetchOrders = async (): Promise<Order[]> => {
@@ -34,3 +34,34 @@ export const fetchAllOrders = async (): Promise<Order[]> => {
     throw new Error("Не вдалося завантажити всі замовлення");
   }
 };
+export const fetchOrderHistory = async (): Promise<Order[]> => {
+    try {
+      const response = await fetch("http://localhost:5000/orders/history", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+  
+      console.log("Response status:", response.status); // Логування статусу
+  
+      const text = await response.text(); // Читаємо тіло відповіді як текст один раз
+      console.log("Response data:", text); // Логування тіла відповіді
+  
+      if (!response.ok) {
+        throw new Error("Не вдалося завантажити історію замовлень");
+      }
+  
+      if (!text) {
+        throw new Error("Порожня відповідь від сервера");
+      }
+  
+      const data = JSON.parse(text); // Парсимо текст у JSON
+      return data;
+    } catch (error) {
+      console.error("Помилка отримання історії замовлень:", error);
+      throw error;
+    }
+  };
+  
