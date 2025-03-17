@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -16,6 +18,17 @@ import {
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface OrderItemProps {
   item: OrderItemData;
@@ -35,14 +48,13 @@ const OrderItem: React.FC<OrderItemProps> = ({
   );
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [alertOpen, setAlertOpen] = useState<boolean>(false);
 
   const initialValues = useRef({ size: item.size, quantity: item.quantity });
 
-  // Знаходимо інформацію про доступний stock для обраного розміру
   const sizeData = item.sizes?.find((s) => s.size === selectedSize);
   const availableStock = sizeData ? sizeData.stock : 0;
 
-  // Використовуємо useMemo для створення масиву варіантів кількості
   const quantityOptions = useMemo(() => {
     return Array.from({ length: availableStock }, (_, i) => i + 1);
   }, [availableStock]);
@@ -74,8 +86,7 @@ const OrderItem: React.FC<OrderItemProps> = ({
     }
   };
 
-  const handleDelete = async () => {
-    if (!confirm("Ви впевнені, що хочете видалити цю позицію?")) return;
+  const handleConfirmDelete = async () => {
     setIsDeleting(true);
     try {
       await deleteOrderItem(item.productOrderId);
@@ -85,6 +96,7 @@ const OrderItem: React.FC<OrderItemProps> = ({
       console.error("Помилка видалення позиції:", error);
     } finally {
       setIsDeleting(false);
+      setAlertOpen(false);
     }
   };
 
@@ -105,13 +117,15 @@ const OrderItem: React.FC<OrderItemProps> = ({
     return () => clearTimeout(timer);
   }, [selectedSize, selectedQuantity]);
 
-  // Обчислюємо оригінальну ціну для відображення
   const originalPrice =
     item.discount > 0 ? item.price / (1 - item.discount / 100) : item.price;
 
   return (
-    <div className="flex items-start border-b pb-4 w-full">
-      <Link href={`/product/${item.articleNumber}`} className="block">
+    <div className="flex items-start border-b pb-4 w-full space-x-4">
+      <Link
+        href={`/product/${item.articleNumber}`}
+        className="block flex-shrink-0"
+      >
         {item.imageUrls.length > 0 ? (
           <Image
             src={item.imageUrls[0]}
@@ -121,13 +135,13 @@ const OrderItem: React.FC<OrderItemProps> = ({
             className="rounded-lg"
           />
         ) : (
-          <div className="w-[100px] h-[100px] bg-gray-200 flex items-center justify-center rounded-lg">
+          <div className="w-24 h-24 bg-gray-200 flex items-center justify-center rounded-lg">
             <span className="text-gray-500 text-sm">Немає зображення</span>
           </div>
         )}
       </Link>
-      <div className="ml-4 flex-1">
-        <Link href={`/product/${item.articleNumber}`} className="block">
+      <div className="flex-1">
+        <Link href={`/product/${item.articleNumber}`}>
           <h2 className="text-lg font-semibold hover:underline">{item.name}</h2>
         </Link>
         <p className="text-sm text-gray-500">Артикул: {item.articleNumber}</p>
@@ -136,17 +150,16 @@ const OrderItem: React.FC<OrderItemProps> = ({
             <p className="text-gray-500 line-through text-sm">
               {originalPrice.toFixed(0)} грн.
             </p>
-            <p className="text-red-500 font-semibold">
+            <p className="text-destructive font-semibold">
               {item.price.toFixed(0)} грн.
             </p>
           </div>
         ) : (
-          <p className="text-red-500 font-semibold">
+          <p className="text-destructive font-semibold">
             {item.price.toFixed(0)} грн.
           </p>
         )}
         <div className="mt-2 flex flex-col md:flex-row md:items-center gap-4">
-          {/* Селектор розміру */}
           <div className="w-40">
             <Select value={selectedSize} onValueChange={setSelectedSize}>
               <SelectTrigger className="w-full">
@@ -161,7 +174,6 @@ const OrderItem: React.FC<OrderItemProps> = ({
               </SelectContent>
             </Select>
           </div>
-          {/* Селектор кількості */}
           <div className="w-20">
             <Select
               value={selectedQuantity.toString()}
@@ -181,9 +193,28 @@ const OrderItem: React.FC<OrderItemProps> = ({
           </div>
         </div>
       </div>
-      <Button variant="outline" onClick={handleDelete} disabled={isDeleting}>
-        <Trash2 className={isDeleting ? "animate-spin" : ""} />
-      </Button>
+      {/* Підтвердження видалення через AlertDialog */}
+      <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
+        <AlertDialogTrigger asChild>
+          <Button variant="outline" disabled={isDeleting}>
+            <Trash2 className={isDeleting ? "animate-spin" : ""} />
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Підтвердіть видалення</AlertDialogTitle>
+            <AlertDialogDescription>
+              Ви впевнені, що хочете видалити цей товар? Ця дія незворотна.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Відмінити</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete}>
+              Видалити
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

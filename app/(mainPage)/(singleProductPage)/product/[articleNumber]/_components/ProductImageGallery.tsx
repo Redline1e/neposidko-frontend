@@ -4,7 +4,9 @@ interface ProductImageGalleryProps {
   images: string[];
 }
 
-export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images }) => {
+export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
+  images,
+}) => {
   if (!images || images.length === 0) {
     return <div className="text-center text-gray-500">Зображення відсутні</div>;
   }
@@ -13,7 +15,7 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images
 
   return (
     <div className="flex flex-col md:flex-row">
-      <div className="flex flex-row md:flex-col space-x-2 md:space-x-0 md:space-y-2 mr-2 md:mr-0 md:mb-4">
+      <div className="flex md:flex-col gap-2 mb-4 md:mb-0 md:mr-4">
         {images.map((img, index) => (
           <img
             key={index}
@@ -29,14 +31,12 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images
         ))}
       </div>
       <div className="flex-1">
-        <div className="w-full max-w-[560px] mx-auto">
-          <div className="relative" style={{ paddingBottom: "135.7%" }}>
-            <img
-              src={selectedImage}
-              alt="Вибране зображення"
-              className="absolute top-0 left-0 w-full h-full object-cover rounded shadow-md"
-            />
-          </div>
+        <div className="relative" style={{ paddingBottom: "100%" }}>
+          <img
+            src={selectedImage}
+            alt="Вибране зображення"
+            className="absolute top-0 left-0 w-full h-full object-cover rounded shadow-md"
+          />
         </div>
       </div>
     </div>

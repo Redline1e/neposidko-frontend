@@ -1,6 +1,9 @@
+"use client";
+
 import React, { useMemo, useState } from "react";
 import CheckoutDialog from "./CheckoutDialog";
 import { OrderItemData } from "@/utils/types";
+import { Button } from "@/components/ui/button";
 
 interface OrderTotalProps {
   orderItems: OrderItemData[];
@@ -19,7 +22,6 @@ const OrderTotal: React.FC<OrderTotalProps> = ({
     const totalOriginalPrice = orderItems.reduce((sum, item) => {
       const salePrice = item.price;
       const discountPercent = item.discount;
-      // Якщо є знижка, обчислюємо оригінальну ціну
       const originalPrice =
         discountPercent > 0
           ? salePrice / (1 - discountPercent / 100)
@@ -40,12 +42,12 @@ const OrderTotal: React.FC<OrderTotalProps> = ({
   }, [orderItems]);
 
   return (
-    <div className="bg-blue-50 p-6 rounded-lg w-full md:w-80 h-[200px]">
+    <div className="bg-blue-50 p-6 rounded-lg w-full md:w-80 h-48">
       <p className="flex justify-between text-gray-700">
         <span>Сума замовлення:</span>
         <span>{totalOriginalPrice.toFixed(0)} грн.</span>
       </p>
-      <p className="flex justify-between text-red-500">
+      <p className="flex justify-between text-destructive">
         <span>Знижка:</span>
         <span>-{totalDiscount.toFixed(0)} грн.</span>
       </p>
@@ -54,13 +56,12 @@ const OrderTotal: React.FC<OrderTotalProps> = ({
         <span>Разом:</span>
         <span>{totalPrice.toFixed(0)} грн.</span>
       </p>
-      <button
+      <Button
         onClick={() => setDialogOpen(true)}
-        className="w-full mt-4 bg-green-500 text-white py-2 rounded-lg"
+        className="w-full mt-4 bg-green-500 text-white"
       >
         ОФОРМИТИ ЗАМОВЛЕННЯ
-      </button>
-      {/* Відкриваємо CheckoutDialog */}
+      </Button>
       <CheckoutDialog
         orderId={orderId}
         onCheckoutSuccess={() => {

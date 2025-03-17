@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,7 +31,7 @@ const checkoutSchema = z.object({
 export type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
 interface CheckoutDialogProps {
-  orderId: number; // передається як число
+  orderId: number;
   onCheckoutSuccess: () => void;
   isOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -42,7 +43,6 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
   isOpen: controlledOpen,
   onOpenChange,
 }) => {
-  // Використовуємо керований стан, якщо пропси передані, інакше – внутрішній стан
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = onOpenChange || setInternalOpen;
@@ -57,7 +57,7 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
     defaultValues: {
       deliveryAddress: "",
       telephone: "",
-      paymentMethod: "full", // за замовчуванням – Повна оплата
+      paymentMethod: "full",
     },
   });
 
@@ -67,12 +67,11 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
       toast.error("Помилка: orderId відсутній або не є числом");
       return;
     }
-    console.log("orderId:", orderId, "form data:", data);
     try {
       const response = await fetch("http://localhost:5000/orders/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId: Number(orderId), ...data }), // Явно перетворюємо в число
+        body: JSON.stringify({ orderId: Number(orderId), ...data }),
       });
       if (!response.ok) {
         const errorData = await response.json();
@@ -88,34 +87,45 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
       toast.error(error.message || "Помилка оформлення замовлення");
     }
   };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="w-full max-w-md">
+      <DialogContent className="w-full max-w-md p-6 shadow-lg rounded-lg">
         <DialogHeader>
-          <DialogTitle>Оформлення замовлення</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-xl font-bold">
+            Оформлення замовлення
+          </DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
             Введіть свої дані для доставки та оберіть спосіб оплати.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
           <div>
-            <label className="block text-sm font-medium">Місце доставки</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Місце доставки
+            </label>
             <Input {...register("deliveryAddress")} placeholder="Ваша адреса" />
             {errors.deliveryAddress && (
-              <p className="text-red-500 text-xs">
+              <p className="mt-1 text-destructive text-sm">
                 {errors.deliveryAddress.message}
               </p>
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium">Телефон</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Телефон
+            </label>
             <Input {...register("telephone")} placeholder="Ваш телефон" />
             {errors.telephone && (
-              <p className="text-red-500 text-xs">{errors.telephone.message}</p>
+              <p className="mt-1 text-destructive text-sm">
+                {errors.telephone.message}
+              </p>
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium">Спосіб оплати</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Спосіб оплати
+            </label>
             <select
               {...register("paymentMethod")}
               className="border p-2 rounded-md w-full"
@@ -124,12 +134,12 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
               <option value="prepaid">Передоплата (200 грн)</option>
             </select>
             {errors.paymentMethod && (
-              <p className="text-red-500 text-xs">
+              <p className="mt-1 text-destructive text-sm">
                 {errors.paymentMethod.message}
               </p>
             )}
           </div>
-          <Button type="submit" className="w-full">
+          <Button type="submit" className="w-full mt-2">
             Підтвердити замовлення
           </Button>
         </form>

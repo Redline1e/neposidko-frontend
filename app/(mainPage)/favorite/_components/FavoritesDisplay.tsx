@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import ProductItem from "@/app/(mainPage)/(productsPage)/products/_components/ProductItem";
 import { Product } from "@/utils/types";
 import { fetchFavorites } from "@/lib/api/favorites-service";
@@ -11,7 +11,7 @@ export const FavoriteDisplay: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const getFavorites = async () => {
+  const getFavorites = useCallback(async () => {
     setLoading(true);
     try {
       const data = await fetchFavorites();
@@ -23,20 +23,21 @@ export const FavoriteDisplay: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     getFavorites();
-  }, []);
+  }, [getFavorites]);
 
-  if (loading)
+  if (loading) {
     return (
       <p className="flex justify-center items-center animate-spin py-20">
         <Loader2 size={32} />
       </p>
     );
+  }
 
-  if (error)
+  if (error) {
     return (
       <div className="flex flex-col justify-center items-center py-20">
         <AlertCircle size={44} className="text-gray-900 mb-4" />
@@ -45,20 +46,28 @@ export const FavoriteDisplay: React.FC = () => {
         </p>
       </div>
     );
+  }
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-8">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-        {products.length === 0 ? (
-          <p className="col-span-full text-center">
-            У вас немає улюблених товарів
-          </p>
-        ) : (
-          products.map((product) => (
-            <ProductItem key={product.articleNumber} product={product} />
-          ))
-        )}
-      </div>
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+      <h1 className="text-2xl font-semibold text-center mb-4">
+        Улюблені товари
+      </h1>
+      {products.length === 0 ? (
+        <p className="text-center text-md text-gray-600">
+          У вас немає улюблених товарів
+        </p>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+          {products.map((product) => (
+            <ProductItem
+              key={product.articleNumber}
+              product={product}
+              isFavoriteView={true}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

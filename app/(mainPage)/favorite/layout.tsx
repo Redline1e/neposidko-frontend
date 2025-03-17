@@ -5,7 +5,9 @@ interface BrowseLayoutProps {
 }
 
 const BrowseLayout: React.FC<BrowseLayoutProps> = ({ children }) => {
-  return <main className="flex-1 flex justify-center">{children}</main>;
+  return (
+    <main className="flex-1 flex justify-center bg-gray-50">{children}</main>
+  );
 };
 
 export default BrowseLayout;

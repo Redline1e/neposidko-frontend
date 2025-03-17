@@ -39,7 +39,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   const [sizes, setSizes] = useState<Sizes[]>([]);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Завантаження категорій через API
+  // Завантаження категорій
   useEffect(() => {
     const loadCategories = async () => {
       try {
@@ -52,7 +52,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     loadCategories();
   }, []);
 
-  // Завантаження розмірів через API
+  // Завантаження розмірів
   useEffect(() => {
     const loadSizes = async () => {
       try {
@@ -65,7 +65,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     loadSizes();
   }, []);
 
-  // Заборона прокручування сторінки при відкритому сайдбарі
+  // Заборона прокручування при відкритому сайдбарі
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
     return () => {

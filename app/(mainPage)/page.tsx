@@ -4,7 +4,7 @@ import { Slider } from "./_components/slider/Slider";
 
 const Home: React.FC = () => {
   return (
-    <div className="flex w-full flex-col justify-center">
+    <div className="flex w-full flex-col justify-center space-y-6">
       <CategoriesDisplay />
       <Slider />
     </div>

@@ -40,7 +40,7 @@ const UserProfilePage: React.FC = () => {
   }
 
   return (
-    <div className="p-8">
+    <div className="w-full sm:w-[600px] mx-auto p-8">
       <h1 className="text-3xl font-bold mb-4">Вітаємо, {user?.name}!</h1>
       <p className="text-lg">Ласкаво просимо на вашу особисту сторінку.</p>
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Heart, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -18,11 +18,15 @@ interface SizeInfo {
   stock: number;
 }
 
-interface ProductItemProps {
+export interface ProductItemProps {
   product: Product & { sizes?: SizeInfo[]; categoryId?: number };
+  isFavoriteView?: boolean;
 }
 
-const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
+const ProductItem: React.FC<ProductItemProps> = ({
+  product,
+  isFavoriteView = false,
+}) => {
   const {
     articleNumber,
     price,
@@ -34,8 +38,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
   const discountedPrice = discount
     ? Math.round(price * (1 - discount / 100))
     : price;
-  const imageSrc =
-    imageUrls && imageUrls.length > 0 ? imageUrls[0] : "/fallback.jpg";
+  const imageSrc = imageUrls?.length > 0 ? imageUrls[0] : "/fallback.jpg";
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
   useEffect(() => {
@@ -49,7 +52,6 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
         console.error("Помилка при перевірці улюблених:", error);
       }
     };
-
     checkFavoriteStatus();
   }, [articleNumber]);
 
@@ -59,41 +61,32 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (!isFavorite) {
-      try {
+    try {
+      if (!isFavorite) {
         await addToFavorites(articleNumber);
         setIsFavorite(true);
-      } catch (error) {
-        console.error("Не вдалося додати в улюблені:", error);
-      }
-    } else {
-      try {
+      } else {
         await removeFromFavorites(articleNumber);
         setIsFavorite(false);
-      } catch (error) {
-        console.error("Не вдалося видалити з улюблених:", error);
       }
+    } catch (error) {
+      console.error("Не вдалося змінити статус улюбленого товару:", error);
     }
   };
+
+  const selectedSize = sizes.length > 0 ? sizes[0].size : "OneSize";
 
   const handleAddToCart = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
 
-    // Вибираємо найменший доступний розмір
-    const smallestSize = sizes[0]?.size;
-    if (!smallestSize) {
-      toast.error("Немає доступних розмірів");
-      return;
-    }
-
     try {
       const cartItem: OrderItem = {
-        articleNumber: product.articleNumber,
-        size: smallestSize,
+        articleNumber,
+        size: selectedSize,
         quantity: 1,
-        orderId: 0, // Сервер сам призначить
-        productOrderId: 0, // Сервер сам призначить
+        orderId: 0,
+        productOrderId: 0,
       };
       await addOrderItem(cartItem);
       toast.success("Товар додано до кошика!");
@@ -104,8 +97,8 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
 
   return (
     <Link href={`/product/${articleNumber}`} passHref className="block">
-      <div className="bg-white shadow-lg rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border w-64">
-        <div className="relative w-64 h-64">
+      <div className="bg-white shadow-lg rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border w-full sm:w-64">
+        <div className="relative w-full aspect-square">
           <img
             src={imageSrc}
             alt={name}
@@ -118,44 +111,42 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
           )}
           <Button
             onClick={handleToggleFavorite}
-            className={`absolute top-1 right-2 rounded-full shadow-md ${
-              isFavorite ? "bg-red-500 hover:bg-red-500/80" : ""
-            }`}
+            className="absolute top-1 right-2 rounded-full shadow-md"
             variant="ghost"
             size="sm"
           >
             <Heart className={isFavorite ? "text-white" : "text-red-500"} />
           </Button>
         </div>
-        <div className="p-4">
-          <h2 className="text-lg font-semibold text-gray-800 truncate">
+        <div className="p-2 sm:p-4">
+          <h2 className="truncate font-semibold text-gray-800 text-sm sm:text-base md:text-lg">
             {name}
           </h2>
-          <div className="mt-2 flex items-center space-x-2">
+          <div className="mt-1 sm:mt-2 flex items-center space-x-1 sm:space-x-2">
             {discount > 0 && (
-              <span className="text-gray-400 line-through text-sm">
+              <span className="line-through text-xs sm:text-sm text-gray-400">
                 {price} ₴
               </span>
             )}
-            <span className="text-red-500 font-semibold text-lg whitespace-nowrap">
+            <span className="whitespace-nowrap text-red-500 font-semibold text-sm sm:text-base md:text-lg">
               {discountedPrice} ₴
             </span>
           </div>
           {sizes.length > 0 && (
-            <div className="mt-3">
-              <span className="text-gray-800 font-semibold whitespace-nowrap">
+            <div className="mt-1 sm:mt-3">
+              <span className="whitespace-nowrap font-semibold text-gray-800 text-xs sm:text-sm">
                 {sizes
                   .slice(0, 2)
-                  .map((sizeObj) => sizeObj.size)
+                  .map((s) => s.size)
                   .join(", ")}
-                {sizes.length > 2 && "..."}
+                {sizes.length > 2 && "…"}
               </span>
             </div>
           )}
-          <div className="mt-4">
+          <div className="mt-2 sm:mt-4">
             <Button
               onClick={handleAddToCart}
-              className="w-full flex items-center justify-center bg-blue-700 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-200 gap-2"
+              className="w-full flex items-center justify-center bg-blue-700 text-white py-1 sm:py-2 rounded-lg hover:bg-blue-600 transition duration-200 gap-1 sm:gap-2 text-xs sm:text-sm"
             >
               <ShoppingCart size={18} /> Додати до кошика
             </Button>

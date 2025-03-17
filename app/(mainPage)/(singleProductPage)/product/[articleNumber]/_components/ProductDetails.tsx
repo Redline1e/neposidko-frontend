@@ -54,22 +54,18 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
 
   return (
     <div className="flex flex-col">
-      <p className="text-md">{articleNumber}</p>
       <h1 className="text-3xl font-bold mb-4">{title}</h1>
-      <div className="mb-5 flex flex-col-reverse relative">
-        <span className="text-2xl font-semibold text-red-600 mr-2">
-          {discountedPrice.toFixed(0)}$
-        </span>
-        {discount > 0 && (
-          <span className="line-through text-gray-500 text-md">
-            {price.toFixed(0)}
+      <div className="mb-5 relative">
+        <div className="flex items-baseline gap-2">
+          {discount > 0 && (
+            <span className="line-through text-gray-500 text-lg self-start">
+              {price.toFixed(0)}$
+            </span>
+          )}
+          <span className="text-2xl font-semibold text-red-600">
+            {discountedPrice.toFixed(0)}$
           </span>
-        )}
-        {discount > 0 && (
-          <div className="absolute top-4 left-20 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
-            -{discount}%
-          </div>
-        )}
+        </div>
       </div>
       <div className="mb-5">
         <span className="font-semibold">Розміри: </span>
@@ -79,8 +75,10 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
               <span
                 key={index}
                 onClick={() => handleSizeSelect(size)}
-                className={`px-4 py-2 border rounded text-sm font-medium cursor-pointer transition duration-200 ${
-                  selectedSize === size ? "bg-neutral-400" : "hover:bg-gray-100"
+                className={`px-3 py-1 border rounded cursor-pointer transition-colors duration-200 ${
+                  selectedSize === size
+                    ? "bg-neutral-400 text-white border-neutral-400"
+                    : "hover:bg-gray-100"
                 }`}
               >
                 {size}
@@ -91,10 +89,10 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
           )}
         </div>
       </div>
-      <div className="flex space-x-4 mt-3 mb-6">
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <Button
           onClick={handleAddToCartClick}
-          className="flex items-center"
+          className="flex items-center justify-center"
           aria-label="Додати в кошик"
         >
           <ShoppingCart className="mr-2 h-5 w-5" />
@@ -103,44 +101,43 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
         <Button
           variant="outline"
           onClick={onToggleWishlist}
-          className="flex items-center"
+          className="flex items-center justify-center"
           aria-label={isFavorite ? "Видалити з обраного" : "Додати в обране"}
         >
           <Heart
-            className={`sm:mr-2 md:mr-2 lg:mr-2 h-5 w-5 ${
-              isFavorite ? "text-red-500" : ""
+            className={`mr-2 h-5 w-5 ${
+              isFavorite ? "text-red-500" : "text-gray-500"
             }`}
           />
-          <p className="hidden sm:block md:block lg:block">
+          <span className="hidden sm:inline">
             {isFavorite ? "В обраному" : "Додати в обране"}
-          </p>
+          </span>
         </Button>
       </div>
-
-      <Accordion type="single" collapsible>
+      <Accordion type="single" collapsible className="mt-4">
         <AccordionItem value="1">
           <AccordionTrigger>Детально про товар</AccordionTrigger>
           <AccordionContent>
-            <div className="space-y-4">
+            <div className="space-y-2">
               <div className="flex justify-between">
-                <div className="font-semibold">Категорія:</div>
-                <div>{product.category}</div>
+                <span className="font-semibold">Категорія:</span>
+                <span>{product.category}</span>
               </div>
               <div className="flex justify-between">
-                <div className="font-semibold">Бренд:</div>
-                <div>{product.brand}</div>
+                <span className="font-semibold">Бренд:</span>
+                <span>{product.brand}</span>
               </div>
               <div className="flex justify-between">
-                <div className="font-semibold">Колір:</div>
-                <div>{product.color}</div>
+                <span className="font-semibold">Колір:</span>
+                <span>{product.color}</span>
               </div>
               <div className="flex justify-between">
-                <div className="font-semibold">Сезон:</div>
-                <div>{product.season}</div>
+                <span className="font-semibold">Сезон:</span>
+                <span>{product.season}</span>
               </div>
               <div className="flex justify-between">
-                <div className="font-semibold">Країна виробник:</div>
-                <div>{product.country}</div>
+                <span className="font-semibold">Країна виробник:</span>
+                <span>{product.country}</span>
               </div>
             </div>
           </AccordionContent>
@@ -149,14 +146,14 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
         <AccordionItem value="2">
           <AccordionTrigger>Матеріали</AccordionTrigger>
           <AccordionContent>
-            <div className="space-y-4">
+            <div className="space-y-2">
               <div className="flex justify-between">
-                <div className="font-semibold">Матеріал верху:</div>
-                <div>{product.upperMaterial}</div>
+                <span className="font-semibold">Матеріал верху:</span>
+                <span>{product.upperMaterial}</span>
               </div>
               <div className="flex justify-between">
-                <div className="font-semibold">Матеріал підкладки:</div>
-                <div className="text-end">{product.liningMaterial}</div>
+                <span className="font-semibold">Матеріал підкладки:</span>
+                <span>{product.liningMaterial}</span>
               </div>
             </div>
           </AccordionContent>
@@ -165,10 +162,10 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
         <AccordionItem value="3">
           <AccordionTrigger>Доставка та оплата</AccordionTrigger>
           <AccordionContent>
-            <div className="space-y-4">
-              <p>-Самовивіз</p>
-              <p>-Нова Пошта</p>
-              <p>-Укр Пошта</p>
+            <div className="space-y-2">
+              <p>- Самовивіз</p>
+              <p>- Нова Пошта</p>
+              <p>- Укр Пошта</p>
             </div>
           </AccordionContent>
         </AccordionItem>

@@ -29,8 +29,8 @@ export const CategoriesDisplay = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center animate-spin">
-        <Loader2 />
+      <div className="flex justify-center items-center h-64 animate-spin">
+        <Loader2 className="w-8 h-8" />
       </div>
     );
   }
@@ -40,8 +40,10 @@ export const CategoriesDisplay = () => {
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold text-center mb-6">Популярні категорії</h1>
+    <div className="container mx-auto p-4 sm:p-6">
+      <h1 className="text-2xl font-bold text-center mb-6">
+        Популярні категорії
+      </h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {categories.map((category, id) => (
           <CategoriesItem key={id} category={category} />

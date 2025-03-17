@@ -106,7 +106,7 @@ const EditUser: React.FC = () => {
   }
 
   return (
-    <Card className="max-w-md mx-auto mt-10 p-4">
+    <Card className="w-full sm:w-[600px] mx-auto mt-10 p-4">
       <CardHeader>
         <CardTitle>Редагувати профіль</CardTitle>
       </CardHeader>

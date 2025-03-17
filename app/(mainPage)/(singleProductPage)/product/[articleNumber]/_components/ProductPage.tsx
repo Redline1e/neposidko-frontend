@@ -42,7 +42,7 @@ export const ProductPage: React.FC = () => {
     loadProduct();
   }, [articleNumber]);
 
-  // Перевірка, чи є товар в обраному
+  // Перевірка наявності товару в обраному
   useEffect(() => {
     if (product) {
       const checkFavorite = async () => {
@@ -64,7 +64,6 @@ export const ProductPage: React.FC = () => {
     setSelectedSize(size);
   };
 
-  // ProductPage.tsx
   const handleAddToCart = async () => {
     if (!selectedSize || !product) {
       toast.error("Будь ласка, виберіть розмір перед додаванням в кошик!");
@@ -77,7 +76,7 @@ export const ProductPage: React.FC = () => {
         size: selectedSize,
         quantity: 1,
         orderId: 0, // Сервер сам призначить
-        productOrderId: 0, // Сервер сам призначить
+        productOrderId: 0,
       };
 
       await addOrderItem(cartItem);
@@ -104,16 +103,16 @@ export const ProductPage: React.FC = () => {
 
   if (loading)
     return (
-      <p className="text-center py-10">
-        <Loader2 className="animate-spin h-8 w-8 mx-auto" />
+      <p className="flex justify-center items-center py-10">
+        <Loader2 className="animate-spin h-10 w-10" />
       </p>
     );
   if (error) return <p className="text-center text-red-500 py-10">{error}</p>;
   if (!product) return <p className="text-center py-10">Товар не знайдено</p>;
 
   return (
-    <div className="container mx-auto p-4 mt-2">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-[50px]">
+    <div className="container mx-auto px-4 py-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
         <ProductImageGallery images={product.imageUrls} />
         <ProductDetails
           articleNumber={product.articleNumber}

@@ -21,11 +21,7 @@ export const OrderDisplay: React.FC = () => {
                 item.articleNumber
               );
               return {
-                productOrderId: item.productOrderId,
-                orderId: item.orderId,
-                articleNumber: item.articleNumber,
-                size: item.size,
-                quantity: item.quantity,
+                ...item,
                 price: productData.price,
                 discount: productData.discount,
                 name: productData.name,
@@ -38,11 +34,7 @@ export const OrderDisplay: React.FC = () => {
                 error
               );
               return {
-                productOrderId: item.productOrderId,
-                orderId: item.orderId,
-                articleNumber: item.articleNumber,
-                size: item.size,
-                quantity: item.quantity,
+                ...item,
                 price: 0,
                 discount: 0,
                 name: "Немає даних",
@@ -71,11 +63,10 @@ export const OrderDisplay: React.FC = () => {
     );
   };
 
-  // Передаємо orderId з першого orderItem, якщо є
   const orderId = orderItems.length > 0 ? orderItems[0].orderId : 0;
 
   return (
-    <div className="flex flex-col md:flex-row gap-8">
+    <div className="flex flex-col md:flex-row gap-8 p-4">
       <div className="flex-1 space-y-4">
         {orderItems.length > 0 ? (
           orderItems.map((item) => (
@@ -86,7 +77,7 @@ export const OrderDisplay: React.FC = () => {
             />
           ))
         ) : (
-          <p>Ваш кошик порожній.</p>
+          <p className="text-center text-gray-600 -mt-4">Ваш кошик порожній.</p>
         )}
       </div>
       {orderItems.length > 0 && (
@@ -94,7 +85,7 @@ export const OrderDisplay: React.FC = () => {
           orderItems={orderItems}
           orderId={orderId}
           onCheckoutSuccess={() => {
-            setOrderItems([]); // Очищаємо кошик після успішного оформлення
+            setOrderItems([]);
           }}
         />
       )}

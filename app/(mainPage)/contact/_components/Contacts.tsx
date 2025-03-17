@@ -23,7 +23,8 @@ const Contacts: React.FC<ContactsProps> = ({ children }) => {
           <Mail /> Email: neposidko@ukr.net
         </li>
       </ul>
-      <div>{children}</div>
+      {/* Додано відступ зверху для дітей */}
+      <div className="mt-8">{children}</div>
     </div>
   );
 };

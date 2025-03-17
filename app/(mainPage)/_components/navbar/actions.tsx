@@ -13,6 +13,8 @@ import Link from "next/link";
 import useMedia from "use-media";
 import { fetchFavorites } from "@/lib/api/favorites-service";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { fetchOrderItems } from "@/lib/api/order-items-service";
+import { DialogTitle } from "@radix-ui/react-dialog";
 
 interface ActionLink {
   name: string;
@@ -29,70 +31,89 @@ const actionLinks: ActionLink[] = [
 ];
 
 export const Actions = () => {
-  const isWide = useMedia({ minWidth: "1320px" });
+  const isWide = useMedia({ minWidth: "1150px" });
   const [favoriteCount, setFavoriteCount] = useState<number>(0);
+  const [orderItemsCount, setOrderItemsCount] = useState<number>(0);
 
   useEffect(() => {
-    const loadFavorites = async () => {
+    const loadData = async () => {
       try {
         const favorites = await fetchFavorites();
+        const orderItems = await fetchOrderItems();
         setFavoriteCount(favorites.length);
+        setOrderItemsCount(orderItems.length);
       } catch (error) {
-        console.error("Error fetching favorites:", error);
+        console.error("Error fetching data:", error);
       }
     };
-    loadFavorites();
+    loadData();
   }, []);
 
   return (
     <>
       {isWide ? (
-        <ul className="flex items-center gap-5 pr-5 -ml-20 text-neutral-700">
+        <ul className="flex items-center gap-6 text-neutral-700 font-open-sans mr-4">
           {actionLinks.map((link, index) => (
             <li key={index} className="relative">
-              <Link href={link.href} className="flex items-center gap-2">
-                <link.icon className="w-5 h-5" />
+              <Link
+                href={link.href}
+                className="flex items-center gap-2 hover:text-neutral-500 transition-colors duration-200"
+              >
+                <link.icon className="w-6 h-6" />{" "}
+                {/* Видалено hover і transition */}
                 {link.name === "Обране" && favoriteCount > 0 && (
-                  <span className="absolute -top-1 left-3 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+                  <span className="absolute -top-1 left-4 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
                     {favoriteCount}
                   </span>
                 )}
-                <span>{link.name}</span>
+                {link.name === "Кошик" && orderItemsCount > 0 && (
+                  <span className="absolute -top-1 left-4 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+                    {orderItemsCount}
+                  </span>
+                )}
+                <span className="text-base">{link.name}</span>
               </Link>
             </li>
           ))}
         </ul>
       ) : (
-        <div className="flex items-center px-5 gap-5">
+        <div className="flex items-center gap-4 px-4 -mr-2">
           {/* Обране */}
-          <Link href="/favorite" className="flex items-center gap-2 relative">
-            <Heart className="w-5 h-5" />
+          <Link href="/favorite" className="relative" aria-label="Обране">
+            <Heart className="w-6 h-6 text-neutral-700 hover:text-neutral-500 transition-colors duration-200" />
             {favoriteCount > 0 && (
-              <span className="absolute -top-1 left-3 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+              <span className="absolute -top-1 left-4 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
                 {favoriteCount}
               </span>
             )}
           </Link>
 
           {/* Кошик */}
-          <Link href="/cart" className="flex items-center gap-2">
-            <ShoppingCart className="w-5 h-5" />
+          <Link href="/cart" className="relative" aria-label="Кошик">
+            <ShoppingCart className="w-6 h-6 text-neutral-700 hover:text-neutral-500 transition-colors duration-200" />
+            {orderItemsCount > 0 && (
+              <span className="absolute -top-1 left-4 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+                {orderItemsCount}
+              </span>
+            )}
           </Link>
 
-          {/* Бургер-меню (відкривається справа) */}
+          {/* Бургер-меню */}
           <Sheet>
             <SheetTrigger className="p-2 rounded-md border-none focus:outline-none">
-              <Menu className="w-6 h-6" />
+              <Menu className="w-6 h-6 text-neutral-700 hover:text-neutral-500 transition-colors duration-200" />
             </SheetTrigger>
-            <SheetContent side="right" className="w-64">
-              <ul className="flex flex-col gap-4 mt-4">
+            <SheetContent side="right" className="w-64 bg-white">
+              <DialogTitle className="sr-only">Sidebar Menu</DialogTitle>
+              <ul className="flex flex-col gap-4 mt-6">
                 {actionLinks.map((link, index) => (
                   <li key={index}>
                     <Link
                       href={link.href}
-                      className="flex items-center gap-3 text-lg font-medium"
+                      className="flex items-center gap-3 text-lg font-medium text-neutral-700 hover:text-neutral-500 transition-colors duration-200 font-open-sans"
                     >
-                      <link.icon className="w-6 h-6" />
+                      <link.icon className="w-6 h-6" />{" "}
+                      {/* Видалено hover і transition */}
                       <span>{link.name}</span>
                     </Link>
                   </li>

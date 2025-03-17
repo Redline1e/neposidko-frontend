@@ -9,10 +9,10 @@ interface BrowseLayoutProps {
 
 const BrowseLayout: React.FC<BrowseLayoutProps> = ({ children }) => {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-gray-50">
       <Toaster />
       <Navbar />
-      <main className="flex-1 flex">{children}</main>
+      <main className="flex-1 flex flex-col">{children}</main>
       <Footer />
     </div>
   );

@@ -19,7 +19,6 @@ export const Search = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Закриття випадаючого списку при кліку поза ним
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -33,7 +32,6 @@ export const Search = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Debounce для автоматичного пошуку
   useEffect(() => {
     if (query.trim().length < 3) {
       setResults([]);
@@ -47,7 +45,7 @@ export const Search = () => {
         setResults(res);
         setShowDropdown(true);
       } catch (error) {
-        console.error("Помилка пошуку:", error);
+        console.error("Search error:", error);
       }
     }, 300);
 
@@ -70,20 +68,20 @@ export const Search = () => {
 
   return (
     <div className="relative z-50" ref={containerRef}>
-      <form onSubmit={handleSubmit} className="flex">
+      <form onSubmit={handleSubmit} className="flex items-center">
         <Input
           value={query}
           onChange={handleChange}
           placeholder="Пошук..."
-          aria-label="Пошук"
-          className="rounded-l border border-gray-300 pr-8"
+          aria-label="Search"
+          className="rounded-l border border-neutral-300 pr-8 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
         />
         {query && (
           <button
             type="button"
             onClick={handleClear}
-            className="px-2 absolute right-0 top-2"
-            aria-label="Очистити пошук"
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-neutral-500 hover:text-neutral-700"
+            aria-label="Clear search"
           >
             <X className="h-5 w-5" />
           </button>
@@ -91,18 +89,18 @@ export const Search = () => {
       </form>
 
       {showDropdown && (
-        <div className="absolute left-0 right-0 bg-white border mt-1 z-10 max-h-60 overflow-y-auto">
+        <div className="absolute left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg max-h-60 overflow-y-auto z-10">
           {results.length > 0 ? (
             <ul>
               {results.map((product) => (
                 <li
                   key={product.articleNumber}
-                  className="p-2 hover:bg-gray-100 border-b last:border-b-0 flex items-center"
+                  className="p-2 hover:bg-neutral-100 transition-colors duration-200"
                 >
                   <Link
                     href={`/product/${product.articleNumber}`}
                     onClick={() => setShowDropdown(false)}
-                    className="flex items-center w-full"
+                    className="flex items-center"
                   >
                     <img
                       src={
@@ -111,19 +109,19 @@ export const Search = () => {
                           : product.imageUrls
                       }
                       alt={product.name}
-                      className="w-10 h-10 object-cover rounded"
+                      className="w-10 h-10 object-cover rounded mr-2"
                     />
-                    <span className="ml-2 truncate">{product.name}</span>
+                    <span className="text-neutral-700 truncate">
+                      {product.name}
+                    </span>
                   </Link>
                 </li>
               ))}
             </ul>
           ) : (
-            <div className="p-4 flex items-center justify-center">
-              <div className="flex gap-2 text-gray-500">
-                <Frown className="h-5 w-5 mt-0.5" />
-                Нічого не знайдено
-              </div>
+            <div className="p-4 flex items-center justify-center text-neutral-500">
+              <Frown className="h-5 w-5 mr-2" />
+              Немає результатів
             </div>
           )}
         </div>

@@ -14,9 +14,15 @@ const UserLayout: React.FC<UserLayoutProps> = ({ children }) => {
 
   return (
     <AuthCheck>
-      <div className={`flex flex-1 ${isMobile ? "flex-col" : "flex-row"}`}>
+      <div
+        className={`${
+          isMobile ? "h-auto flex flex-col" : "min-h-screen flex flex-row"
+        }`}
+      >
         <UserSidebar isMobile={isMobile} />
-        <div className="flex-1 p-4 h-full">{children}</div>
+        <div className={`${isMobile ? "p-4" : "flex-1 p-4 overflow-y-auto"}`}>
+          {children}
+        </div>
       </div>
     </AuthCheck>
   );

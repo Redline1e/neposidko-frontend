@@ -2,9 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Order, OrderItem } from "@/utils/types";
-import {
-  fetchOrderHistory,
-} from "@/lib/api/order-service";
+import { fetchOrderHistory } from "@/lib/api/order-service";
 import { fetchOrderHistoryItems } from "@/lib/api/order-items-service";
 
 interface ExtendedOrderItem extends OrderItem {
@@ -78,8 +76,10 @@ const OrderHistory: React.FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-center">Історія замовлень</h1>
+    <div className="w-full max-w-[800px] mx-auto p-4 sm:p-6">
+      <h1 className="text-3xl sm:text-4xl font-bold mb-6 text-center">
+        Історія замовлень
+      </h1>
       {orders.length === 0 ? (
         <p className="text-gray-500 text-center">
           У вас ще немає виконаних замовлень.
@@ -90,7 +90,7 @@ const OrderHistory: React.FC = () => {
             key={order.orderId}
             className="border rounded-lg p-4 shadow-lg bg-white mb-6"
           >
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-wrap justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">
                 Замовлення #{order.orderId}
               </h2>
@@ -115,14 +115,14 @@ const OrderHistory: React.FC = () => {
                     return (
                       <li
                         key={item.productOrderId}
-                        className="flex items-center space-x-4 p-2 border rounded-lg bg-gray-50"
+                        className="flex flex-row items-center p-2 border rounded-lg bg-gray-50 space-x-4"
                       >
                         <img
                           src={productImage}
                           alt={productName}
-                          className="w-16 h-16 object-cover rounded-md"
+                          className="w-20 h-20 object-cover rounded-lg"
                         />
-                        <div>
+                        <div className="text-left">
                           <p className="font-semibold">{productName}</p>
                           <p className="text-gray-600 text-sm">
                             Артикул: {item.articleNumber}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { FilterSidebar } from "./_components/FilterSidebar";
 import ProductDisplay from "./_components/ProductDisplay";
@@ -34,7 +34,7 @@ export default function Home() {
   }, [categoryQuery]);
 
   return (
-    <div className="flex w-full h-screen">
+    <div className="flex w-full h-screen bg-gray-100">
       <FilterSidebar filters={filters} setFilters={setFilters} />
       <main className="flex-1">
         <ProductDisplay filters={filters} sortOrder={sortOrder} />
