@@ -13,7 +13,6 @@ import Link from "next/link";
 import useMedia from "use-media";
 import { fetchFavorites } from "@/lib/api/favorites-service";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Dialog, DialogTitle } from "@radix-ui/react-dialog";
 
 interface ActionLink {
   name: string;

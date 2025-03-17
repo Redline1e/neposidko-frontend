@@ -91,7 +91,6 @@ const AdminProductsPage: React.FC = () => {
       console.error("Error loading products:", error);
     }
   }, [filters, query]);
-
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
       loadProducts();

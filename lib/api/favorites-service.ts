@@ -34,7 +34,9 @@ export const fetchFavorites = async (): Promise<Product[]> => {
     return z.array(ProductSchema).parse(response.data);
   } catch (error: any) {
     if (error.response && error.response.status === 403) {
-      console.warn("Access forbidden: invalid token or insufficient permissions");
+      console.warn(
+        "Access forbidden: invalid token or insufficient permissions"
+      );
       return [];
     }
     console.error("Помилка при завантаженні улюблених товарів:", error);
@@ -73,5 +75,17 @@ export const removeFromFavorites = async (
     console.error("Помилка при видаленні товару з улюблених:", error);
     toast.error("Не вдалося видалити товар з улюблених");
     throw new Error("Не вдалося видалити товар з улюблених");
+  }
+};
+
+export const fetchFavoritesCount = async (): Promise<number> => {
+  try {
+    const token = getToken();
+    if (!token) return 0;
+    const favorites = await fetchFavorites();
+    return favorites.length;
+  } catch (error: any) {
+    console.error("Error fetching favorites count:", error);
+    return 0;
   }
 };

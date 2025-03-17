@@ -118,12 +118,21 @@ const AddProduct: React.FC = () => {
         method: "POST",
         body: formData,
       });
-      if (!response.ok) throw new Error("Не вдалося додати продукт");
-      await response.json();
-      toast.success("Товар успішно додано!");
-      setPreviewUrls([]);
-    } catch (error) {
-      toast.error("Не вдалося додати товар");
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 409) {
+          toast.error("Товар з таким articleNumber уже існує");
+        } else {
+          throw new Error(errorData.message || "Не вдалося додати продукт");
+        }
+      } else {
+        toast.success("Товар успішно додано!");
+        setPreviewUrls([]);
+      }
+    } catch (error: any) {
+      console.error("Помилка при додаванні товару:", error);
+      toast.error(error.message || "Не вдалося додати товар");
     }
   };
 

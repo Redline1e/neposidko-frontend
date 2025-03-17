@@ -4,6 +4,7 @@ import { z } from "zod";
 import axios from "axios";
 
 import { OrderItemDataSchema, OrderItemData } from "@/utils/types"; // переконайтеся, що експортуєте OrderItemDataSchema
+import { getToken } from "../hooks/getToken";
 
 export const fetchOrderItems = async (): Promise<OrderItemData[]> => {
   try {
@@ -85,4 +86,18 @@ export const fetchOrderHistoryItems = async (): Promise<OrderItem[]> => {
     throw new Error("Не вдалося завантажити позиції історії замовлень");
   }
   return response.json();
+};
+
+export const fetchCartCount = async (): Promise<number> => {
+  try {
+    const token = getToken();
+    if (!token) return 0;
+    const response = await apiClient.get("/order-items/count", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data.count;
+  } catch (error: any) {
+    console.error("Error fetching cart count:", error);
+    return 0;
+  }
 };
