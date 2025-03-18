@@ -15,7 +15,12 @@ export const fetchProducts = async (): Promise<Product[]> => {
 export const fetchActiveProducts = async (): Promise<Product[]> => {
   try {
     const response = await apiClient.get("/products/active");
-    return z.array(ProductSchema).parse(response.data);
+    const products: Product[] = z.array(ProductSchema).parse(response.data);
+    return products.filter((product: Product) =>
+      product.sizes.some(
+        (size: { size: string; stock: number }) => size.stock > 0
+      )
+    );
   } catch (error: any) {
     console.error("Помилка при завантаженні активних товарів:", error);
     throw new Error("Не вдалося завантажити активні товари");

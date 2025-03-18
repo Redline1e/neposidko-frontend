@@ -334,7 +334,10 @@ const renderProductEditForm = (
                 type="radio"
                 value="percent"
                 checked={discountMode === "percent"}
-                onChange={() => setDiscountMode("percent")}
+                onChange={() => {
+                  setDiscountMode("percent");
+                  onChange({ discountMode: "percent" });
+                }}
               />
               %
             </label>
@@ -343,7 +346,10 @@ const renderProductEditForm = (
                 type="radio"
                 value="amount"
                 checked={discountMode === "amount"}
-                onChange={() => setDiscountMode("amount")}
+                onChange={() => {
+                  setDiscountMode("amount");
+                  onChange({ discountMode: "amount" });
+                }}
               />
               ₴
             </label>
@@ -429,17 +435,30 @@ const updateProductWithImages = async (product: Product) => {
   const formData = new FormData();
   formData.append("brandId", String(product.brandId));
   formData.append("price", String(product.price));
-  formData.append("discount", String(product.discount));
+
+  // Якщо режим знижки передається, відправляємо його
+  if ((product as any).discountMode) {
+    formData.append("discountMode", (product as any).discountMode);
+  }
+
+  // Якщо потрібно, можна також провести конвертацію, наприклад,
+  // якщо бекенд завжди очікує відсоткове значення:
+  let discountToSave = product.discount;
+  if ((product as any).discountMode === "amount") {
+    discountToSave = (product.discount / product.price) * 100;
+  }
+  formData.append("discount", String(discountToSave));
+
   formData.append("name", product.name);
   formData.append("description", product.description);
   formData.append("categoryId", String(product.categoryId));
   formData.append("sizes", JSON.stringify(product.sizes || []));
 
+  // Обробка зображень (залишається без змін)
   const existingImages = product.imageUrls.filter(
     (url) => !url.startsWith("blob:")
   );
   formData.append("imageUrls", JSON.stringify(existingImages));
-
   const newImages = product.imageUrls.filter((url) => url.startsWith("blob:"));
   for (const url of newImages) {
     const response = await fetch(url);

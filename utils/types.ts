@@ -60,6 +60,7 @@ export const ProductSchema = z.object({
     )
     .optional()
     .default([]), // додано
+  discountMode: z.enum(["percent", "amount"]).optional().default("percent"),
 });
 
 export type Product = z.infer<typeof ProductSchema>;

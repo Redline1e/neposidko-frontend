@@ -10,13 +10,24 @@ import {
 } from "@/components/ui/accordion";
 import { toast } from "sonner";
 
+// Фіксований порядок для текстових розмірів
+const sizeOrder = ["XS", "S", "M", "L", "XL", "XXL"];
+
+// Функція для визначення значення розміру
+const getSizeValue = (size: string) => {
+  if (!isNaN(Number(size))) {
+    return Number(size); // Якщо це число, повертаємо його
+  }
+  return sizeOrder.indexOf(size); // Якщо текст, повертаємо індекс із sizeOrder
+};
+
 interface ProductDetailsProps {
   articleNumber: string;
   title: string;
   description: string;
   price: number;
   discount: number;
-  sizes: string[];
+  sizes: { size: string; stock: number }[];
   onAddToCart: () => void;
   onToggleWishlist: () => void;
   onSizeSelect: (size: string) => void;
@@ -52,6 +63,13 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
     onAddToCart();
   };
 
+  // Сортування розмірів
+  const sortedSizes = sizes.sort((a, b) => {
+    const aValue = getSizeValue(a.size);
+    const bValue = getSizeValue(b.size);
+    return aValue - bValue;
+  });
+
   return (
     <div className="flex flex-col">
       <h1 className="text-3xl font-bold mb-4">{title}</h1>
@@ -70,20 +88,26 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
       <div className="mb-5">
         <span className="font-semibold">Розміри: </span>
         <div className="flex flex-wrap gap-2 mt-2">
-          {sizes.length > 0 ? (
-            sizes.map((size, index) => (
-              <span
-                key={index}
-                onClick={() => handleSizeSelect(size)}
-                className={`px-3 py-1 border rounded cursor-pointer transition-colors duration-200 ${
-                  selectedSize === size
-                    ? "bg-neutral-400 text-white border-neutral-400"
-                    : "hover:bg-gray-100"
-                }`}
-              >
-                {size}
-              </span>
-            ))
+          {sortedSizes.length > 0 ? (
+            sortedSizes.map((sizeObj, index) => {
+              const { size, stock } = sizeObj;
+              const isAvailable = stock > 0;
+              return (
+                <span
+                  key={index}
+                  onClick={() => isAvailable && handleSizeSelect(size)}
+                  className={`px-3 py-1 border rounded transition-colors duration-200 ${
+                    isAvailable
+                      ? selectedSize === size
+                        ? "bg-neutral-400 text-white border-neutral-400 cursor-pointer"
+                        : "hover:bg-gray-100 cursor-pointer"
+                      : "line-through text-gray-400 cursor-not-allowed"
+                  }`}
+                >
+                  {size}
+                </span>
+              );
+            })
           ) : (
             <span className="text-gray-500">Немає доступних розмірів</span>
           )}

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Heart, ShoppingCart } from "lucide-react";
+import { Heart, ShoppingCart, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import {
@@ -41,6 +41,9 @@ const ProductItem: React.FC<ProductItemProps> = ({
   const imageSrc = imageUrls?.length > 0 ? imageUrls[0] : "/fallback.jpg";
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
+  // Сортуємо розміри за зростанням
+  const sortedSizes = [...sizes].sort((a, b) => a.size.localeCompare(b.size));
+
   useEffect(() => {
     const checkFavoriteStatus = async () => {
       try {
@@ -60,7 +63,6 @@ const ProductItem: React.FC<ProductItemProps> = ({
   ) => {
     e.preventDefault();
     e.stopPropagation();
-
     try {
       if (!isFavorite) {
         await addToFavorites(articleNumber);
@@ -74,11 +76,23 @@ const ProductItem: React.FC<ProductItemProps> = ({
     }
   };
 
-  const selectedSize = sizes.length > 0 ? sizes[0].size : "OneSize";
+  // Визначення першого доступного розміру (stock > 0)
+  const availableSizeObj = sortedSizes.find((s) => s.stock > 0);
+  const selectedSize = availableSizeObj
+    ? availableSizeObj.size
+    : sortedSizes[0]?.size || "OneSize";
+
+  // Перевірка, чи є хоча б один доступний розмір
+  const hasAvailableSizes = sortedSizes.some((s) => s.stock > 0);
 
   const handleAddToCart = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (!hasAvailableSizes) {
+      toast.error("Немає доступних розмірів для цього товару.");
+      return;
+    }
 
     try {
       const cartItem: OrderItem = {
@@ -97,7 +111,11 @@ const ProductItem: React.FC<ProductItemProps> = ({
 
   return (
     <Link href={`/product/${articleNumber}`} passHref className="block">
-      <div className="bg-white shadow-lg rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border w-full sm:w-64">
+      <div
+        className={`bg-white shadow-lg rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border w-full ${
+          !hasAvailableSizes ? "opacity-70" : ""
+        }`}
+      >
         <div className="relative w-full aspect-square">
           <img
             src={imageSrc}
@@ -115,7 +133,7 @@ const ProductItem: React.FC<ProductItemProps> = ({
             variant="ghost"
             size="sm"
           >
-            <Heart className={isFavorite ? "text-white" : "text-red-500"} />
+            <Heart className={isFavorite ? "text-red-500" : "text-gray-500"} />
           </Button>
         </div>
         <div className="p-2 sm:p-4">
@@ -132,21 +150,34 @@ const ProductItem: React.FC<ProductItemProps> = ({
               {discountedPrice} ₴
             </span>
           </div>
-          {sizes.length > 0 && (
+          {sortedSizes.length > 0 ? (
             <div className="mt-1 sm:mt-3">
-              <span className="whitespace-nowrap font-semibold text-gray-800 text-xs sm:text-sm">
-                {sizes
-                  .slice(0, 2)
-                  .map((s) => s.size)
-                  .join(", ")}
-                {sizes.length > 2 && "…"}
-              </span>
+              <div className="flex flex-wrap gap-2">
+                {sortedSizes.map((s) => (
+                  <span
+                    key={s.size}
+                    className={`font-semibold text-xs sm:text-sm ${
+                      s.stock === 0
+                        ? "line-through text-gray-400"
+                        : "text-gray-800"
+                    }`}
+                  >
+                    {s.size}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="mt-1 sm:mt-3 flex items-center text-gray-500 text-xs sm:text-sm">
+              <AlertCircle className="mr-1" size={16} />
+              Немає доступних розмірів
             </div>
           )}
           <div className="mt-2 sm:mt-4">
             <Button
               onClick={handleAddToCart}
               className="w-full flex items-center justify-center bg-blue-700 text-white py-1 sm:py-2 rounded-lg hover:bg-blue-600 transition duration-200 gap-1 sm:gap-2 text-xs sm:text-sm"
+              disabled={!hasAvailableSizes}
             >
               <ShoppingCart size={18} /> Додати до кошика
             </Button>

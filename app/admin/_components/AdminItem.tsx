@@ -139,7 +139,7 @@ export function AdminItem<T extends object>({
       </ContextMenu>
 
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="w-[800px] max-w-full">
+        <DialogContent className="w-[800px] max-w-full max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Редагувати {itemLabel}</DialogTitle>
             <DialogDescription>

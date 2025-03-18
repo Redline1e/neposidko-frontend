@@ -120,7 +120,7 @@ export const ProductPage: React.FC = () => {
           description={product.description}
           price={product.price}
           discount={product.discount}
-          sizes={product.sizes.map((s) => s.size)}
+          sizes={product.sizes} // Передаємо повний масив об’єктів
           onAddToCart={handleAddToCart}
           onSizeSelect={handleSizeSelect}
           onToggleWishlist={handleToggleWishlist}

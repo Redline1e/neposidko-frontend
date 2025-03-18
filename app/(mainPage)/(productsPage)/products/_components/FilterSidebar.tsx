@@ -39,7 +39,6 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   const [sizes, setSizes] = useState<Sizes[]>([]);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Завантаження категорій
   useEffect(() => {
     const loadCategories = async () => {
       try {
@@ -52,7 +51,6 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     loadCategories();
   }, []);
 
-  // Завантаження розмірів
   useEffect(() => {
     const loadSizes = async () => {
       try {
@@ -65,7 +63,6 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     loadSizes();
   }, []);
 
-  // Заборона прокручування при відкритому сайдбарі
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
     return () => {
@@ -108,39 +105,44 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
       <Button
         variant="outline"
         onClick={() => setIsOpen(true)}
-        className="md:hidden absolute top-28 left-4 w-12 h-12"
+        className="lg:hidden fixed top-28 left-4 w-12 h-12 z-30"
       >
         <Filter size={24} />
       </Button>
 
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black opacity-50 z-40 md:hidden"
+          className="fixed inset-0 bg-black/50 lg:hidden z-40"
           onClick={() => setIsOpen(false)}
         />
       )}
 
       <div
-        className={`fixed top-0 left-0 h-full w-80 bg-white border border-gray-300 rounded transition-transform duration-300 z-50 ${
+        className={`fixed top-0 left-0 h-full w-80 bg-white border-r transition-transform duration-300 z-50 lg:static lg:z-auto lg:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } md:static md:translate-x-0 md:block`}
+        }`}
       >
-        <div className="mt-3 flex flex-col h-full">
-          <div className="md:hidden flex justify-end p-2">
-            <button onClick={() => setIsOpen(false)} className="p-2">
+        <div className="flex flex-col h-full">
+          <div className="lg:hidden flex justify-end p-4 border-b">
+            <button
+              onClick={() => setIsOpen(false)}
+              className="text-neutral-500 hover:text-neutral-700"
+            >
               <X size={24} />
             </button>
           </div>
-          <h2 className="text-xl font-semibold text-center mb-4">Фільтри</h2>
-          <div className="flex-1 overflow-y-auto p-4">
+
+          <div className="flex-1 overflow-y-auto p-6">
+            <h2 className="text-2xl font-bold mb-6">Фільтри</h2>
+
             {/* Категорії */}
-            <div className="mb-4">
-              <p className="font-medium text-neutral-900">Категорії</p>
-              <div className="mt-2 space-y-2">
+            <div className="mb-8">
+              <h3 className="font-semibold text-lg mb-4">Категорії</h3>
+              <div className="space-y-3">
                 {categories.map((cat) => (
                   <label
-                    key={cat.categoryId}
-                    className="flex items-center space-x-2"
+                    key={`cat-${cat.categoryId}`}
+                    className="flex items-center gap-3 text-neutral-700 hover:text-neutral-900"
                   >
                     <Checkbox
                       checked={filters.categories.includes(
@@ -156,10 +158,10 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
               </div>
             </div>
 
-            {/* Розмір */}
-            <div className="mb-4">
-              <p className="font-medium text-neutral-900">Розмір</p>
-              <div className="mt-2 grid grid-cols-2 gap-2">
+            {/* Розміри */}
+            <div className="mb-8">
+              <h3 className="font-semibold text-lg mb-4">Розмір</h3>
+              <div className="grid grid-cols-2 gap-3">
                 {[...sizes]
                   .sort((a, b) => {
                     const aNum = parseFloat(a.size);
@@ -167,14 +169,14 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                     const aIsNum = !isNaN(aNum);
                     const bIsNum = !isNaN(bNum);
                     if (aIsNum && bIsNum) return aNum - bNum;
-                    else if (aIsNum) return -1;
-                    else if (bIsNum) return 1;
-                    else return a.size.localeCompare(b.size);
+                    if (aIsNum) return -1;
+                    if (bIsNum) return 1;
+                    return a.size.localeCompare(b.size);
                   })
-                  .map((s, index) => (
+                  .map((s) => (
                     <label
-                      key={`${s.size}-${index}`}
-                      className="flex items-center space-x-2"
+                      key={`size-${s.size}-${s.sizeId}`}
+                      className="flex items-center gap-3 text-neutral-700 hover:text-neutral-900"
                     >
                       <Checkbox
                         checked={filters.sizes.includes(s.size)}
@@ -186,17 +188,20 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
               </div>
             </div>
 
-            {/* Ціна */}
-            <div className="mb-4">
-              <p className="font-medium text-neutral-900">Ціна</p>
-              <div className="mt-2 space-y-2">
+            {/* Ціновий діапазон */}
+            <div className="mb-8">
+              <h3 className="font-semibold text-lg mb-4">Ціна</h3>
+              <div className="space-y-3">
                 {[
                   "До 1000 грн",
                   "1000 - 3000 грн",
                   "3000 - 5000 грн",
                   "5000+ грн",
                 ].map((price) => (
-                  <label key={price} className="flex items-center space-x-2">
+                  <label
+                    key={`price-${price}`}
+                    className="flex items-center gap-3 text-neutral-700 hover:text-neutral-900"
+                  >
                     <Checkbox
                       checked={filters.priceRange === price}
                       onCheckedChange={() => handlePriceRangeChange(price)}
@@ -207,18 +212,16 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
               </div>
             </div>
 
-            {/* Наявність знижки */}
-            <div className="mb-4">
-              <p className="font-medium text-neutral-900">Наявність знижки</p>
-              <div className="mt-2">
-                <label className="flex items-center space-x-2">
-                  <Checkbox
-                    checked={filters.discountOnly}
-                    onCheckedChange={handleDiscountChange}
-                  />
-                  <span>Показувати лише зі знижкою</span>
-                </label>
-              </div>
+            {/* Знижки */}
+            <div className="mb-8">
+              <h3 className="font-semibold text-lg mb-4">Акції</h3>
+              <label className="flex items-center gap-3 text-neutral-700 hover:text-neutral-900">
+                <Checkbox
+                  checked={filters.discountOnly}
+                  onCheckedChange={handleDiscountChange}
+                />
+                <span>Тільки товари зі знижкою</span>
+              </label>
             </div>
           </div>
         </div>
