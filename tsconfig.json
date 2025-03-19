@@ -33,7 +33,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts"
-  ],
+, "app/admin/_components/excel/DownloadReport.tsx", "app/admin/_components/excel/UploadExcel.tsx"  ],
   "exclude": [
     "node_modules"
   ]
