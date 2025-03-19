@@ -1,10 +1,8 @@
-// src/api/auth.ts
 import { useState, useEffect } from "react";
 import { apiClient, extractErrorMessage } from "@/utils/apiClient";
 import { User, UserSchema } from "@/utils/types";
 
 
-// Хук для перевірки автентифікації
 export const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -41,7 +39,6 @@ export const useAuth = () => {
   return { isAuthenticated, loading, user };
 };
 
-// Хук для перевірки ролі користувача
 export const useCheckRole = () => {
   const [hasAccess, setHasAccess] = useState(false);
   const [loading, setLoading] = useState(true);

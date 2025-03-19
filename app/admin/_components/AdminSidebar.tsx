@@ -93,6 +93,42 @@ export function AdminSidebar(): React.JSX.Element {
               </p>
             </Link>
           </Button>
+          <Button variant="outline" className="w-full">
+            <Link href="/admin/reviews" className="block w-full">
+              <p
+                className={cn(
+                  "text-neutral-900",
+                  currentPath === "/admin/reviews" && "font-bold"
+                )}
+              >
+                Управління відгуками
+              </p>
+            </Link>
+          </Button>
+          <Button variant="outline" className="w-full">
+            <Link href="/admin/users" className="block w-full">
+              <p
+                className={cn(
+                  "text-neutral-900",
+                  currentPath === "/admin/users" && "font-bold"
+                )}
+              >
+                Управління користувачами
+              </p>
+            </Link>
+          </Button>
+          <Button variant="outline" className="w-full">
+            <Link href="/admin/orders" className="block w-full">
+              <p
+                className={cn(
+                  "text-neutral-900",
+                  currentPath === "/admin/orders" && "font-bold"
+                )}
+              >
+                Управління замовленнями
+              </p>
+            </Link>
+          </Button>
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="p-4">

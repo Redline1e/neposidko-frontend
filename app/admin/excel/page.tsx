@@ -1,5 +1,5 @@
-import DownloadReport from "../_components/excel/DownloadReport";
-import UploadExcel from "../_components/excel/UploadExcel";
+import DownloadReport from "./_components/DownloadReport";
+import UploadExcel from "./_components/UploadExcel";
 
 export default function Home() {
   return (

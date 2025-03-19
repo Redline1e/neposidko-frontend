@@ -22,7 +22,9 @@ export const createReview = async (reviewData: {
   }
 };
 
-export const fetchReviewsByArticle = async (articleNumber: string): Promise<Review[]> => {
+export const fetchReviewsByArticle = async (
+  articleNumber: string
+): Promise<Review[]> => {
   try {
     const response = await apiClient.get(`/reviews/${articleNumber}`);
     return z.array(ReviewSchema).parse(response.data);
@@ -60,4 +62,40 @@ export const deleteReview = async (reviewId: number): Promise<void> => {
     console.error("Помилка при видаленні відгуку:", error);
     throw new Error("Не вдалося видалити відгук");
   }
+};
+
+// Отримання всіх відгуків адміністратором
+export const fetchAdminReviews = async (): Promise<Review[]> => {
+  const token = localStorage.getItem("token");
+  const response = await apiClient.get("/admin/reviews", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return z
+    .array(
+      ReviewSchema.extend({
+        userEmail: z.string(),
+        productName: z.string(),
+      })
+    )
+    .parse(response.data);
+};
+
+// Оновлення відгуку адміністратором
+export const updateAdminReview = async (
+  reviewId: number,
+  data: { rating: number; comment: string }
+): Promise<Review> => {
+  const token = localStorage.getItem("token");
+  const response = await apiClient.put(`/admin/reviews/${reviewId}`, data, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return ReviewSchema.parse(response.data);
+};
+
+// Видалення відгуку адміністратором
+export const deleteAdminReview = async (reviewId: number): Promise<void> => {
+  const token = localStorage.getItem("token");
+  await apiClient.delete(`/admin/reviews/${reviewId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 };

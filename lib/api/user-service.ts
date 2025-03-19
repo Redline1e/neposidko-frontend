@@ -1,5 +1,6 @@
 import { apiClient, extractErrorMessage } from "@/utils/apiClient";
 import { User, UserSchema } from "@/utils/types";
+import { z } from "zod";
 
 // Отримання даних користувача
 export const fetchUser = async (token: string): Promise<User> => {
@@ -96,4 +97,27 @@ export const fetchUserById = async (userId: number): Promise<User> => {
     console.error("Помилка отримання користувача за ID:", message);
     throw new Error(message);
   }
+};
+
+export const fetchAdminUsers = async () => {
+  const token = localStorage.getItem("token");
+  const response = await apiClient.get("/admin/users", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return z.array(UserSchema).parse(response.data);
+};
+
+export const updateAdminUser = async (userId: number, data: Partial<User>) => {
+  const token = localStorage.getItem("token");
+  const response = await apiClient.put(`/admin/users/${userId}`, data, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return UserSchema.parse(response.data);
+};
+
+export const deleteAdminUser = async (userId: number) => {
+  const token = localStorage.getItem("token");
+  await apiClient.delete(`/admin/users/${userId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 };
