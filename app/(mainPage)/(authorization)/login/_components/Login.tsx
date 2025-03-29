@@ -6,8 +6,9 @@ import { z } from "zod";
 import { FC } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { apiClient } from "@/utils/apiClient";
 
-// Схема валідації для форми входу
 const loginSchema = z.object({
   email: z.string().email("Некоректний email"),
   password: z.string().min(6, "Пароль повинен бути не менше 6 символів"),
@@ -16,6 +17,7 @@ const loginSchema = z.object({
 type FormData = z.infer<typeof loginSchema>;
 
 const LoginPage: FC = () => {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -26,20 +28,29 @@ const LoginPage: FC = () => {
 
   const onSubmit = async (data: FormData) => {
     try {
-      const response = await fetch("http://localhost:5000/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      // Отримуємо дані із localStorage (кошик і favorites)
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+      // Формуємо payload з email, password, а також з даними localStorage
+      const payload = { ...data, cart, favorites };
 
-      if (!response.ok) throw new Error("Помилка входу");
+      const response = await apiClient.post("/login", payload);
+      const token = response.data.token;
+      localStorage.setItem("token", token);
 
-      const result = await response.json();
-      localStorage.setItem("token", result.token);
-      window.location.href = "/";
-      toast.success("Вхід успішний!");
+      // При успішній авторизації можна очистити localStorage (якщо дані вже синхронізовано)
+      localStorage.removeItem("cart");
+      localStorage.removeItem("favorites");
+
+      if (localStorage.getItem("returnToCheckout") === "true") {
+        localStorage.removeItem("returnToCheckout");
+        router.push("/cart");
+      } else {
+        router.push("/");
+      }
+      toast.success("Авторизація успішна!");
     } catch (error: any) {
-      toast.error(error.message || "Помилка входу");
+      toast.error(error.message || "Помилка авторизації");
     }
   };
 

@@ -26,7 +26,8 @@ interface OrderItem {
   orderId: number;
   articleNumber: string;
   quantity: number;
-  price: number | null; // Дозволяємо null для ціни
+  price: number | null;
+  size: string;
 }
 
 // Визначення типу Order
@@ -54,7 +55,7 @@ const AdminOrdersPage: React.FC = () => {
         const ordersWithDetails = await Promise.all(
           data.map(async (order) => {
             const details = await fetchAdminOrderDetails(order.orderId);
-            console.log(`Order ${order.orderId} items:`, details.items); // Логування для перевірки
+            console.log(`Order ${order.orderId} items:`, details.items);
             return { ...order, items: details.items };
           })
         );
@@ -89,7 +90,7 @@ const AdminOrdersPage: React.FC = () => {
   };
 
   const toggleOrderDetails = (orderId: number) => {
-    console.log(`Toggling details for order ${orderId}`); // Логування для відстеження
+    console.log(`Toggling details for order ${orderId}`);
     setExpandedOrderId(expandedOrderId === orderId ? null : orderId);
   };
 
@@ -184,8 +185,10 @@ const AdminOrdersPage: React.FC = () => {
                     <div>
                       <h3 className="font-semibold">Товари в замовленні:</h3>
                       <ul>
-                        {order.items.map((item) => (
-                          <li key={item.orderItemId}>
+                        {order.items.map((item, idx) => (
+                          <li
+                            key={`${order.orderId}-${item.articleNumber}-${item.size}-${idx}`}
+                          >
                             {item.articleNumber} - Кількість: {item.quantity},
                             Ціна: {formatPrice(item.price)}
                           </li>

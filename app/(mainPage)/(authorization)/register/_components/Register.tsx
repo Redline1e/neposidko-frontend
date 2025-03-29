@@ -6,8 +6,9 @@ import { z } from "zod";
 import { FC } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { apiClient } from "@/utils/apiClient";
 
-// Схема валідації для форми реєстрації
 const registerSchema = z.object({
   email: z.string().email("Некоректний email"),
   password: z.string().min(6, "Пароль повинен бути не менше 6 символів"),
@@ -16,6 +17,7 @@ const registerSchema = z.object({
 type FormData = z.infer<typeof registerSchema>;
 
 const RegisterPage: FC = () => {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -26,25 +28,29 @@ const RegisterPage: FC = () => {
 
   const onSubmit = async (data: FormData) => {
     try {
-      const response = await fetch("http://localhost:5000/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      // Зчитуємо дані з localStorage: кошик та favorites
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
 
-      if (!response.ok) throw new Error("Помилка реєстрації");
+      // Формуємо payload, який містить email, password, а також дані localStorage
+      const payload = { ...data, cart, favorites };
 
-      const result = await response.json();
+      const response = await apiClient.post("/register", payload);
+      const token = response.data.token;
+      localStorage.setItem("token", token);
+      // Після успішної реєстрації – очищуємо localStorage (якщо дані вже синхронізовано)
+      localStorage.removeItem("cart");
+      localStorage.removeItem("favorites");
 
-      if (result.token) {
-        localStorage.setItem("token", result.token);
-        window.location.href = "/";
-        toast.success("Реєстрація успішна! Ви авторизовані.");
+      if (localStorage.getItem("returnToCheckout") === "true") {
+        localStorage.removeItem("returnToCheckout");
+        router.push("/cart");
       } else {
-        throw new Error("Сталася помилка при реєстрації");
+        router.push("/");
       }
+      toast.success("Авторизація успішна!");
     } catch (error: any) {
-      toast.error(error.message || "Помилка реєстрації");
+      toast.error(error.message || "Помилка авторизації");
     }
   };
 

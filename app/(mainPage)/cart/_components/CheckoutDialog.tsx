@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -14,8 +14,13 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { getToken } from "@/lib/hooks/getToken";
+import { apiClient } from "@/utils/apiClient";
+import { useAuth } from "@/lib/hooks/auth";
+import { Check } from "lucide-react"; // імпортуємо іконку галочки
 
-// Оновлена схема валідації з варіантами оплати: Повна оплата та Передоплата (200 грн)
+// Схема валідації
 const checkoutSchema = z.object({
   deliveryAddress: z.string().min(1, "Місце доставки є обов'язковим"),
   telephone: z
@@ -31,7 +36,7 @@ const checkoutSchema = z.object({
 export type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
 interface CheckoutDialogProps {
-  orderId: number;
+  orderId?: number;
   onCheckoutSuccess: () => void;
   isOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -46,12 +51,17 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = onOpenChange || setInternalOpen;
+  const router = useRouter();
+
+  // Використовуємо наш хук для визначення автентифікації
+  const { isAuthenticated } = useAuth();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
@@ -61,31 +71,83 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
     },
   });
 
-  const onSubmit = async (data: CheckoutFormData) => {
-    if (!orderId || isNaN(Number(orderId))) {
-      console.error("orderId is missing or not a number:", orderId);
-      toast.error("Помилка: orderId відсутній або не є числом");
-      return;
+  // Відновлення даних форми
+  useEffect(() => {
+    const savedData = localStorage.getItem("checkoutFormData");
+    if (savedData) {
+      const formData = JSON.parse(savedData);
+      setValue("deliveryAddress", formData.deliveryAddress);
+      setValue("telephone", formData.telephone);
+      setValue("paymentMethod", formData.paymentMethod);
     }
+  }, [setValue]);
+
+  const onSubmit = async (data: CheckoutFormData) => {
     try {
-      const response = await fetch("http://localhost:5000/orders/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId: Number(orderId), ...data }),
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Не вдалося оформити замовлення");
+      const token = getToken();
+      const cartItems = JSON.parse(localStorage.getItem("cart") || "[]");
+
+      if (token) {
+        // Для авторизованих користувачів
+        const response = await apiClient.post(
+          "/orders/checkout",
+          { ...data },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        toast.success(response.data.message || "Замовлення оформлено успішно");
+      } else {
+        // Для гостей
+        if (!cartItems.length) {
+          toast.error("Кошик порожній");
+          return;
+        }
+        const response = await apiClient.post("/orders/guest-checkout", {
+          ...data,
+          cartItems,
+        });
+        localStorage.removeItem("cart");
+        toast.success(response.data.message || "Замовлення оформлено успішно");
       }
-      const result = await response.json();
-      toast.success(result.message || "Замовлення оформлено успішно");
+
+      localStorage.removeItem("checkoutFormData");
       setOpen(false);
       reset();
       onCheckoutSuccess();
     } catch (error: any) {
-      console.error(error);
       toast.error(error.message || "Помилка оформлення замовлення");
     }
+  };
+
+  const handleRegister = () => {
+    const formData = {
+      deliveryAddress:
+        (document.getElementById("deliveryAddress") as HTMLInputElement)
+          ?.value || "",
+      telephone:
+        (document.getElementById("telephone") as HTMLInputElement)?.value || "",
+      paymentMethod:
+        (document.getElementById("paymentMethod") as HTMLSelectElement)
+          ?.value || "full",
+    };
+    localStorage.setItem("checkoutFormData", JSON.stringify(formData));
+    localStorage.setItem("returnToCheckout", "true");
+    router.push("/register");
+  };
+
+  const handleLogin = () => {
+    const formData = {
+      deliveryAddress:
+        (document.getElementById("deliveryAddress") as HTMLInputElement)
+          ?.value || "",
+      telephone:
+        (document.getElementById("telephone") as HTMLInputElement)?.value || "",
+      paymentMethod:
+        (document.getElementById("paymentMethod") as HTMLSelectElement)
+          ?.value || "full",
+    };
+    localStorage.setItem("checkoutFormData", JSON.stringify(formData));
+    localStorage.setItem("returnToCheckout", "true");
+    router.push("/login");
   };
 
   return (
@@ -104,7 +166,11 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
             <label className="block text-sm font-medium text-gray-700">
               Місце доставки
             </label>
-            <Input {...register("deliveryAddress")} placeholder="Ваша адреса" />
+            <Input
+              id="deliveryAddress"
+              {...register("deliveryAddress")}
+              placeholder="Ваша адреса"
+            />
             {errors.deliveryAddress && (
               <p className="mt-1 text-destructive text-sm">
                 {errors.deliveryAddress.message}
@@ -115,7 +181,11 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
             <label className="block text-sm font-medium text-gray-700">
               Телефон
             </label>
-            <Input {...register("telephone")} placeholder="Ваш телефон" />
+            <Input
+              id="telephone"
+              {...register("telephone")}
+              placeholder="Ваш телефон"
+            />
             {errors.telephone && (
               <p className="mt-1 text-destructive text-sm">
                 {errors.telephone.message}
@@ -127,6 +197,7 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
               Спосіб оплати
             </label>
             <select
+              id="paymentMethod"
               {...register("paymentMethod")}
               className="border p-2 rounded-md w-full"
             >
@@ -139,6 +210,32 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
               </p>
             )}
           </div>
+          {/* Блок авторизації */}
+          {!isAuthenticated ? (
+            <div className="mt-4 p-4 border rounded-md bg-gray-100 flex flex-col space-y-2">
+              <p className="text-sm text-gray-700">
+                Зареєструйтесь або увійдіть, щоб відстежувати статус вашого
+                замовлення у особистому кабінеті.
+              </p>
+              <div className="flex space-x-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleRegister}
+                >
+                  Зареєструватися
+                </Button>
+                <Button type="button" variant="outline" onClick={handleLogin}>
+                  Увійти
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-4 p-4 border rounded-md bg-green-100 flex items-center space-x-2">
+              <Check size={24} className="text-green-600" />
+              <p className="text-sm text-green-700">Ви авторизовані</p>
+            </div>
+          )}
           <Button type="submit" className="w-full mt-2">
             Підтвердити замовлення
           </Button>
