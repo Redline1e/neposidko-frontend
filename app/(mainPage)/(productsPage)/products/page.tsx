@@ -26,7 +26,6 @@ export default function Home() {
   const [filters, setFilters] = useState<FiltersState>(initialFilters);
   const [sortOrder, setSortOrder] = useState("default");
 
-  // Оновлення фільтра категорій при зміні query-параметра
   useEffect(() => {
     if (categoryQuery) {
       setFilters((prev) => ({ ...prev, categories: [categoryQuery] }));
@@ -34,7 +33,7 @@ export default function Home() {
   }, [categoryQuery]);
 
   return (
-    <div className="flex w-full h-screen bg-gray-100">
+    <div className="flex w-full">
       <FilterSidebar filters={filters} setFilters={setFilters} />
       <main className="flex-1">
         <ProductDisplay filters={filters} sortOrder={sortOrder} />

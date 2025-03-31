@@ -11,9 +11,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import useMedia from "use-media";
-import { fetchFavorites } from "@/lib/api/favorites-service";
+import { fetchFavoritesCount } from "@/lib/api/favorites-service";
+import { fetchCartCount } from "@/lib/api/order-items-service";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { fetchOrderItems } from "@/lib/api/order-items-service";
 import { DialogTitle } from "@radix-ui/react-dialog";
 
 interface ActionLink {
@@ -35,18 +35,32 @@ export const Actions = () => {
   const [favoriteCount, setFavoriteCount] = useState<number>(0);
   const [orderItemsCount, setOrderItemsCount] = useState<number>(0);
 
+  // Функція для оновлення лічильників
+  const updateCounts = async () => {
+    try {
+      const favCount = await fetchFavoritesCount();
+      const cartCount = await fetchCartCount();
+      setFavoriteCount(favCount);
+      setOrderItemsCount(cartCount);
+    } catch (error) {
+      console.error("Помилка оновлення лічильників:", error);
+    }
+  };
+
+  // Завантаження початкових значень
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const favorites = await fetchFavorites();
-        const orderItems = await fetchOrderItems();
-        setFavoriteCount(favorites.length);
-        setOrderItemsCount(orderItems.length);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
+    updateCounts();
+  }, []);
+
+  // Обробник глобальних подій для оновлення лічильників
+  useEffect(() => {
+    const handleUpdate = () => updateCounts();
+    window.addEventListener("favoritesUpdated", handleUpdate);
+    window.addEventListener("cartUpdated", handleUpdate);
+    return () => {
+      window.removeEventListener("favoritesUpdated", handleUpdate);
+      window.removeEventListener("cartUpdated", handleUpdate);
     };
-    loadData();
   }, []);
 
   return (
@@ -59,8 +73,7 @@ export const Actions = () => {
                 href={link.href}
                 className="flex items-center gap-2 hover:text-neutral-500 transition-colors duration-200"
               >
-                <link.icon className="w-6 h-6" />{" "}
-                {/* Видалено hover і transition */}
+                <link.icon className="w-6 h-6" />
                 {link.name === "Обране" && favoriteCount > 0 && (
                   <span className="absolute -top-1 left-4 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
                     {favoriteCount}
@@ -112,8 +125,7 @@ export const Actions = () => {
                       href={link.href}
                       className="flex items-center gap-3 text-lg font-medium text-neutral-700 hover:text-neutral-500 transition-colors duration-200 font-open-sans"
                     >
-                      <link.icon className="w-6 h-6" />{" "}
-                      {/* Видалено hover і transition */}
+                      <link.icon className="w-6 h-6" />
                       <span>{link.name}</span>
                     </Link>
                   </li>

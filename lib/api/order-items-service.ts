@@ -1,9 +1,11 @@
 import { apiClient } from "@/utils/apiClient";
-import { OrderItem, OrderItemSchema } from "@/utils/types";
+import {
+  OrderItem,
+  OrderItemSchema,
+  OrderItemData,
+  OrderItemDataSchema,
+} from "@/utils/types";
 import { z } from "zod";
-import axios from "axios";
-
-import { OrderItemDataSchema, OrderItemData } from "@/utils/types"; // переконайтеся, що експортуєте OrderItemDataSchema
 import { getToken } from "../hooks/getToken";
 import { toast } from "sonner";
 
@@ -34,14 +36,15 @@ export const addOrderItem = async (
       const response = await apiClient.post("/order-items", orderItem, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      window.dispatchEvent(new Event("cartUpdated")); // Сповіщаємо про зміну
       return OrderItemSchema.parse(response.data);
     } else {
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      // Assign a temporary ID for guests (e.g., timestamp)
-      orderItem.productOrderId = Date.now();
+      orderItem.productOrderId = Date.now(); // Тимчасовий ID для гостей
       cart.push(orderItem);
       localStorage.setItem("cart", JSON.stringify(cart));
       toast.success("Товар додано до кошика (локально)");
+      window.dispatchEvent(new Event("cartUpdated")); // Сповіщаємо про зміну
       return orderItem;
     }
   } catch (error: any) {
@@ -49,6 +52,7 @@ export const addOrderItem = async (
     throw new Error("Не вдалося додати позицію замовлення");
   }
 };
+
 export const updateOrderItem = async (
   orderItem: OrderItem
 ): Promise<OrderItem> => {
@@ -60,6 +64,7 @@ export const updateOrderItem = async (
         orderItem,
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      window.dispatchEvent(new Event("cartUpdated")); // Сповіщаємо про зміну
       return OrderItemSchema.parse(response.data);
     } else {
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
@@ -67,6 +72,7 @@ export const updateOrderItem = async (
         item.productOrderId === orderItem.productOrderId ? orderItem : item
       );
       localStorage.setItem("cart", JSON.stringify(updatedCart));
+      window.dispatchEvent(new Event("cartUpdated")); // Сповіщаємо про зміну
       return orderItem;
     }
   } catch (error: any) {
@@ -91,11 +97,13 @@ export const deleteOrderItem = async (
       );
       localStorage.setItem("cart", JSON.stringify(updatedCart));
     }
+    window.dispatchEvent(new Event("cartUpdated")); // Сповіщаємо про зміну
   } catch (error: any) {
     console.error("Помилка при видаленні позиції замовлення:", error);
     throw new Error("Не вдалося видалити позицію замовлення");
   }
 };
+
 export const fetchOrderHistoryItems = async (): Promise<OrderItem[]> => {
   const response = await fetch("http://localhost:5000/order-items/history", {
     headers: {
@@ -122,7 +130,7 @@ export const fetchCartCount = async (): Promise<number> => {
       return cart.length;
     }
   } catch (error: any) {
-    console.error("Error fetching cart count:", error);
+    console.error("Помилка підрахунку товарів у кошику:", error);
     return 0;
   }
 };

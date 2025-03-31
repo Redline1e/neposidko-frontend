@@ -6,7 +6,7 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { cn } from "@/lib/api/utils";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import React from "react";
 

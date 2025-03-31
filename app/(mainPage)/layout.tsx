@@ -12,7 +12,7 @@ const BrowseLayout: React.FC<BrowseLayoutProps> = ({ children }) => {
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Toaster />
       <Navbar />
-      <main className="flex-1 flex flex-col">{children}</main>
+      <main className="flex-1 overflow-y-auto">{children}</main>
       <Footer />
     </div>
   );

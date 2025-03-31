@@ -101,7 +101,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   };
 
   return (
-    <>
+    <div className="min-h-full">
       <Button
         variant="outline"
         onClick={() => setIsOpen(true)}
@@ -226,6 +226,6 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };

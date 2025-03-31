@@ -90,8 +90,7 @@ const OrderItem: React.FC<OrderItemProps> = ({
     setIsDeleting(true);
     try {
       await deleteOrderItem(item.productOrderId);
-      onItemDelete?.(item.productOrderId);
-      router.refresh();
+      onItemDelete?.(item.productOrderId); // Передаємо ID видаленого товару
     } catch (error) {
       console.error("Помилка видалення позиції:", error);
     } finally {
@@ -193,7 +192,6 @@ const OrderItem: React.FC<OrderItemProps> = ({
           </div>
         </div>
       </div>
-      {/* Підтвердження видалення через AlertDialog */}
       <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
         <AlertDialogTrigger asChild>
           <Button variant="outline" disabled={isDeleting}>

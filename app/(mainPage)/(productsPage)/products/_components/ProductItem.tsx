@@ -41,7 +41,6 @@ const ProductItem: React.FC<ProductItemProps> = ({
   const imageSrc = imageUrls?.length > 0 ? imageUrls[0] : "/fallback.jpg";
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
-  // Сортуємо розміри за зростанням
   const sortedSizes = [...sizes].sort((a, b) => a.size.localeCompare(b.size));
 
   useEffect(() => {
@@ -76,13 +75,11 @@ const ProductItem: React.FC<ProductItemProps> = ({
     }
   };
 
-  // Визначення першого доступного розміру (stock > 0)
   const availableSizeObj = sortedSizes.find((s) => s.stock > 0);
   const selectedSize = availableSizeObj
     ? availableSizeObj.size
     : sortedSizes[0]?.size || "OneSize";
 
-  // Перевірка, чи є хоча б один доступний розмір
   const hasAvailableSizes = sortedSizes.some((s) => s.stock > 0);
 
   const handleAddToCart = async (e: React.MouseEvent<HTMLButtonElement>) => {

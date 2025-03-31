@@ -5,6 +5,14 @@ import { Frown } from "lucide-react";
 import ProductItem from "./ProductItem";
 import { fetchActiveProducts } from "@/lib/api/product-service";
 import { Product } from "@/utils/types";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface ProductDisplayProps {
   filters: {
@@ -23,6 +31,8 @@ export const ProductDisplay: React.FC<ProductDisplayProps> = ({
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   const getProducts = async () => {
     setLoading(true);
@@ -42,7 +52,6 @@ export const ProductDisplay: React.FC<ProductDisplayProps> = ({
     getProducts();
   }, []);
 
-  // Фільтрація товарів
   const filteredProducts = products.filter((product) => {
     const categoryIdStr =
       product.categoryId != null ? product.categoryId.toString() : "";
@@ -70,7 +79,6 @@ export const ProductDisplay: React.FC<ProductDisplayProps> = ({
     return matchesCategory && matchesSize && matchesPrice && matchesDiscount;
   });
 
-  // Сортування товарів
   const sortedProducts = filteredProducts.sort((a, b) => {
     if (sortOrder === "priceAsc") {
       const priceA = a.discount
@@ -96,6 +104,11 @@ export const ProductDisplay: React.FC<ProductDisplayProps> = ({
     return 0;
   });
 
+  const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentProducts = sortedProducts.slice(startIndex, endIndex);
+
   if (loading)
     return (
       <p className="mt-20 text-center text-xl font-semibold">Завантаження...</p>
@@ -106,7 +119,7 @@ export const ProductDisplay: React.FC<ProductDisplayProps> = ({
     );
 
   return (
-    <div className="md:mt-20 mt-28 mb-10 h-[calc(100vh-80px)] overflow-y-auto">
+    <div className="md:mt-20 mt-28 mb-10">
       {sortedProducts.length === 0 ? (
         <p className="flex justify-center items-center text-xl font-semibold gap-x-2">
           Товари не знайдено <Frown />
@@ -114,9 +127,59 @@ export const ProductDisplay: React.FC<ProductDisplayProps> = ({
       ) : (
         <div className="container mx-auto px-4 mb-5">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {sortedProducts.map((product) => (
+            {currentProducts.map((product) => (
               <ProductItem key={product.articleNumber} product={product} />
             ))}
+          </div>
+          <div className="mt-8 flex justify-center">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    className={
+                      currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
+                    }
+                    onClick={(e) => {
+                      if (currentPage > 1) {
+                        setCurrentPage((prev) => prev - 1);
+                      } else {
+                        e.preventDefault();
+                      }
+                    }}
+                    aria-disabled={currentPage === 1}
+                  />
+                </PaginationItem>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <PaginationItem key={page}>
+                      <PaginationLink
+                        onClick={() => setCurrentPage(page)}
+                        isActive={currentPage === page}
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )
+                )}
+                <PaginationItem>
+                  <PaginationNext
+                    className={
+                      currentPage === totalPages
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }
+                    onClick={(e) => {
+                      if (currentPage < totalPages) {
+                        setCurrentPage((prev) => prev + 1);
+                      } else {
+                        e.preventDefault();
+                      }
+                    }}
+                    aria-disabled={currentPage === totalPages}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
           </div>
         </div>
       )}
