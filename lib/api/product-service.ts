@@ -1,20 +1,29 @@
-import { apiClient } from "@/utils/apiClient";
+import {
+  apiClient,
+  getAuthHeaders,
+  extractErrorMessage,
+} from "@/utils/apiClient";
 import { Product, ProductSchema } from "@/utils/types";
 import { z } from "zod";
 
 export const fetchProducts = async (): Promise<Product[]> => {
   try {
-    const response = await apiClient.get("/products");
+    const response = await apiClient.get("/products", {
+      headers: getAuthHeaders(),
+    });
     return z.array(ProductSchema).parse(response.data);
   } catch (error: any) {
-    console.error("Помилка при завантаженні товарів:", error);
-    throw new Error("Не вдалося завантажити товари");
+    const message = extractErrorMessage(error, "Не вдалося завантажити товари");
+    console.error(message);
+    throw new Error(message);
   }
 };
 
 export const fetchActiveProducts = async (): Promise<Product[]> => {
   try {
-    const response = await apiClient.get("/products/active");
+    const response = await apiClient.get("/products/active", {
+      headers: getAuthHeaders(),
+    });
     const products: Product[] = z.array(ProductSchema).parse(response.data);
     return products.filter((product: Product) =>
       product.sizes.some(
@@ -22,27 +31,38 @@ export const fetchActiveProducts = async (): Promise<Product[]> => {
       )
     );
   } catch (error: any) {
-    console.error("Помилка при завантаженні активних товарів:", error);
-    throw new Error("Не вдалося завантажити активні товари");
+    const message = extractErrorMessage(
+      error,
+      "Не вдалося завантажити активні товари"
+    );
+    console.error(message);
+    throw new Error(message);
   }
 };
 
 export const fetchInactiveProducts = async (): Promise<Product[]> => {
   try {
-    const response = await apiClient.get("/products/inactive");
+    const response = await apiClient.get("/products/inactive", {
+      headers: getAuthHeaders(),
+    });
     return z.array(ProductSchema).parse(response.data);
   } catch (error: any) {
-    console.error("Помилка при завантаженні неактивних товарів:", error);
-    throw new Error("Не вдалося завантажити неактивні товари");
+    const message = extractErrorMessage(
+      error,
+      "Не вдалося завантажити неактивні товари"
+    );
+    console.error(message);
+    throw new Error(message);
   }
 };
 
 export const addProduct = async (product: Product): Promise<void> => {
   try {
-    await apiClient.post("/products", product);
+    await apiClient.post("/products", product, { headers: getAuthHeaders() });
   } catch (error: any) {
-    console.error("Помилка при додаванні товару:", error);
-    throw new Error("Не вдалося додати товар");
+    const message = extractErrorMessage(error, "Не вдалося додати товар");
+    console.error(message);
+    throw new Error(message);
   }
 };
 
@@ -50,32 +70,43 @@ export const fetchProductByArticle = async (
   articleNumber: string
 ): Promise<Product> => {
   try {
-    const response = await apiClient.get(`/product/${articleNumber}`);
+    const response = await apiClient.get(`/product/${articleNumber}`, {
+      headers: getAuthHeaders(),
+    });
     return ProductSchema.parse(response.data);
   } catch (error: any) {
-    console.error(`Помилка при завантаженні товару ${articleNumber}:`, error);
-    throw new Error("Не вдалося завантажити товар");
+    const message = extractErrorMessage(
+      error,
+      `Не вдалося завантажити товар ${articleNumber}`
+    );
+    console.error(message);
+    throw new Error(message);
   }
 };
 
 export const searchProducts = async (query: string): Promise<Product[]> => {
   try {
     const response = await apiClient.get(
-      `/search?q=${encodeURIComponent(query)}`
+      `/search?q=${encodeURIComponent(query)}`,
+      { headers: getAuthHeaders() }
     );
     return z.array(ProductSchema).parse(response.data);
   } catch (error: any) {
-    console.error("Помилка при пошуку товарів:", error);
-    throw new Error("Не вдалося виконати пошук");
+    const message = extractErrorMessage(error, "Не вдалося виконати пошук");
+    console.error(message);
+    throw new Error(message);
   }
 };
 
 export const updateProduct = async (product: Product): Promise<void> => {
   try {
-    await apiClient.put(`/product/${product.articleNumber}`, product);
+    await apiClient.put(`/product/${product.articleNumber}`, product, {
+      headers: getAuthHeaders(),
+    });
   } catch (error: any) {
-    console.error("Помилка оновлення товару:", error);
-    throw new Error("Не вдалося оновити товар");
+    const message = extractErrorMessage(error, "Не вдалося оновити товар");
+    console.error(message);
+    throw new Error(message);
   }
 };
 
@@ -84,18 +115,29 @@ export const updateProductActiveStatus = async (
   isActive: boolean
 ): Promise<void> => {
   try {
-    await apiClient.patch(`/product/${articleNumber}/active`, { isActive });
+    await apiClient.patch(
+      `/product/${articleNumber}/active`,
+      { isActive },
+      { headers: getAuthHeaders() }
+    );
   } catch (error: any) {
-    console.error("Помилка оновлення статусу активності товару:", error);
-    throw new Error("Не вдалося оновити статус активності товару");
+    const message = extractErrorMessage(
+      error,
+      "Не вдалося оновити статус активності товару"
+    );
+    console.error(message);
+    throw new Error(message);
   }
 };
 
 export const deleteProduct = async (articleNumber: string): Promise<void> => {
   try {
-    await apiClient.delete(`/product/${articleNumber}`);
+    await apiClient.delete(`/product/${articleNumber}`, {
+      headers: getAuthHeaders(),
+    });
   } catch (error: any) {
-    console.error("Помилка видалення товару:", error);
-    throw new Error("Не вдалося видалити товар");
+    const message = extractErrorMessage(error, "Не вдалося видалити товар");
+    console.error(message);
+    throw new Error(message);
   }
 };

@@ -1,4 +1,8 @@
-import { apiClient } from "@/utils/apiClient";
+import {
+  apiClient,
+  getAuthHeaders,
+  extractErrorMessage,
+} from "@/utils/apiClient";
 import {
   OrderItem,
   OrderItemSchema,
@@ -6,23 +10,24 @@ import {
   OrderItemDataSchema,
 } from "@/utils/types";
 import { z } from "zod";
-import { getToken } from "../hooks/getToken";
 import { toast } from "sonner";
 
 export const fetchOrderItems = async (): Promise<OrderItemData[]> => {
   try {
-    const token = getToken();
-    if (token) {
-      const response = await apiClient.get("/order-items", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+    const headers = getAuthHeaders();
+    if (headers.Authorization) {
+      const response = await apiClient.get("/order-items", { headers });
       return z.array(OrderItemDataSchema).parse(response.data);
     } else {
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
       return cart;
     }
   } catch (error: any) {
-    console.error("Помилка завантаження позицій замовлення:", error);
+    const message = extractErrorMessage(
+      error,
+      "Не вдалося завантажити позиції замовлення"
+    );
+    console.error(message);
     return [];
   }
 };
@@ -31,25 +36,28 @@ export const addOrderItem = async (
   orderItem: OrderItem
 ): Promise<OrderItem> => {
   try {
-    const token = getToken();
-    if (token) {
+    const headers = getAuthHeaders();
+    if (headers.Authorization) {
       const response = await apiClient.post("/order-items", orderItem, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers,
       });
-      window.dispatchEvent(new Event("cartUpdated")); // Сповіщаємо про зміну
+      window.dispatchEvent(new Event("cartUpdated"));
       return OrderItemSchema.parse(response.data);
     } else {
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
       orderItem.productOrderId = Date.now(); // Тимчасовий ID для гостей
       cart.push(orderItem);
       localStorage.setItem("cart", JSON.stringify(cart));
-      toast.success("Товар додано до кошика (локально)");
-      window.dispatchEvent(new Event("cartUpdated")); // Сповіщаємо про зміну
+      window.dispatchEvent(new Event("cartUpdated"));
       return orderItem;
     }
   } catch (error: any) {
-    console.error("Помилка при додаванні позиції замовлення:", error);
-    throw new Error("Не вдалося додати позицію замовлення");
+    const message = extractErrorMessage(
+      error,
+      "Не вдалося додати позицію замовлення"
+    );
+    console.error(message);
+    throw new Error(message);
   }
 };
 
@@ -57,14 +65,14 @@ export const updateOrderItem = async (
   orderItem: OrderItem
 ): Promise<OrderItem> => {
   try {
-    const token = getToken();
-    if (token) {
+    const headers = getAuthHeaders();
+    if (headers.Authorization) {
       const response = await apiClient.put(
         `/order-items/${orderItem.productOrderId}`,
         orderItem,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers }
       );
-      window.dispatchEvent(new Event("cartUpdated")); // Сповіщаємо про зміну
+      window.dispatchEvent(new Event("cartUpdated"));
       return OrderItemSchema.parse(response.data);
     } else {
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
@@ -72,12 +80,16 @@ export const updateOrderItem = async (
         item.productOrderId === orderItem.productOrderId ? orderItem : item
       );
       localStorage.setItem("cart", JSON.stringify(updatedCart));
-      window.dispatchEvent(new Event("cartUpdated")); // Сповіщаємо про зміну
+      window.dispatchEvent(new Event("cartUpdated"));
       return orderItem;
     }
   } catch (error: any) {
-    console.error("Помилка при оновленні позиції замовлення:", error);
-    throw new Error("Не вдалося оновити позицію замовлення");
+    const message = extractErrorMessage(
+      error,
+      "Не вдалося оновити позицію замовлення"
+    );
+    console.error(message);
+    throw new Error(message);
   }
 };
 
@@ -85,11 +97,9 @@ export const deleteOrderItem = async (
   productOrderId: number
 ): Promise<void> => {
   try {
-    const token = getToken();
-    if (token) {
-      await apiClient.delete(`/order-items/${productOrderId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+    const headers = getAuthHeaders();
+    if (headers.Authorization) {
+      await apiClient.delete(`/order-items/${productOrderId}`, { headers });
     } else {
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
       const updatedCart = cart.filter(
@@ -97,40 +107,49 @@ export const deleteOrderItem = async (
       );
       localStorage.setItem("cart", JSON.stringify(updatedCart));
     }
-    window.dispatchEvent(new Event("cartUpdated")); // Сповіщаємо про зміну
+    window.dispatchEvent(new Event("cartUpdated"));
   } catch (error: any) {
-    console.error("Помилка при видаленні позиції замовлення:", error);
-    throw new Error("Не вдалося видалити позицію замовлення");
+    const message = extractErrorMessage(
+      error,
+      "Не вдалося видалити позицію замовлення"
+    );
+    console.error(message);
+    throw new Error(message);
   }
 };
 
 export const fetchOrderHistoryItems = async (): Promise<OrderItem[]> => {
-  const response = await fetch("http://localhost:5000/order-items/history", {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  });
-  if (!response.ok) {
-    throw new Error("Не вдалося завантажити позиції історії замовлень");
+  try {
+    const response = await apiClient.get("/order-items/history", {
+      headers: getAuthHeaders(),
+    });
+    return z.array(OrderItemSchema).parse(response.data);
+  } catch (error: any) {
+    const message = extractErrorMessage(
+      error,
+      "Не вдалося завантажити історію замовлень"
+    );
+    console.error(message);
+    throw new Error(message);
   }
-  return response.json();
 };
 
 export const fetchCartCount = async (): Promise<number> => {
   try {
-    const token = getToken();
-    if (token) {
-      const response = await apiClient.get("/order-items/count", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+    const headers = getAuthHeaders();
+    if (headers.Authorization) {
+      const response = await apiClient.get("/order-items/count", { headers });
       return response.data.count;
     } else {
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
       return cart.length;
     }
   } catch (error: any) {
-    console.error("Помилка підрахунку товарів у кошику:", error);
+    const message = extractErrorMessage(
+      error,
+      "Не вдалося підрахувати товари в кошику"
+    );
+    console.error(message);
     return 0;
   }
 };

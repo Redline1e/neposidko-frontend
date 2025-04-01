@@ -63,6 +63,12 @@ export const OrderDisplay: React.FC = () => {
     );
   };
 
+  const handleItemDelete = (deletedItemId: number) => {
+    setOrderItems((prevItems) =>
+      prevItems.filter((item) => item.productOrderId !== deletedItemId)
+    );
+  };
+
   const orderId = orderItems.length > 0 ? orderItems[0].orderId : 0;
 
   return (
@@ -74,6 +80,7 @@ export const OrderDisplay: React.FC = () => {
               key={item.productOrderId}
               item={item}
               onItemUpdate={handleItemUpdate}
+              onItemDelete={handleItemDelete} 
             />
           ))
         ) : (

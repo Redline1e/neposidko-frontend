@@ -1,12 +1,15 @@
-import { apiClient, extractErrorMessage } from "@/utils/apiClient";
+import {
+  apiClient,
+  getAuthHeaders,
+  extractErrorMessage,
+} from "@/utils/apiClient";
 import { User, UserSchema } from "@/utils/types";
 import { z } from "zod";
 
-// Отримання даних користувача
-export const fetchUser = async (token: string): Promise<User> => {
+export const fetchUser = async (): Promise<User> => {
   try {
     const response = await apiClient.get("/protected", {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: getAuthHeaders(),
     });
     return UserSchema.parse(response.data);
   } catch (error: any) {
@@ -14,43 +17,36 @@ export const fetchUser = async (token: string): Promise<User> => {
       error,
       "Не вдалося отримати дані користувача"
     );
-    console.error("Помилка отримання користувача:", message);
+    console.error(message);
     throw new Error(message);
   }
 };
 
-// Оновлення даних користувача
-export const updateUser = async (
-  token: string,
-  name: string,
-  email: string,
-  telephone?: string,
-  deliveryAddress?: string
-): Promise<User> => {
+export const updateUser = async (data: {
+  name: string;
+  email: string;
+  telephone?: string;
+  deliveryAddress?: string;
+}): Promise<User> => {
   try {
-    const response = await apiClient.put(
-      "/user",
-      { name, email, telephone, deliveryAddress },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    const response = await apiClient.put("/user", data, {
+      headers: getAuthHeaders(),
+    });
     return UserSchema.parse(response.data);
   } catch (error: any) {
     const message = extractErrorMessage(
       error,
       "Не вдалося оновити дані користувача"
     );
-    console.error("Помилка оновлення користувача:", message);
+    console.error(message);
     throw new Error(message);
   }
 };
 
-// Видалення користувача
-export const deleteUser = async (
-  token: string
-): Promise<{ message: string }> => {
+export const deleteUser = async (): Promise<{ message: string }> => {
   try {
     const response = await apiClient.delete("/user", {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: getAuthHeaders(),
     });
     return response.data;
   } catch (error: any) {
@@ -58,16 +54,15 @@ export const deleteUser = async (
       error,
       "Не вдалося видалити користувача"
     );
-    console.error("Помилка видалення користувача:", message);
+    console.error(message);
     throw new Error(message);
   }
 };
 
-// Альтернативний endpoint для отримання даних користувача
-export const getUserData = async (token: string): Promise<User> => {
+export const getUserData = async (): Promise<User> => {
   try {
     const response = await apiClient.get("/user", {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: getAuthHeaders(),
     });
     return UserSchema.parse(response.data);
   } catch (error: any) {
@@ -75,49 +70,73 @@ export const getUserData = async (token: string): Promise<User> => {
       error,
       "Не вдалося отримати дані про користувача"
     );
-    console.error("Помилка отримання даних про користувача:", message);
+    console.error(message);
     throw new Error(message);
   }
 };
 
-// Отримання користувача за ID
 export const fetchUserById = async (userId: number): Promise<User> => {
-  const token = localStorage.getItem("token");
-  if (!token) throw new Error("Токен не знайдено");
   try {
     const response = await apiClient.get(`/user/${userId}`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: getAuthHeaders(),
     });
     return UserSchema.parse(response.data);
   } catch (error: any) {
     const message = extractErrorMessage(
       error,
-      "Не вдалося отримати дані користувача"
+      `Не вдалося отримати дані користувача за ID ${userId}`
     );
-    console.error("Помилка отримання користувача за ID:", message);
+    console.error(message);
     throw new Error(message);
   }
 };
 
-export const fetchAdminUsers = async () => {
-  const token = localStorage.getItem("token");
-  const response = await apiClient.get("/admin/users", {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return z.array(UserSchema).parse(response.data);
+export const fetchAdminUsers = async (): Promise<User[]> => {
+  try {
+    const response = await apiClient.get("/admin/users", {
+      headers: getAuthHeaders(),
+    });
+    return z.array(UserSchema).parse(response.data);
+  } catch (error: any) {
+    const message = extractErrorMessage(
+      error,
+      "Не вдалося завантажити користувачів для адміністратора"
+    );
+    console.error(message);
+    throw new Error(message);
+  }
 };
 
-export const updateAdminUser = async (userId: number, data: Partial<User>) => {
-  const token = localStorage.getItem("token");
-  const response = await apiClient.put(`/admin/users/${userId}`, data, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return UserSchema.parse(response.data);
+export const updateAdminUser = async (
+  userId: number,
+  data: Partial<User>
+): Promise<User> => {
+  try {
+    const response = await apiClient.put(`/admin/users/${userId}`, data, {
+      headers: getAuthHeaders(),
+    });
+    return UserSchema.parse(response.data);
+  } catch (error: any) {
+    const message = extractErrorMessage(
+      error,
+      `Не вдалося оновити користувача ${userId}`
+    );
+    console.error(message);
+    throw new Error(message);
+  }
 };
 
-export const deleteAdminUser = async (userId: number) => {
-  const token = localStorage.getItem("token");
-  await apiClient.delete(`/admin/users/${userId}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+export const deleteAdminUser = async (userId: number): Promise<void> => {
+  try {
+    await apiClient.delete(`/admin/users/${userId}`, {
+      headers: getAuthHeaders(),
+    });
+  } catch (error: any) {
+    const message = extractErrorMessage(
+      error,
+      `Не вдалося видалити користувача ${userId}`
+    );
+    console.error(message);
+    throw new Error(message);
+  }
 };

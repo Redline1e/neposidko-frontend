@@ -1,45 +1,50 @@
-import { apiClient } from "@/utils/apiClient";
+import {
+  apiClient,
+  getAuthHeaders,
+  extractErrorMessage,
+} from "@/utils/apiClient";
 import { toast } from "sonner";
 
-export const syncLocalData = async (token: string) => {
+export const syncLocalData = async (): Promise<void> => {
   try {
+    const headers = getAuthHeaders();
+    if (!headers.Authorization) {
+      throw new Error("Токен автентифікації відсутній");
+    }
+
     // Синхронізація кошика
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
     if (cart.length > 0) {
-      await apiClient.post(
-        "/order-items/bulk", // Використовуємо масовий ендпоінт
-        { items: cart },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      localStorage.removeItem("cart"); // Очищаємо після успіху
+      await apiClient.post("/order-items/bulk", { items: cart }, { headers });
+      localStorage.removeItem("cart");
     }
 
     // Синхронізація улюблених
     const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
     if (favorites.length > 0) {
       await apiClient.post(
-        "/favorites/bulk", // Використовуємо масовий ендпоінт
+        "/favorites/bulk",
         {
           items: favorites.map((articleNumber: string) => ({ articleNumber })),
         },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers }
       );
-      localStorage.removeItem("favorites"); // Очищаємо після успіху
+      localStorage.removeItem("favorites");
     }
 
     // Синхронізація сесії (якщо потрібно)
     const sessionId = localStorage.getItem("sessionId") || "unknown";
-    await apiClient.patch(
-      "/orders/sync",
-      { sessionId },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    await apiClient.patch("/orders/sync", { sessionId }, { headers });
     localStorage.removeItem("sessionId");
 
     toast.success("Дані успішно синхронізовано з вашим обліковим записом");
   } catch (error: any) {
-    console.error("Помилка синхронізації:", error);
-    toast.error("Не вдалося синхронізувати дані");
-    throw error; // Кидаємо помилку, щоб обробити її в компонентах
+    const message = extractErrorMessage(
+      error,
+      "Не вдалося синхронізувати дані"
+    );
+    console.error(message);
+    toast.error(message);
+    throw new Error(message);
   }
 };

@@ -1,13 +1,23 @@
-import { apiClient } from "@/utils/apiClient";
+import {
+  apiClient,
+  getAuthHeaders,
+  extractErrorMessage,
+} from "@/utils/apiClient";
 import { Sizes, SizesSchema } from "@/utils/types";
 import { z } from "zod";
 
 export const fetchSizes = async (): Promise<Sizes[]> => {
   try {
-    const response = await apiClient.get("/sizes");
+    const response = await apiClient.get("/sizes", {
+      headers: getAuthHeaders(),
+    });
     return z.array(SizesSchema).parse(response.data);
   } catch (error: any) {
-    console.error("Помилка завантаження розмірів:", error);
-    throw new Error("Не вдалося завантажити розміри");
+    const message = extractErrorMessage(
+      error,
+      "Не вдалося завантажити розміри"
+    );
+    console.error(message);
+    throw new Error(message);
   }
 };

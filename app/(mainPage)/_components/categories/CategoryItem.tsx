@@ -15,13 +15,15 @@ export const CategoriesItem: React.FC<CategoriesItemProps> = ({ category }) => {
       className="cursor-pointer"
     >
       <div className="bg-white shadow-md rounded-xl overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-xl">
-        <Image
-          src={category.imageUrl || "/placeholder.jpg"}
-          alt={category.name}
-          width={300}
-          height={300}
-          className="w-full h-56 object-cover"
-        />
+        {category.imageUrl && (
+          <Image
+            src={category.imageUrl}
+            alt={category.name}
+            width={300}
+            height={300}
+            className="w-full h-56 object-cover"
+          />
+        )}
         <div className="p-4">
           <h2 className="text-lg font-semibold text-gray-800">
             {category.name}

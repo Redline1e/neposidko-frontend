@@ -1,24 +1,25 @@
-import { apiClient } from "@/utils/apiClient";
+import {
+  apiClient,
+  getAuthHeaders,
+  extractErrorMessage,
+} from "@/utils/apiClient";
 import { Review, ReviewSchema } from "@/utils/types";
 import { z } from "zod";
-import axios from "axios";
 
-// Створення відгуку
 export const createReview = async (reviewData: {
   articleNumber: string;
   rating: number;
   comment: string;
 }): Promise<Review> => {
   try {
-    const token = localStorage.getItem("token");
-    if (!token) throw new Error("Токен не знайдено");
     const response = await apiClient.post("/reviews", reviewData, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: getAuthHeaders(),
     });
     return ReviewSchema.parse(response.data);
   } catch (error: any) {
-    console.error("Помилка при створенні відгуку:", error);
-    throw new Error("Не вдалося створити відгук");
+    const message = extractErrorMessage(error, "Не вдалося створити відгук");
+    console.error(message);
+    throw new Error(message);
   }
 };
 
@@ -26,11 +27,17 @@ export const fetchReviewsByArticle = async (
   articleNumber: string
 ): Promise<Review[]> => {
   try {
-    const response = await apiClient.get(`/reviews/${articleNumber}`);
+    const response = await apiClient.get(`/reviews/${articleNumber}`, {
+      headers: getAuthHeaders(),
+    });
     return z.array(ReviewSchema).parse(response.data);
   } catch (error: any) {
-    console.error("Помилка при завантаженні відгуків:", error);
-    throw new Error("Не вдалося завантажити відгуки");
+    const message = extractErrorMessage(
+      error,
+      "Не вдалося завантажити відгуки"
+    );
+    console.error(message);
+    throw new Error(message);
   }
 };
 
@@ -39,63 +46,82 @@ export const updateReview = async (
   reviewData: { rating: number; comment: string }
 ): Promise<Review> => {
   try {
-    const token = localStorage.getItem("token");
-    if (!token) throw new Error("Токен не знайдено");
     const response = await apiClient.put(`/reviews/${reviewId}`, reviewData, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: getAuthHeaders(),
     });
     return ReviewSchema.parse(response.data);
   } catch (error: any) {
-    console.error("Помилка при оновленні відгуку:", error);
-    throw new Error("Не вдалося оновити відгук");
+    const message = extractErrorMessage(error, "Не вдалося оновити відгук");
+    console.error(message);
+    throw new Error(message);
   }
 };
 
 export const deleteReview = async (reviewId: number): Promise<void> => {
   try {
-    const token = localStorage.getItem("token");
-    if (!token) throw new Error("Токен не знайдено");
     await apiClient.delete(`/reviews/${reviewId}`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: getAuthHeaders(),
     });
   } catch (error: any) {
-    console.error("Помилка при видаленні відгуку:", error);
-    throw new Error("Не вдалося видалити відгук");
+    const message = extractErrorMessage(error, "Не вдалося видалити відгук");
+    console.error(message);
+    throw new Error(message);
   }
 };
 
-// Отримання всіх відгуків адміністратором
 export const fetchAdminReviews = async (): Promise<Review[]> => {
-  const token = localStorage.getItem("token");
-  const response = await apiClient.get("/admin/reviews", {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return z
-    .array(
-      ReviewSchema.extend({
-        userEmail: z.string(),
-        productName: z.string(),
-      })
-    )
-    .parse(response.data);
+  try {
+    const response = await apiClient.get("/admin/reviews", {
+      headers: getAuthHeaders(),
+    });
+    return z
+      .array(
+        ReviewSchema.extend({
+          userEmail: z.string(),
+          productName: z.string(),
+        })
+      )
+      .parse(response.data);
+  } catch (error: any) {
+    const message = extractErrorMessage(
+      error,
+      "Не вдалося завантажити відгуки для адміністратора"
+    );
+    console.error(message);
+    throw new Error(message);
+  }
 };
 
-// Оновлення відгуку адміністратором
 export const updateAdminReview = async (
   reviewId: number,
   data: { rating: number; comment: string }
 ): Promise<Review> => {
-  const token = localStorage.getItem("token");
-  const response = await apiClient.put(`/admin/reviews/${reviewId}`, data, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return ReviewSchema.parse(response.data);
+  try {
+    const response = await apiClient.put(`/admin/reviews/${reviewId}`, data, {
+      headers: getAuthHeaders(),
+    });
+    return ReviewSchema.parse(response.data);
+  } catch (error: any) {
+    const message = extractErrorMessage(
+      error,
+      `Не вдалося оновити відгук ${reviewId}`
+    );
+    console.error(message);
+    throw new Error(message);
+  }
 };
 
-// Видалення відгуку адміністратором
 export const deleteAdminReview = async (reviewId: number): Promise<void> => {
-  const token = localStorage.getItem("token");
-  await apiClient.delete(`/admin/reviews/${reviewId}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  try {
+    await apiClient.delete(`/admin/reviews/${reviewId}`, {
+      headers: getAuthHeaders(),
+    });
+  } catch (error: any) {
+    const message = extractErrorMessage(
+      error,
+      `Не вдалося видалити відгук ${reviewId}`
+    );
+    console.error(message);
+    throw new Error(message);
+  }
 };
