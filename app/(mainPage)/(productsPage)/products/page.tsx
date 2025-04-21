@@ -33,9 +33,9 @@ export default function Home() {
   }, [categoryQuery]);
 
   return (
-    <div className="flex w-full">
+    <div className="flex w-full min-h-[calc(100vh-250px)]">
       <FilterSidebar filters={filters} setFilters={setFilters} />
-      <main className="flex-1">
+      <main className="flex-1 flex flex-col overflow-y-auto">
         <ProductDisplay filters={filters} sortOrder={sortOrder} />
       </main>
       <SortSelect sortOrder={sortOrder} setSortOrder={setSortOrder} />

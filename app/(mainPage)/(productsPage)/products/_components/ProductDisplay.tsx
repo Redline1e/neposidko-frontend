@@ -61,7 +61,7 @@ export const ProductDisplay: React.FC<ProductDisplayProps> = ({
     const matchesSize =
       filters.sizes.length === 0 ||
       product.sizes?.some((s) => filters.sizes.includes(s.size));
-    let productPrice = product.discount
+    const productPrice = product.discount
       ? Math.round(product.price * (1 - product.discount / 100))
       : product.price;
     let matchesPrice = true;

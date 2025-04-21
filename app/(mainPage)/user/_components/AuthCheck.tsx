@@ -1,8 +1,10 @@
+// AuthCheck.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { fetchUser } from "@/lib/api/user-service";
 
 interface AuthCheckProps {
   children: React.ReactNode;
@@ -19,22 +21,10 @@ const AuthCheck: React.FC<AuthCheckProps> = ({ children }) => {
       router.push("/login");
       return;
     }
-
     const validateToken = async () => {
       try {
-        const response = await fetch("http://localhost:5000/protected", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (response.ok) {
-          setIsAuth(true);
-        } else {
-          router.push("/login");
-        }
+        await fetchUser();
+        setIsAuth(true);
       } catch (error) {
         console.error("Помилка авторизації:", error);
         router.push("/login");
@@ -42,7 +32,6 @@ const AuthCheck: React.FC<AuthCheckProps> = ({ children }) => {
         setLoading(false);
       }
     };
-
     validateToken();
   }, [router]);
 
@@ -53,11 +42,9 @@ const AuthCheck: React.FC<AuthCheckProps> = ({ children }) => {
       </div>
     );
   }
-
   if (!isAuth) {
     return null;
   }
-
   return <>{children}</>;
 };
 

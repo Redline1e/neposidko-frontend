@@ -11,10 +11,11 @@ export const fetchProducts = async (): Promise<Product[]> => {
     const response = await apiClient.get("/products", {
       headers: getAuthHeaders(),
     });
+    console.log("Fetched products response:", response.data); // Логування отриманих даних
     return z.array(ProductSchema).parse(response.data);
   } catch (error: any) {
     const message = extractErrorMessage(error, "Не вдалося завантажити товари");
-    console.error(message);
+    console.error("Error in fetchProducts:", error.response || error);
     throw new Error(message);
   }
 };
@@ -25,8 +26,9 @@ export const fetchActiveProducts = async (): Promise<Product[]> => {
       headers: getAuthHeaders(),
     });
     const products: Product[] = z.array(ProductSchema).parse(response.data);
+    // Забезпечуємо, що product.sizes завжди є масивом
     return products.filter((product: Product) =>
-      product.sizes.some(
+      (product.sizes ?? []).some(
         (size: { size: string; stock: number }) => size.stock > 0
       )
     );
@@ -73,13 +75,14 @@ export const fetchProductByArticle = async (
     const response = await apiClient.get(`/product/${articleNumber}`, {
       headers: getAuthHeaders(),
     });
+    console.log("Fetched product:", response.data); // Логування для налагодження
     return ProductSchema.parse(response.data);
   } catch (error: any) {
     const message = extractErrorMessage(
       error,
       `Не вдалося завантажити товар ${articleNumber}`
     );
-    console.error(message);
+    console.error("Error in fetchProductByArticle:", error.response || error);
     throw new Error(message);
   }
 };
@@ -138,6 +141,21 @@ export const deleteProduct = async (articleNumber: string): Promise<void> => {
   } catch (error: any) {
     const message = extractErrorMessage(error, "Не вдалося видалити товар");
     console.error(message);
+    throw new Error(message);
+  }
+};
+
+export const addProductWithImages = async (
+  formData: FormData
+): Promise<void> => {
+  try {
+    await apiClient.post("/products", formData, {
+      headers: {
+        ...getAuthHeaders(),
+      },
+    });
+  } catch (error: any) {
+    const message = extractErrorMessage(error, "Не вдалося додати товар");
     throw new Error(message);
   }
 };

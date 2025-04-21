@@ -1,22 +1,14 @@
+// DownloadReport.tsx
 "use client";
+
 import React from "react";
+import { toast } from "sonner";
+import { downloadReport } from "@/lib/api/excel-service";
 
 const DownloadReport: React.FC = () => {
   const handleDownload = async () => {
     try {
-      const response = await fetch("http://localhost:5000/generate-report", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error);
-      }
-
-      const blob = await response.blob();
+      const blob = await downloadReport();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -25,9 +17,9 @@ const DownloadReport: React.FC = () => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Помилка завантаження звіту:", error);
-      alert(`Помилка: ${(error as Error).message}`);
+      alert(`Помилка: ${error.message}`);
     }
   };
 

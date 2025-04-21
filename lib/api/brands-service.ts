@@ -12,7 +12,7 @@ export const fetchBrands = async (): Promise<Brand[]> => {
       headers: getAuthHeaders(),
     });
     return z.array(BrandSchema).parse(response.data);
-  } catch (error: any) {
+  } catch (error: unknown) {
     const message = extractErrorMessage(error, "Не вдалося завантажити бренди");
     console.error(message);
     throw new Error(message);
@@ -22,7 +22,7 @@ export const fetchBrands = async (): Promise<Brand[]> => {
 export const addBrand = async (brand: Brand): Promise<void> => {
   try {
     await apiClient.post("/brands", brand, { headers: getAuthHeaders() });
-  } catch (error: any) {
+  } catch (error: unknown) {
     const message = extractErrorMessage(error, "Не вдалося додати бренд");
     console.error(message);
     throw new Error(message);
@@ -35,7 +35,7 @@ export const fetchBrandById = async (brandId: number): Promise<Brand> => {
       headers: getAuthHeaders(),
     });
     return BrandSchema.parse(response.data);
-  } catch (error: any) {
+  } catch (error: unknown) {
     const message = extractErrorMessage(
       error,
       `Не вдалося завантажити бренд ${brandId}`
@@ -53,7 +53,7 @@ export const updateBrand = async (brand: Brand): Promise<void> => {
     await apiClient.put(`/brand/${brand.brandId}`, brand, {
       headers: getAuthHeaders(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     const message = extractErrorMessage(error, "Не вдалося оновити бренд");
     console.error(message);
     throw new Error(message);
@@ -63,7 +63,7 @@ export const updateBrand = async (brand: Brand): Promise<void> => {
 export const deleteBrand = async (brandId: number): Promise<void> => {
   try {
     await apiClient.delete(`/brand/${brandId}`, { headers: getAuthHeaders() });
-  } catch (error: any) {
+  } catch (error: unknown) {
     const message = extractErrorMessage(error, "Не вдалося видалити бренд");
     console.error(message);
     throw new Error(message);

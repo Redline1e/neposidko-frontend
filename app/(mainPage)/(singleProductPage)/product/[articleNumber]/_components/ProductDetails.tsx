@@ -22,7 +22,6 @@ const getSizeValue = (size: string) => {
 };
 
 interface ProductDetailsProps {
-  articleNumber: string;
   title: string;
   description: string;
   price: number;
@@ -35,7 +34,6 @@ interface ProductDetailsProps {
 }
 
 export const ProductDetails: React.FC<ProductDetailsProps> = ({
-  articleNumber,
   title,
   description,
   price,
@@ -166,7 +164,6 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
             </div>
           </AccordionContent>
         </AccordionItem>
-
         <AccordionItem value="2">
           <AccordionTrigger>Матеріали</AccordionTrigger>
           <AccordionContent>
@@ -182,7 +179,6 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
             </div>
           </AccordionContent>
         </AccordionItem>
-
         <AccordionItem value="3">
           <AccordionTrigger>Доставка та оплата</AccordionTrigger>
           <AccordionContent>

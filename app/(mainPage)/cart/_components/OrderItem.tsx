@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import type { OrderItemData, OrderItem as OrderItemType } from "@/utils/types";
 import {
@@ -41,12 +40,10 @@ const OrderItem: React.FC<OrderItemProps> = ({
   onItemUpdate,
   onItemDelete,
 }) => {
-  const router = useRouter();
   const [selectedSize, setSelectedSize] = useState<string>(item.size);
   const [selectedQuantity, setSelectedQuantity] = useState<number>(
     item.quantity
   );
-  const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [alertOpen, setAlertOpen] = useState<boolean>(false);
 
@@ -60,7 +57,6 @@ const OrderItem: React.FC<OrderItemProps> = ({
   }, [availableStock]);
 
   const handleSave = async () => {
-    setIsSaving(true);
     try {
       const updatedItem: OrderItemType = {
         productOrderId: item.productOrderId,
@@ -81,8 +77,6 @@ const OrderItem: React.FC<OrderItemProps> = ({
       onItemUpdate?.(newItem);
     } catch (error) {
       console.error("Помилка оновлення позиції:", error);
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -90,7 +84,7 @@ const OrderItem: React.FC<OrderItemProps> = ({
     setIsDeleting(true);
     try {
       await deleteOrderItem(item.productOrderId);
-      onItemDelete?.(item.productOrderId); // Передаємо ID видаленого товару
+      onItemDelete?.(item.productOrderId);
     } catch (error) {
       console.error("Помилка видалення позиції:", error);
     } finally {
@@ -114,7 +108,7 @@ const OrderItem: React.FC<OrderItemProps> = ({
       };
     }, 500);
     return () => clearTimeout(timer);
-  }, [selectedSize, selectedQuantity]);
+  }, [selectedSize, selectedQuantity, handleSave]);
 
   const originalPrice =
     item.discount > 0 ? item.price / (1 - item.discount / 100) : item.price;

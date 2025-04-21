@@ -40,17 +40,17 @@ export const fetchAllOrders = async (): Promise<Order[]> => {
     const response = await apiClient.get("/orders/all", {
       headers: getAuthHeaders(),
     });
+    console.log("fetchAllOrders response:", response.data);
     return z.array(OrderSchema).parse(response.data);
   } catch (error: any) {
-    const message = extractErrorMessage(
-      error,
-      "Не вдалося завантажити всі замовлення"
-    );
-    console.error(message);
-    throw new Error(message);
+    console.error("Помилка в fetchAllOrders:", {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+    });
+    throw new Error("Не вдалося завантажити всі замовлення");
   }
 };
-
 export const fetchOrderHistory = async (): Promise<Order[]> => {
   try {
     const response = await apiClient.get("/orders/history", {
@@ -67,29 +67,20 @@ export const fetchOrderHistory = async (): Promise<Order[]> => {
   }
 };
 
-export const fetchAdminOrders = async () => {
+export const fetchAdminOrders = async (): Promise<Order[]> => {
   try {
     const response = await apiClient.get("/admin/orders", {
       headers: getAuthHeaders(),
     });
-    return z
-      .array(
-        OrderSchema.extend({
-          userEmail: z.string(),
-          statusName: z.string(),
-          deliveryAddress: z.string().nullable(),
-          telephone: z.string().nullable(),
-          paymentMethod: z.string().nullable(),
-        })
-      )
-      .parse(response.data);
+    console.log("fetchAdminOrders response:", response.data);
+    return z.array(OrderSchema).parse(response.data);
   } catch (error: any) {
-    const message = extractErrorMessage(
-      error,
-      "Не вдалося завантажити замовлення для адміністратора"
-    );
-    console.error(message);
-    throw new Error(message);
+    console.error("Помилка в fetchAdminOrders:", {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+    });
+    throw new Error("Не вдалося завантажити замовлення для адміністратора");
   }
 };
 

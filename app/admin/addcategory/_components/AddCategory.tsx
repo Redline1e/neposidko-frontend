@@ -1,14 +1,18 @@
+// AddCategory.tsx
 "use client";
+
 import React, { useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
+import { addCategoryWithImage } from "@/lib/api/category-service";
+import Image from "next/image";
 
 // Схема валідації для категорії
 const categorySchema = z.object({
-  name: z.string().min(1, "Назва категорії є обов'язковою"),
+  name: z.string().min(1, "Назва категорії є обов&apos;язковою"),
   image: z
     .instanceof(File)
     .refine(
@@ -16,7 +20,6 @@ const categorySchema = z.object({
       "Максимальний розмір файлу 5MB"
     ),
 });
-
 type FormData = z.infer<typeof categorySchema>;
 
 const AddCategory: React.FC = () => {
@@ -28,7 +31,6 @@ const AddCategory: React.FC = () => {
   } = useForm<FormData>({
     resolver: zodResolver(categorySchema),
   });
-
   const [previewUrl, setPreviewUrl] = useState<string>("");
 
   const onDrop = useCallback(
@@ -52,14 +54,10 @@ const AddCategory: React.FC = () => {
     const formData = new FormData();
     formData.append("name", data.name);
     formData.append("image", data.image);
-
+    console.log("Name:", formData.get("name"));
+    console.log("Image:", formData.get("image"));
     try {
-      const response = await fetch("http://localhost:5000/categories", {
-        method: "POST",
-        body: formData,
-      });
-      if (!response.ok) throw new Error("Не вдалося додати категорію");
-      await response.json();
+      await addCategoryWithImage(formData);
       toast.success("Категорію успішно додано!");
       setPreviewUrl("");
     } catch (error) {

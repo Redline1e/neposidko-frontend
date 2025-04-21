@@ -13,13 +13,15 @@ import { Review } from "@/utils/types";
 import { toast } from "sonner";
 import { Star, Trash2, User2Icon } from "lucide-react";
 import { useAuth } from "@/lib/hooks/auth";
-import { fetchUserById } from "@/lib/api/user-service";
+import { fetchUserNameById } from "@/lib/api/user-service";
 
 interface CommentsSectionProps {
   articleNumber: string;
 }
 
-export const CommentsSection: React.FC<CommentsSectionProps> = ({ articleNumber }) => {
+export const CommentsSection: React.FC<CommentsSectionProps> = ({
+  articleNumber,
+}) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [newComment, setNewComment] = useState<string>("");
   const [newRating, setNewRating] = useState<number>(5);
@@ -27,7 +29,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({ articleNumber 
   const [editingReviewId, setEditingReviewId] = useState<number | null>(null);
   const [editComment, setEditComment] = useState<string>("");
   const [editRating, setEditRating] = useState<number>(5);
-  const [reviewUsers, setReviewUsers] = useState<Record<number, string>>({});
+  const [reviewUsers, setReviewUsers] = useState<Record<string, string>>({});
 
   const { isAuthenticated, user } = useAuth();
 
@@ -35,7 +37,13 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({ articleNumber 
     const loadReviews = async () => {
       try {
         const fetchedReviews = await fetchReviewsByArticle(articleNumber);
-        setReviews(fetchedReviews);
+        // Фільтруємо відгуки, щоб виключити ті, де userId не є валідним UUID
+        const uuidRegex =
+          /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+        const validReviews = fetchedReviews.filter((review) =>
+          uuidRegex.test(review.userId)
+        );
+        setReviews(validReviews);
       } catch (error) {
         console.error("Помилка завантаження відгуків:", error);
       }
@@ -45,16 +53,22 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({ articleNumber 
 
   useEffect(() => {
     const loadReviewUsers = async () => {
-      const uniqueUserIds = Array.from(new Set(reviews.map((r) => r.userId)));
-      const usersMap: Record<number, string> = { ...reviewUsers };
+      const uuidRegex =
+        /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+      const validReviews = reviews.filter((r) => uuidRegex.test(r.userId));
+      const uniqueUserIds = Array.from(
+        new Set(validReviews.map((r) => r.userId))
+      );
+      const usersMap: Record<string, string> = { ...reviewUsers };
 
       await Promise.all(
         uniqueUserIds.map(async (id) => {
           if (!usersMap[id]) {
             try {
-              const userData = await fetchUserById(id);
-              usersMap[id] = userData.name;
+              const userName = await fetchUserNameById(id);
+              usersMap[id] = userName;
             } catch (error) {
+              console.error(error);
               usersMap[id] = "Невідомий користувач";
             }
           }
@@ -67,7 +81,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({ articleNumber 
     if (reviews.length > 0) {
       loadReviewUsers();
     }
-  }, [reviews]);
+  }, [reviews, reviewUsers]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -111,6 +125,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({ articleNumber 
       );
       setEditingReviewId(null);
     } catch (error) {
+      console.error("Помилка під час збереження змін", error);
       toast.error("Не вдалося оновити відгук");
     }
   };
@@ -118,9 +133,12 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({ articleNumber 
   const handleDeleteReview = async (reviewId: number) => {
     try {
       await deleteReview(reviewId);
-      setReviews((prevReviews) => prevReviews.filter((r) => r.reviewId !== reviewId));
+      setReviews((prevReviews) =>
+        prevReviews.filter((r) => r.reviewId !== reviewId)
+      );
       toast.success("Відгук успішно видалено");
     } catch (error) {
+      console.error("Помилка під час видалення відгуку:", error);
       toast.error("Не вдалося видалити відгук");
     }
   };
@@ -128,7 +146,10 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({ articleNumber 
   const renderStars = (rating: number) => (
     <div className="flex">
       {Array.from({ length: 5 }, (_, i) => (
-        <Star key={i} className={i < rating ? "text-yellow-500" : "text-gray-300"} />
+        <Star
+          key={i}
+          className={i < rating ? "text-yellow-500" : "text-gray-300"}
+        />
       ))}
     </div>
   );
@@ -178,7 +199,8 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({ articleNumber 
               isAuthenticated &&
               user &&
               review.userId === user.userId &&
-              Date.now() - new Date(review.reviewDate).getTime() <= 10 * 60 * 1000;
+              Date.now() - new Date(review.reviewDate).getTime() <=
+                10 * 60 * 1000;
 
             return (
               <div

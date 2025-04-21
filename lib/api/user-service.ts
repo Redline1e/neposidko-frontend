@@ -17,7 +17,7 @@ export const fetchUser = async (): Promise<User> => {
       error,
       "Не вдалося отримати дані користувача"
     );
-    console.error(message);
+    console.error("Error in fetchUser:", error.response || error);
     throw new Error(message);
   }
 };
@@ -38,7 +38,7 @@ export const updateUser = async (data: {
       error,
       "Не вдалося оновити дані користувача"
     );
-    console.error(message);
+    console.error("Error in updateUser:", error.response || error);
     throw new Error(message);
   }
 };
@@ -75,7 +75,7 @@ export const getUserData = async (): Promise<User> => {
   }
 };
 
-export const fetchUserById = async (userId: number): Promise<User> => {
+export const fetchUserById = async (userId: string): Promise<User> => {
   try {
     const response = await apiClient.get(`/user/${userId}`, {
       headers: getAuthHeaders(),
@@ -108,7 +108,7 @@ export const fetchAdminUsers = async (): Promise<User[]> => {
 };
 
 export const updateAdminUser = async (
-  userId: number,
+  userId: string,
   data: Partial<User>
 ): Promise<User> => {
   try {
@@ -126,7 +126,7 @@ export const updateAdminUser = async (
   }
 };
 
-export const deleteAdminUser = async (userId: number): Promise<void> => {
+export const deleteAdminUser = async (userId: string): Promise<void> => {
   try {
     await apiClient.delete(`/admin/users/${userId}`, {
       headers: getAuthHeaders(),
@@ -138,5 +138,14 @@ export const deleteAdminUser = async (userId: number): Promise<void> => {
     );
     console.error(message);
     throw new Error(message);
+  }
+};
+export const fetchUserNameById = async (userId: string): Promise<string> => {
+  try {
+    const response = await apiClient.get(`/public/user/${userId}/name`);
+    return response.data.name;
+  } catch (error: any) {
+    console.error(`Помилка завантаження імені для userId ${userId}:`, error);
+    return "Невідомий користувач";
   }
 };

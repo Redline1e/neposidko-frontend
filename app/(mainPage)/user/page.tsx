@@ -17,12 +17,8 @@ const UserProfilePage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      window.location.href = "/login";
-      return;
-    }
-    fetchUser(token)
+    // Токен перевіряється всередині fetchUser (через getAuthHeaders)
+    fetchUser()
       .then((data: User) => setUser(data))
       .catch((error) => {
         console.error("Error fetching user data:", error);
@@ -38,7 +34,6 @@ const UserProfilePage: React.FC = () => {
       </div>
     );
   }
-
   return (
     <div className="w-full sm:w-[600px] mx-auto p-8">
       <h1 className="text-3xl font-bold mb-4">Вітаємо, {user?.name}!</h1>

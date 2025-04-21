@@ -12,6 +12,7 @@ import {
 import { addOrderItem } from "@/lib/api/order-items-service";
 import { Product, OrderItem } from "@/utils/types";
 import { toast } from "sonner";
+import Image from "next/image";
 
 interface SizeInfo {
   size: string;
@@ -23,10 +24,7 @@ export interface ProductItemProps {
   isFavoriteView?: boolean;
 }
 
-const ProductItem: React.FC<ProductItemProps> = ({
-  product,
-  isFavoriteView = false,
-}) => {
+const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
   const {
     articleNumber,
     price,
@@ -102,6 +100,7 @@ const ProductItem: React.FC<ProductItemProps> = ({
       await addOrderItem(cartItem);
       toast.success("Товар додано до кошика!");
     } catch (error) {
+      console.error("Помилка при додаванні до кошика:", error);
       toast.error("Не вдалося додати товар до кошика");
     }
   };
@@ -114,7 +113,7 @@ const ProductItem: React.FC<ProductItemProps> = ({
         }`}
       >
         <div className="relative w-full aspect-square">
-          <img
+          <Image
             src={imageSrc}
             alt={name}
             className="w-full h-full object-cover rounded-t-lg"

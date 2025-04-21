@@ -3,7 +3,8 @@ import React, { useState, useCallback } from "react";
 import Image from "next/image";
 import { useDropzone } from "react-dropzone";
 import { Category } from "@/utils/types";
-import { deleteCategory, updateCategory } from "@/lib/api/category-service";
+import { apiClient, getAuthHeaders } from "@/utils/apiClient";
+import { deleteCategory } from "@/lib/api/category-service";
 import { AdminItem } from "../../_components/AdminItem";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,7 +13,8 @@ import { toast } from "sonner";
 
 // Схема валідації для категорії
 const categorySchema = z.object({
-  name: z.string().min(1, "Назва категорії є обов'язковою"),
+    
+  name: z.string().min(1, `Назва категорії є обов&apos;язковою`),
   image: z
     .instanceof(File)
     .optional()
@@ -123,24 +125,25 @@ const renderCategoryEditForm = (
 };
 
 const updateCategoryWithImage = async (category: Category) => {
-  const formData = new FormData();
-  formData.append("name", category.name);
-  if (category.imageUrl && category.imageUrl.startsWith("blob:")) {
-    const response = await fetch(category.imageUrl);
-    const blob = await response.blob();
-    formData.append("image", blob, "category-image.jpg");
-  }
-
   try {
-    const response = await fetch(
-      `http://localhost:5000/categories/${category.categoryId}`,
-      {
-        method: "PUT",
-        body: formData,
-      }
-    );
-    if (!response.ok) throw new Error("Не вдалося оновити категорію");
-    await response.json();
+    const formData = new FormData();
+    formData.append("name", category.name);
+
+    // Якщо imageUrl є blob URL, завантажуємо файл і додаємо до FormData
+    if (category.imageUrl && category.imageUrl.startsWith("blob:")) {
+      const response = await fetch(category.imageUrl);
+      const blob = await response.blob();
+      formData.append("image", blob, "category-image.jpg");
+    }
+
+    // Використовуємо apiClient для відправки PUT запиту
+    await apiClient.put(`/categories/${category.categoryId}`, formData, {
+      headers: {
+        ...getAuthHeaders(),
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
     toast.success("Категорію успішно оновлено!");
   } catch (error) {
     toast.error("Помилка оновлення категорії");

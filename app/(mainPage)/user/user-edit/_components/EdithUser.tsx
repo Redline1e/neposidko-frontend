@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState, useCallback } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,7 +23,6 @@ const userSchema = z.object({
     ),
   deliveryAddress: z.string().optional(),
 });
-
 type FormData = z.infer<typeof userSchema>;
 
 const redirectToLogin = () => {
@@ -40,12 +38,7 @@ const EditUser: React.FC = () => {
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(userSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      telephone: "",
-      deliveryAddress: "",
-    },
+    defaultValues: { name: "", email: "", telephone: "", deliveryAddress: "" },
   });
 
   useEffect(() => {
@@ -56,7 +49,8 @@ const EditUser: React.FC = () => {
         return;
       }
       try {
-        const userData = await fetchUser(token);
+        // Використовуємо fetchUser() без передачі token
+        const userData = await fetchUser();
         reset({
           name: userData.name,
           email: userData.email,
@@ -71,7 +65,6 @@ const EditUser: React.FC = () => {
         setLoading(false);
       }
     };
-
     loadUserData();
   }, [reset]);
 
@@ -83,13 +76,13 @@ const EditUser: React.FC = () => {
       return;
     }
     try {
-      await updateUser(
-        token,
-        data.name,
-        data.email,
-        data.telephone,
-        data.deliveryAddress
-      );
+      // Викликаємо updateUser() із об'єктом даних (без token як параметра)
+      await updateUser({
+        name: data.name,
+        email: data.email,
+        telephone: data.telephone,
+        deliveryAddress: data.deliveryAddress,
+      });
       toast.success("Дані успішно оновлено!");
     } catch (error) {
       console.error("Error updating user:", error);

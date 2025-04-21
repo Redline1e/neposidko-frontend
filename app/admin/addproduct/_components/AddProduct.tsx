@@ -17,6 +17,7 @@ import {
 import { fetchBrands } from "@/lib/api/brands-service";
 import { fetchCategories } from "@/lib/api/category-service";
 import { toast } from "sonner";
+import { apiClient, getAuthHeaders } from "@/utils/apiClient";
 
 // Схема валідації для товару
 const productSchema = z.object({
@@ -114,22 +115,14 @@ const AddProduct: React.FC = () => {
     data.imageFiles.forEach((file) => formData.append("images", file));
 
     try {
-      const response = await fetch("http://localhost:5000/products", {
-        method: "POST",
-        body: formData,
+      await apiClient.post("/products", formData, {
+        headers: {
+          ...getAuthHeaders(),
+          "Content-Type": "multipart/form-data",
+        },
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        if (response.status === 409) {
-          toast.error("Товар з таким articleNumber уже існує");
-        } else {
-          throw new Error(errorData.message || "Не вдалося додати продукт");
-        }
-      } else {
-        toast.success("Товар успішно додано!");
-        setPreviewUrls([]);
-      }
+      toast.success("Товар успішно додано!");
+      setPreviewUrls([]);
     } catch (error: any) {
       console.error("Помилка при додаванні товару:", error);
       toast.error(error.message || "Не вдалося додати товар");

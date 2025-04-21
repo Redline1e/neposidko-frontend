@@ -21,7 +21,7 @@ import { Trash2, Edit } from "lucide-react";
 
 // Визначення типу User
 interface User {
-  userId: number;
+  userId: string;
   roleId: number;
   name: string;
   email: string;
@@ -45,7 +45,7 @@ const AdminUsersPage: React.FC = () => {
     loadUsers();
   }, []);
 
-  const handleUpdate = async (userId: number, data: Partial<User>) => {
+  const handleUpdate = async (userId: string, data: Partial<User>) => {
     try {
       await updateAdminUser(userId, data);
       setUsers(users.map((u) => (u.userId === userId ? { ...u, ...data } : u)));
@@ -54,7 +54,7 @@ const AdminUsersPage: React.FC = () => {
     }
   };
 
-  const handleDelete = async (userId: number) => {
+  const handleDelete = async (userId: string) => {
     try {
       await deleteAdminUser(userId);
       setUsers(users.filter((u) => u.userId !== userId));

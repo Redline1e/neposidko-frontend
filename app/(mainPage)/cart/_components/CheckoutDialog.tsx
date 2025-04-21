@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation";
 import { getToken } from "@/lib/hooks/getToken";
 import { apiClient } from "@/utils/apiClient";
 import { useAuth } from "@/lib/hooks/auth";
-import { Check } from "lucide-react"; // імпортуємо іконку галочки
+import { Check } from "lucide-react";
 
 // Схема валідації
 const checkoutSchema = z.object({
@@ -36,14 +36,12 @@ const checkoutSchema = z.object({
 export type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
 interface CheckoutDialogProps {
-  orderId?: number;
   onCheckoutSuccess: () => void;
   isOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
 
 const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
-  orderId,
   onCheckoutSuccess,
   isOpen: controlledOpen,
   onOpenChange,
@@ -113,8 +111,10 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
       setOpen(false);
       reset();
       onCheckoutSuccess();
-    } catch (error: any) {
-      toast.error(error.message || "Помилка оформлення замовлення");
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Невідома помилка";
+      toast.error(message || "Помилка оформлення замовлення");
     }
   };
 
@@ -210,7 +210,6 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
               </p>
             )}
           </div>
-          {/* Блок авторизації */}
           {!isAuthenticated ? (
             <div className="mt-4 p-4 border rounded-md bg-gray-100 flex flex-col space-y-2">
               <p className="text-sm text-gray-700">

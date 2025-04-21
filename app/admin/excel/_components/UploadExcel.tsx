@@ -1,5 +1,8 @@
+// UploadExcel.tsx
 "use client";
+
 import React, { useState } from "react";
+import { uploadExcelFile } from "@/lib/api/excel-service";
 
 const UploadExcel: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -16,22 +19,12 @@ const UploadExcel: React.FC = () => {
       alert("Виберіть файл!");
       return;
     }
-
     const formData = new FormData();
     formData.append("file", file);
-
     try {
-      const response = await fetch("http://localhost:5000/upload-excel", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await response.json();
-      if (response.ok) {
-        alert(data.message);
-      } else {
-        alert(data.error);
-      }
-    } catch (error) {
+      const data = await uploadExcelFile(formData);
+      alert(data.message);
+    } catch (error: any) {
       console.error("Помилка завантаження файлу:", error);
       alert("Помилка сервера");
     }

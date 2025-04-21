@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useCallback, useState, useEffect } from "react";
 import Image from "next/image";
 import { useDropzone } from "react-dropzone";
@@ -24,8 +25,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import { apiClient, getAuthHeaders } from "@/utils/apiClient";
 
-// Схема валідації без кастомних повідомлень для знижки
+// Схема валідації
 const createProductEditSchema = (
   discountMode: "percent" | "amount",
   price: number
@@ -52,6 +54,7 @@ const createProductEditSchema = (
 
 type FormData = z.infer<ReturnType<typeof createProductEditSchema>>;
 
+// Компонент для сортування зображень
 interface SortableImageProps {
   image: string;
   index: number;
@@ -106,6 +109,7 @@ const SortableImage: React.FC<SortableImageProps> = ({
   );
 };
 
+// Функція для відображення картки продукту
 const renderProductCard = (product: Product) => {
   const imageSrc = product.imageUrls?.[0] || "/fallback.jpg";
   const discountedPrice =
@@ -158,6 +162,7 @@ const renderProductCard = (product: Product) => {
   );
 };
 
+// Функція для відображення форми редагування
 const renderProductEditForm = (
   product: Product,
   onChange: (changed: Partial<Product>) => void
@@ -431,30 +436,24 @@ const renderProductEditForm = (
   );
 };
 
+// Функція для оновлення продукту через apiClient
 const updateProductWithImages = async (product: Product) => {
   const formData = new FormData();
   formData.append("brandId", String(product.brandId));
   formData.append("price", String(product.price));
+  formData.append("name", product.name);
+  formData.append("description", product.description);
+  formData.append("categoryId", String(product.categoryId));
+  formData.append("sizes", JSON.stringify(product.sizes || []));
 
-  // Якщо режим знижки передається, відправляємо його
-  if ((product as any).discountMode) {
-    formData.append("discountMode", (product as any).discountMode);
-  }
-
-  // Якщо потрібно, можна також провести конвертацію, наприклад,
-  // якщо бекенд завжди очікує відсоткове значення:
+  // Обробка знижки
   let discountToSave = product.discount;
   if ((product as any).discountMode === "amount") {
     discountToSave = (product.discount / product.price) * 100;
   }
   formData.append("discount", String(discountToSave));
 
-  formData.append("name", product.name);
-  formData.append("description", product.description);
-  formData.append("categoryId", String(product.categoryId));
-  formData.append("sizes", JSON.stringify(product.sizes || []));
-
-  // Обробка зображень (залишається без змін)
+  // Обробка зображень
   const existingImages = product.imageUrls.filter(
     (url) => !url.startsWith("blob:")
   );
@@ -467,15 +466,12 @@ const updateProductWithImages = async (product: Product) => {
   }
 
   try {
-    const response = await fetch(
-      `http://localhost:5000/product/${product.articleNumber}`,
-      {
-        method: "PUT",
-        body: formData,
-      }
-    );
-    if (!response.ok) throw new Error("Не вдалося оновити продукт");
-    await response.json();
+    await apiClient.put(`/product/${product.articleNumber}`, formData, {
+      headers: {
+        ...getAuthHeaders(),
+        "Content-Type": "multipart/form-data",
+      },
+    });
     toast.success("Продукт успішно оновлено!");
   } catch (error) {
     toast.error("Помилка оновлення продукту");
@@ -483,6 +479,7 @@ const updateProductWithImages = async (product: Product) => {
   }
 };
 
+// Експортований компонент ProductItem
 export const ProductItem: React.FC<{
   product: Product;
   onDelete: (product: Product) => Promise<void>;

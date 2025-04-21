@@ -32,7 +32,7 @@ export const ProductPage: React.FC = () => {
       try {
         const data = await fetchProductByArticle(articleNumber as string);
         setProduct(data);
-      } catch (err) {
+      } catch {
         setError("Не вдалося завантажити товар");
       } finally {
         setLoading(false);
@@ -52,8 +52,8 @@ export const ProductPage: React.FC = () => {
             (fav) => fav.articleNumber === product.articleNumber
           );
           setIsFavorite(isFav);
-        } catch (error) {
-          console.error("Помилка при перевірці обраного:", error);
+        } catch {
+          console.error("Помилка при перевірці обраного");
         }
       };
       checkFavorite();
@@ -81,7 +81,7 @@ export const ProductPage: React.FC = () => {
 
       await addOrderItem(cartItem);
       toast.success("Товар додано до кошика!");
-    } catch (error) {
+    } catch {
       toast.error("Не вдалося додати товар до кошика");
     }
   };
@@ -96,7 +96,7 @@ export const ProductPage: React.FC = () => {
         await removeFromFavorites(product.articleNumber);
         setIsFavorite(false);
       }
-    } catch (error) {
+    } catch {
       toast.error("Не вдалося оновити обране");
     }
   };
@@ -115,12 +115,11 @@ export const ProductPage: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
         <ProductImageGallery images={product.imageUrls} />
         <ProductDetails
-          articleNumber={product.articleNumber}
           title={product.name}
           description={product.description}
           price={product.price}
           discount={product.discount}
-          sizes={product.sizes} // Передаємо повний масив об’єктів
+          sizes={product.sizes}
           onAddToCart={handleAddToCart}
           onSizeSelect={handleSizeSelect}
           onToggleWishlist={handleToggleWishlist}

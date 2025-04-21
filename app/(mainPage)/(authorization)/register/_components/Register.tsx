@@ -49,8 +49,10 @@ const RegisterPage: FC = () => {
         router.push("/");
       }
       toast.success("Авторизація успішна!");
-    } catch (error: any) {
-      toast.error(error.message || "Помилка авторизації");
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Невідома помилка";
+      toast.error(message || "Помилка реєстрації");
     }
   };
 
