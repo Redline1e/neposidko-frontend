@@ -5,7 +5,6 @@ import {
 } from "@/utils/apiClient";
 import { Product, ProductSchema } from "@/utils/types";
 import { toast } from "sonner";
-import { fetchProductByArticle } from "./product-service";
 import { z } from "zod";
 
 export const addToFavorites = async (articleNumber: string): Promise<void> => {
@@ -25,7 +24,7 @@ export const addToFavorites = async (articleNumber: string): Promise<void> => {
       }
     }
     window.dispatchEvent(new Event("favoritesUpdated"));
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       "Не вдалося додати товар до улюблених"
@@ -42,16 +41,10 @@ export const fetchFavorites = async (): Promise<Product[]> => {
     if (headers.Authorization) {
       const response = await apiClient.get("/favorites", { headers });
       return z.array(ProductSchema).parse(response.data);
-    } else {
-      const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-      const products = await Promise.all(
-        favorites.map((articleNumber: string) =>
-          fetchProductByArticle(articleNumber)
-        )
-      );
-      return products;
     }
-  } catch (error: any) {
+    const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+    return favorites;
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       "Не вдалося завантажити улюблені товари"
@@ -71,11 +64,10 @@ export const isProductFavorite = async (
         headers,
       });
       return response.data.isFavorite;
-    } else {
-      const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-      return favorites.includes(articleNumber);
     }
-  } catch (error: any) {
+    const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+    return favorites.includes(articleNumber);
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       "Не вдалося перевірити статус улюбленого товару"
@@ -102,7 +94,7 @@ export const removeFromFavorites = async (
       toast.success("Товар видалено з улюблених");
     }
     window.dispatchEvent(new Event("favoritesUpdated"));
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       "Не вдалося видалити товар з улюблених"
@@ -119,11 +111,10 @@ export const fetchFavoritesCount = async (): Promise<number> => {
     if (headers.Authorization) {
       const response = await apiClient.get("/favorites/count", { headers });
       return response.data.count;
-    } else {
-      const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-      return favorites.length;
     }
-  } catch (error: any) {
+    const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+    return favorites.length;
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       "Не вдалося підрахувати улюблені товари"

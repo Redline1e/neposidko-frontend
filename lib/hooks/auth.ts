@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { apiClient, extractErrorMessage } from "@/utils/apiClient";
+import { apiClient } from "@/utils/apiClient";
 import { User, UserSchema } from "@/utils/types";
 
 

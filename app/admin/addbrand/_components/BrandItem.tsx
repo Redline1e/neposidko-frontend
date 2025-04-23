@@ -6,7 +6,6 @@ import { deleteBrand, updateBrand } from "@/lib/api/brands-service";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { toast } from "sonner";
 
 // Схема валідації для бренду
 const brandSchema = z.object({
@@ -25,10 +24,10 @@ const renderBrandCard = (brand: Brand) => (
   </div>
 );
 
-const renderBrandEditForm = (
-  brand: Brand,
-  onChange: (changed: Partial<Brand>) => void
-) => {
+const BrandEditForm: React.FC<{
+  brand: Brand;
+  onChange: (changed: Partial<Brand>) => void;
+}> = ({ brand, onChange }) => {
   const {
     register,
     formState: { errors },
@@ -58,8 +57,10 @@ export const BrandItem: React.FC<{ brand: Brand }> = ({ brand }) => (
     item={brand}
     itemLabel="бренд"
     renderCard={renderBrandCard}
-    renderEditForm={renderBrandEditForm}
-    onSave={updateBrand} // Передаємо функцію напряму
+    renderEditForm={(brand, onChange) => (
+      <BrandEditForm brand={brand} onChange={onChange} />
+    )}
+    onSave={updateBrand}
     onDelete={(item) => deleteBrand(item.brandId)}
   />
 );

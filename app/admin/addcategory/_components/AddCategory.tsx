@@ -1,4 +1,3 @@
-// AddCategory.tsx
 "use client";
 
 import React, { useState, useCallback } from "react";
@@ -12,14 +11,15 @@ import Image from "next/image";
 
 // Схема валідації для категорії
 const categorySchema = z.object({
-  name: z.string().min(1, "Назва категорії є обов&apos;язковою"),
+  name: z.string().min(1, "Назва категорії є обов'язковою"),
   image: z
-    .instanceof(File)
+    .any()
     .refine(
-      (file) => file.size <= 5 * 1024 * 1024,
+      (file) => file instanceof File && file.size <= 5 * 1024 * 1024,
       "Максимальний розмір файлу 5MB"
     ),
 });
+
 type FormData = z.infer<typeof categorySchema>;
 
 const AddCategory: React.FC = () => {
@@ -54,13 +54,13 @@ const AddCategory: React.FC = () => {
     const formData = new FormData();
     formData.append("name", data.name);
     formData.append("image", data.image);
-    console.log("Name:", formData.get("name"));
-    console.log("Image:", formData.get("image"));
+
     try {
       await addCategoryWithImage(formData);
       toast.success("Категорію успішно додано!");
       setPreviewUrl("");
     } catch (error) {
+      console.error("Помилка додавання категорії:", error);
       toast.error("Не вдалося додати категорію");
     }
   };
@@ -81,7 +81,9 @@ const AddCategory: React.FC = () => {
           className="border p-2 rounded-md w-full"
         />
         {errors.name && (
-          <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+          <p className="text-red-500 text-sm mt-1">
+            {errors.name.message as string}
+          </p>
         )}
       </div>
       <div>
@@ -102,15 +104,23 @@ const AddCategory: React.FC = () => {
           )}
         </div>
         {previewUrl && (
-          <img
-            src={previewUrl}
-            alt="Preview"
-            className="mt-2 h-24 w-full object-cover rounded"
-            onError={(e) => (e.currentTarget.src = "/fallback.jpg")}
-          />
+          <div className="mt-2 h-24 w-full relative rounded overflow-hidden">
+            <Image
+              src={previewUrl}
+              alt="Preview"
+              fill
+              sizes="(max-width: 640px) 100vw, 640px"
+              className="object-cover"
+              onError={(e) => {
+                e.currentTarget.src = "/fallback.jpg";
+              }}
+            />
+          </div>
         )}
         {errors.image && (
-          <p className="text-red-500 text-sm mt-1">{errors.image.message}</p>
+          <p className="text-red-500 text-sm mt-1">
+            {errors.image.message as string}
+          </p>
         )}
       </div>
       <button

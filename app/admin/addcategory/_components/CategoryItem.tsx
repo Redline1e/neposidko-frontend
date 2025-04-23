@@ -13,8 +13,7 @@ import { toast } from "sonner";
 
 // Схема валідації для категорії
 const categorySchema = z.object({
-    
-  name: z.string().min(1, `Назва категорії є обов&apos;язковою`),
+  name: z.string().min(1, "Назва категорії є обов'язковою"),
   image: z
     .instanceof(File)
     .optional()
@@ -42,10 +41,10 @@ const renderCategoryCard = (category: Category) => (
   </div>
 );
 
-const renderCategoryEditForm = (
-  category: Category,
-  onChange: (changed: Partial<Category>) => void
-) => {
+const CategoryEditForm: React.FC<{
+  category: Category;
+  onChange: (changed: Partial<Category>) => void;
+}> = ({ category, onChange }) => {
   const [previewUrl, setPreviewUrl] = useState<string>(category.imageUrl || "");
   const {
     register,
@@ -88,7 +87,9 @@ const renderCategoryEditForm = (
           onChange={(e) => onChange({ name: e.target.value })}
         />
         {errors.name && (
-          <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+          <p className="text-red-500 text-sm mt-1">
+            {errors.name.message as string}
+          </p>
         )}
       </div>
       <div>
@@ -107,17 +108,21 @@ const renderCategoryEditForm = (
           )}
         </div>
         {previewUrl && (
-          <Image
-            src={previewUrl}
-            alt="Зображення категорії"
-            width={300}
-            height={300}
-            className="mt-4 w-full h-56 object-contain rounded"
-            onError={(e) => (e.currentTarget.src = "/fallback.jpg")}
-          />
+          <div className="mt-4 w-full h-56 relative rounded overflow-hidden">
+            <Image
+              src={previewUrl}
+              alt="Зображення категорії"
+              fill
+              sizes="(max-width: 300px) 100vw, 300px"
+              className="object-contain"
+              onError={(e) => (e.currentTarget.src = "/fallback.jpg")}
+            />
+          </div>
         )}
         {errors.image && (
-          <p className="text-red-500 text-sm mt-1">{errors.image.message}</p>
+          <p className="text-red-500 text-sm mt-1">
+            {errors.image.message as string}
+          </p>
         )}
       </div>
     </div>
@@ -129,14 +134,12 @@ const updateCategoryWithImage = async (category: Category) => {
     const formData = new FormData();
     formData.append("name", category.name);
 
-    // Якщо imageUrl є blob URL, завантажуємо файл і додаємо до FormData
     if (category.imageUrl && category.imageUrl.startsWith("blob:")) {
       const response = await fetch(category.imageUrl);
       const blob = await response.blob();
       formData.append("image", blob, "category-image.jpg");
     }
 
-    // Використовуємо apiClient для відправки PUT запиту
     await apiClient.put(`/categories/${category.categoryId}`, formData, {
       headers: {
         ...getAuthHeaders(),
@@ -146,6 +149,7 @@ const updateCategoryWithImage = async (category: Category) => {
 
     toast.success("Категорію успішно оновлено!");
   } catch (error) {
+    console.error("Помилка оновлення категорії:", error);
     toast.error("Помилка оновлення категорії");
     throw error;
   }
@@ -159,7 +163,9 @@ export const CategoriesItem: React.FC<{ category: Category }> = ({
       item={category}
       itemLabel="категорія"
       renderCard={renderCategoryCard}
-      renderEditForm={renderCategoryEditForm}
+      renderEditForm={(category, onChange) => (
+        <CategoryEditForm category={category} onChange={onChange} />
+      )}
       onSave={updateCategoryWithImage}
       onDelete={(item) => deleteCategory(item.categoryId)}
     />

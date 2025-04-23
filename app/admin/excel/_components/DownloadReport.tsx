@@ -1,8 +1,6 @@
-// DownloadReport.tsx
 "use client";
 
 import React from "react";
-import { toast } from "sonner";
 import { downloadReport } from "@/lib/api/excel-service";
 
 const DownloadReport: React.FC = () => {
@@ -17,9 +15,13 @@ const DownloadReport: React.FC = () => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Помилка завантаження звіту:", error);
-      alert(`Помилка: ${error.message}`);
+      alert(
+        `Помилка: ${
+          error instanceof Error ? error.message : "Невідома помилка"
+        }`
+      );
     }
   };
 

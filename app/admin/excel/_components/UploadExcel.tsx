@@ -1,4 +1,3 @@
-// UploadExcel.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -24,7 +23,7 @@ const UploadExcel: React.FC = () => {
     try {
       const data = await uploadExcelFile(formData);
       alert(data.message);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Помилка завантаження файлу:", error);
       alert("Помилка сервера");
     }

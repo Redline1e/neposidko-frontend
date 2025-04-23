@@ -12,7 +12,7 @@ export const fetchOrders = async (): Promise<Order[]> => {
       headers: getAuthHeaders(),
     });
     return z.array(OrderSchema).parse(response.data);
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       "Не вдалося завантажити замовлення"
@@ -28,7 +28,7 @@ export const addOrder = async (order: Order): Promise<Order> => {
       headers: getAuthHeaders(),
     });
     return OrderSchema.parse(response.data);
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(error, "Не вдалося додати замовлення");
     console.error(message);
     throw new Error(message);
@@ -40,24 +40,23 @@ export const fetchAllOrders = async (): Promise<Order[]> => {
     const response = await apiClient.get("/orders/all", {
       headers: getAuthHeaders(),
     });
-    console.log("fetchAllOrders response:", response.data);
     return z.array(OrderSchema).parse(response.data);
-  } catch (error: any) {
-    console.error("Помилка в fetchAllOrders:", {
-      status: error.response?.status,
-      data: error.response?.data,
-      message: error.message,
-    });
+  } catch (error) {
+    console.error(
+      "Помилка в fetchAllOrders:",
+      error instanceof Error ? error.message : error
+    );
     throw new Error("Не вдалося завантажити всі замовлення");
   }
 };
+
 export const fetchOrderHistory = async (): Promise<Order[]> => {
   try {
     const response = await apiClient.get("/orders/history", {
       headers: getAuthHeaders(),
     });
     return z.array(OrderSchema).parse(response.data);
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       "Не вдалося завантажити історію замовлень"
@@ -72,14 +71,12 @@ export const fetchAdminOrders = async (): Promise<Order[]> => {
     const response = await apiClient.get("/admin/orders", {
       headers: getAuthHeaders(),
     });
-    console.log("fetchAdminOrders response:", response.data);
     return z.array(OrderSchema).parse(response.data);
-  } catch (error: any) {
-    console.error("Помилка в fetchAdminOrders:", {
-      status: error.response?.status,
-      data: error.response?.data,
-      message: error.message,
-    });
+  } catch (error) {
+    console.error(
+      "Помилка в fetchAdminOrders:",
+      error instanceof Error ? error.message : error
+    );
     throw new Error("Не вдалося завантажити замовлення для адміністратора");
   }
 };
@@ -90,7 +87,7 @@ export const fetchAdminOrderDetails = async (orderId: number) => {
       headers: getAuthHeaders(),
     });
     return response.data;
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       `Не вдалося завантажити деталі замовлення ${orderId}`
@@ -109,7 +106,7 @@ export const updateAdminOrder = async (
       headers: getAuthHeaders(),
     });
     return OrderSchema.parse(response.data);
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       `Не вдалося оновити замовлення ${orderId}`
@@ -124,7 +121,7 @@ export const deleteAdminOrder = async (orderId: number) => {
     await apiClient.delete(`/admin/orders/${orderId}`, {
       headers: getAuthHeaders(),
     });
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       `Не вдалося видалити замовлення ${orderId}`

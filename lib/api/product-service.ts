@@ -11,11 +11,13 @@ export const fetchProducts = async (): Promise<Product[]> => {
     const response = await apiClient.get("/products", {
       headers: getAuthHeaders(),
     });
-    console.log("Fetched products response:", response.data); // Логування отриманих даних
     return z.array(ProductSchema).parse(response.data);
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(error, "Не вдалося завантажити товари");
-    console.error("Error in fetchProducts:", error.response || error);
+    console.error(
+      "Error in fetchProducts:",
+      error instanceof Error ? error.message : error
+    );
     throw new Error(message);
   }
 };
@@ -26,13 +28,12 @@ export const fetchActiveProducts = async (): Promise<Product[]> => {
       headers: getAuthHeaders(),
     });
     const products: Product[] = z.array(ProductSchema).parse(response.data);
-    // Забезпечуємо, що product.sizes завжди є масивом
     return products.filter((product: Product) =>
       (product.sizes ?? []).some(
         (size: { size: string; stock: number }) => size.stock > 0
       )
     );
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       "Не вдалося завантажити активні товари"
@@ -48,7 +49,7 @@ export const fetchInactiveProducts = async (): Promise<Product[]> => {
       headers: getAuthHeaders(),
     });
     return z.array(ProductSchema).parse(response.data);
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       "Не вдалося завантажити неактивні товари"
@@ -61,7 +62,7 @@ export const fetchInactiveProducts = async (): Promise<Product[]> => {
 export const addProduct = async (product: Product): Promise<void> => {
   try {
     await apiClient.post("/products", product, { headers: getAuthHeaders() });
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(error, "Не вдалося додати товар");
     console.error(message);
     throw new Error(message);
@@ -75,14 +76,16 @@ export const fetchProductByArticle = async (
     const response = await apiClient.get(`/product/${articleNumber}`, {
       headers: getAuthHeaders(),
     });
-    console.log("Fetched product:", response.data); // Логування для налагодження
     return ProductSchema.parse(response.data);
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       `Не вдалося завантажити товар ${articleNumber}`
     );
-    console.error("Error in fetchProductByArticle:", error.response || error);
+    console.error(
+      "Error in fetchProductByArticle:",
+      error instanceof Error ? error.message : error
+    );
     throw new Error(message);
   }
 };
@@ -94,7 +97,7 @@ export const searchProducts = async (query: string): Promise<Product[]> => {
       { headers: getAuthHeaders() }
     );
     return z.array(ProductSchema).parse(response.data);
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(error, "Не вдалося виконати пошук");
     console.error(message);
     throw new Error(message);
@@ -106,7 +109,7 @@ export const updateProduct = async (product: Product): Promise<void> => {
     await apiClient.put(`/product/${product.articleNumber}`, product, {
       headers: getAuthHeaders(),
     });
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(error, "Не вдалося оновити товар");
     console.error(message);
     throw new Error(message);
@@ -123,7 +126,7 @@ export const updateProductActiveStatus = async (
       { isActive },
       { headers: getAuthHeaders() }
     );
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       "Не вдалося оновити статус активності товару"
@@ -138,7 +141,7 @@ export const deleteProduct = async (articleNumber: string): Promise<void> => {
     await apiClient.delete(`/product/${articleNumber}`, {
       headers: getAuthHeaders(),
     });
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(error, "Не вдалося видалити товар");
     console.error(message);
     throw new Error(message);
@@ -154,7 +157,7 @@ export const addProductWithImages = async (
         ...getAuthHeaders(),
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(error, "Не вдалося додати товар");
     throw new Error(message);
   }

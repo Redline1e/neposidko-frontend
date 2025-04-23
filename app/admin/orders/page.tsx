@@ -18,7 +18,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Trash2, Edit } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 // Визначення типу OrderItem
 interface OrderItem {
@@ -33,14 +33,15 @@ interface OrderItem {
 // Визначення типу Order
 interface Order {
   orderId: number;
-  userId: number;
+  userId: string | null; // Відповідає API
   orderStatusId: number | null;
   orderDate: string;
-  userEmail: string;
-  statusName: string;
-  deliveryAddress: string | null;
-  telephone: string | null;
-  paymentMethod: string | null;
+  userEmail: string | null;
+  // Нові поля з деталей замовлення
+  statusName?: string;
+  deliveryAddress?: string;
+  telephone?: string;
+  paymentMethod?: string;
   items?: OrderItem[];
 }
 
@@ -51,19 +52,27 @@ const AdminOrdersPage: React.FC = () => {
   useEffect(() => {
     const loadOrders = async () => {
       try {
-        const data = await fetchAdminOrders();
+        const ordersList = await fetchAdminOrders();
+
         const ordersWithDetails = await Promise.all(
-          data.map(async (order) => {
+          ordersList.map(async (order) => {
             const details = await fetchAdminOrderDetails(order.orderId);
-            console.log(`Order ${order.orderId} items:`, details.items);
-            return { ...order, items: details.items };
+
+            return {
+              ...order,
+              ...details, // Об'єднуємо основні дані з деталями
+              items: details.items,
+              userId: order.userId, // Зберігаємо оригінальний тип
+            } as Order;
           })
         );
+
         setOrders(ordersWithDetails);
       } catch (error) {
-        console.error("Помилка завантаження замовлень:", error);
+        console.error("Помилка завантаження:", error);
       }
     };
+
     loadOrders();
   }, []);
 

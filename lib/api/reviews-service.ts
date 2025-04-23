@@ -16,7 +16,7 @@ export const createReview = async (reviewData: {
       headers: getAuthHeaders(),
     });
     return ReviewSchema.parse(response.data);
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(error, "Не вдалося створити відгук");
     console.error(message);
     throw new Error(message);
@@ -31,7 +31,7 @@ export const fetchReviewsByArticle = async (
       headers: getAuthHeaders(),
     });
     return z.array(ReviewSchema).parse(response.data);
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       "Не вдалося завантажити відгуки"
@@ -50,7 +50,7 @@ export const updateReview = async (
       headers: getAuthHeaders(),
     });
     return ReviewSchema.parse(response.data);
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(error, "Не вдалося оновити відгук");
     console.error(message);
     throw new Error(message);
@@ -62,7 +62,7 @@ export const deleteReview = async (reviewId: number): Promise<void> => {
     await apiClient.delete(`/reviews/${reviewId}`, {
       headers: getAuthHeaders(),
     });
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(error, "Не вдалося видалити відгук");
     console.error(message);
     throw new Error(message);
@@ -82,7 +82,7 @@ export const fetchAdminReviews = async (): Promise<Review[]> => {
         })
       )
       .parse(response.data);
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       "Не вдалося завантажити відгуки для адміністратора"
@@ -101,7 +101,7 @@ export const updateAdminReview = async (
       headers: getAuthHeaders(),
     });
     return ReviewSchema.parse(response.data);
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       `Не вдалося оновити відгук ${reviewId}`
@@ -116,7 +116,7 @@ export const deleteAdminReview = async (reviewId: number): Promise<void> => {
     await apiClient.delete(`/admin/reviews/${reviewId}`, {
       headers: getAuthHeaders(),
     });
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       `Не вдалося видалити відгук ${reviewId}`

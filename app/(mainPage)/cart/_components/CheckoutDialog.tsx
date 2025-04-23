@@ -36,6 +36,7 @@ const checkoutSchema = z.object({
 export type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
 interface CheckoutDialogProps {
+  orderId: number;
   onCheckoutSuccess: () => void;
   isOpen?: boolean;
   onOpenChange?: (open: boolean) => void;

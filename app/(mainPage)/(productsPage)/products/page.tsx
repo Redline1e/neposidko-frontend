@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { FilterSidebar } from "./_components/FilterSidebar";
 import ProductDisplay from "./_components/ProductDisplay";
 import SortSelect from "./_components/SortSelect";
+import LoadingSkeleton from "./_components/LoadingSkeleton";
 
 export interface FiltersState {
   categories: string[];
@@ -13,7 +14,7 @@ export interface FiltersState {
   discountOnly: boolean;
 }
 
-export default function Home() {
+function ProductsContent() {
   const searchParams = useSearchParams();
   const categoryQuery = searchParams.get("categories") || "";
   const initialFilters: FiltersState = {
@@ -40,5 +41,13 @@ export default function Home() {
       </main>
       <SortSelect sortOrder={sortOrder} setSortOrder={setSortOrder} />
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<LoadingSkeleton />}>
+      <ProductsContent />
+    </Suspense>
   );
 }

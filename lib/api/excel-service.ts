@@ -11,7 +11,7 @@ export const downloadReport = async (): Promise<Blob> => {
       responseType: "blob",
     });
     return response.data;
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(error, "Не вдалося сформувати звіт");
     throw new Error(message);
   }
@@ -25,7 +25,7 @@ export const uploadExcelFile = async (
       headers: {},
     });
     return response.data;
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       "Не вдалося завантажити Excel файл"

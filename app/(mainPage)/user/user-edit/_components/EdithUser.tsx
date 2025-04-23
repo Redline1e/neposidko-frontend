@@ -49,7 +49,6 @@ const EditUser: React.FC = () => {
         return;
       }
       try {
-        // Використовуємо fetchUser() без передачі token
         const userData = await fetchUser();
         reset({
           name: userData.name,
@@ -76,7 +75,6 @@ const EditUser: React.FC = () => {
       return;
     }
     try {
-      // Викликаємо updateUser() із об'єктом даних (без token як параметра)
       await updateUser({
         name: data.name,
         email: data.email,
@@ -106,7 +104,7 @@ const EditUser: React.FC = () => {
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium">Ім'я</label>
+            <label className="block text-sm font-medium">Ім&#39;я</label>
             <Controller
               control={control}
               name="name"

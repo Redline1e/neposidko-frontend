@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import { Order, OrderItem } from "@/utils/types";
 import { fetchOrderHistory } from "@/lib/api/order-service";
 import { fetchOrderHistoryItems } from "@/lib/api/order-items-service";
@@ -110,18 +111,23 @@ const OrderHistory: React.FC = () => {
                     const productImage =
                       item.imageUrls && item.imageUrls.length > 0
                         ? item.imageUrls[0]
-                        : "https://via.placeholder.com/50";
+                        : "/placeholder-product.png";
                     const productName = item.name || item.articleNumber;
                     return (
                       <li
                         key={item.productOrderId}
                         className="flex flex-row items-center p-2 border rounded-lg bg-gray-50 space-x-4"
                       >
-                        <img
-                          src={productImage}
-                          alt={productName}
-                          className="w-20 h-20 object-cover rounded-lg"
-                        />
+                        <div className="relative w-20 h-20">
+                          <Image
+                            src={productImage}
+                            alt={productName}
+                            fill
+                            sizes="(max-width: 80px) 100vw"
+                            className="object-cover rounded-lg"
+                            quality={80}
+                          />
+                        </div>
                         <div className="text-left">
                           <p className="font-semibold">{productName}</p>
                           <p className="text-gray-600 text-sm">

@@ -12,12 +12,12 @@ export const fetchUser = async (): Promise<User> => {
       headers: getAuthHeaders(),
     });
     return UserSchema.parse(response.data);
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       "Не вдалося отримати дані користувача"
     );
-    console.error("Error in fetchUser:", error.response || error);
+    console.error("Error in fetchUser:", error);
     throw new Error(message);
   }
 };
@@ -33,12 +33,12 @@ export const updateUser = async (data: {
       headers: getAuthHeaders(),
     });
     return UserSchema.parse(response.data);
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       "Не вдалося оновити дані користувача"
     );
-    console.error("Error in updateUser:", error.response || error);
+    console.error("Error in updateUser:", error);
     throw new Error(message);
   }
 };
@@ -49,7 +49,7 @@ export const deleteUser = async (): Promise<{ message: string }> => {
       headers: getAuthHeaders(),
     });
     return response.data;
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       "Не вдалося видалити користувача"
@@ -65,7 +65,7 @@ export const getUserData = async (): Promise<User> => {
       headers: getAuthHeaders(),
     });
     return UserSchema.parse(response.data);
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       "Не вдалося отримати дані про користувача"
@@ -81,7 +81,7 @@ export const fetchUserById = async (userId: string): Promise<User> => {
       headers: getAuthHeaders(),
     });
     return UserSchema.parse(response.data);
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       `Не вдалося отримати дані користувача за ID ${userId}`
@@ -97,7 +97,7 @@ export const fetchAdminUsers = async (): Promise<User[]> => {
       headers: getAuthHeaders(),
     });
     return z.array(UserSchema).parse(response.data);
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       "Не вдалося завантажити користувачів для адміністратора"
@@ -116,7 +116,7 @@ export const updateAdminUser = async (
       headers: getAuthHeaders(),
     });
     return UserSchema.parse(response.data);
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       `Не вдалося оновити користувача ${userId}`
@@ -131,7 +131,7 @@ export const deleteAdminUser = async (userId: string): Promise<void> => {
     await apiClient.delete(`/admin/users/${userId}`, {
       headers: getAuthHeaders(),
     });
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       `Не вдалося видалити користувача ${userId}`
@@ -140,11 +140,12 @@ export const deleteAdminUser = async (userId: string): Promise<void> => {
     throw new Error(message);
   }
 };
+
 export const fetchUserNameById = async (userId: string): Promise<string> => {
   try {
     const response = await apiClient.get(`/public/user/${userId}/name`);
     return response.data.name;
-  } catch (error: any) {
+  } catch (error) {
     console.error(`Помилка завантаження імені для userId ${userId}:`, error);
     return "Невідомий користувач";
   }

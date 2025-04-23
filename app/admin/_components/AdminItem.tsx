@@ -97,12 +97,14 @@ export function AdminItem<T extends object>({
               <div className="absolute top-2 right-2">
                 <span
                   className={`ml-2 text-md font-semibold ${
-                    (formData as any).isActive
+                    (formData as { isActive?: boolean }).isActive
                       ? "text-green-600"
                       : "text-red-600"
                   }`}
                 >
-                  {(formData as any).isActive ? "Активний" : "Неактивний"}
+                  {(formData as { isActive?: boolean }).isActive
+                    ? "Активний"
+                    : "Неактивний"}
                 </span>
               </div>
             )}
@@ -121,11 +123,13 @@ export function AdminItem<T extends object>({
               className="gap-x-2"
             >
               <Switch
-                checked={(formData as any).isActive}
+                checked={(formData as { isActive?: boolean }).isActive}
                 onCheckedChange={handleToggleActive}
               />
               <span>
-                {(formData as any).isActive ? "Активний" : "Неактивний"}
+                {(formData as { isActive?: boolean }).isActive
+                  ? "Активний"
+                  : "Неактивний"}
               </span>
             </ContextMenuItem>
           )}

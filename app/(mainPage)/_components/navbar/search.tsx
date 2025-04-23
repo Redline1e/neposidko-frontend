@@ -8,6 +8,7 @@ import React, {
   ChangeEvent,
 } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { X, Frown } from "lucide-react";
 import { searchProducts } from "@/lib/api/product-service";
@@ -92,31 +93,38 @@ export const Search = () => {
         <div className="absolute left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg max-h-60 overflow-y-auto z-10">
           {results.length > 0 ? (
             <ul>
-              {results.map((product) => (
-                <li
-                  key={product.articleNumber}
-                  className="p-2 hover:bg-neutral-100 transition-colors duration-200"
-                >
-                  <Link
-                    href={`/product/${product.articleNumber}`}
-                    onClick={() => setShowDropdown(false)}
-                    className="flex items-center"
+              {results.map((product) => {
+                const imageUrl = Array.isArray(product.imageUrls)
+                  ? product.imageUrls[0]
+                  : product.imageUrls;
+
+                return (
+                  <li
+                    key={product.articleNumber}
+                    className="p-2 hover:bg-neutral-100 transition-colors duration-200"
                   >
-                    <img
-                      src={
-                        Array.isArray(product.imageUrls)
-                          ? product.imageUrls[0]
-                          : product.imageUrls
-                      }
-                      alt={product.name}
-                      className="w-10 h-10 object-cover rounded mr-2"
-                    />
-                    <span className="text-neutral-700 truncate">
-                      {product.name}
-                    </span>
-                  </Link>
-                </li>
-              ))}
+                    <Link
+                      href={`/product/${product.articleNumber}`}
+                      onClick={() => setShowDropdown(false)}
+                      className="flex items-center"
+                    >
+                      <div className="relative w-10 h-10 mr-2">
+                        <Image
+                          src={imageUrl || "/placeholder-product.png"}
+                          alt={product.name}
+                          fill
+                          sizes="(max-width: 40px) 40px"
+                          className="object-cover rounded"
+                          quality={60}
+                        />
+                      </div>
+                      <span className="text-neutral-700 truncate">
+                        {product.name}
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           ) : (
             <div className="p-4 flex items-center justify-center text-neutral-500">

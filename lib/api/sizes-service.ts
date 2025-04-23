@@ -12,7 +12,7 @@ export const fetchSizes = async (): Promise<Sizes[]> => {
       headers: getAuthHeaders(),
     });
     return z.array(SizesSchema).parse(response.data);
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       "Не вдалося завантажити розміри"

@@ -114,6 +114,8 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
       >
         <div className="relative w-full aspect-square">
           <Image
+            width={400}
+            height={600}
             src={imageSrc}
             alt={name}
             className="w-full h-full object-cover rounded-t-lg"

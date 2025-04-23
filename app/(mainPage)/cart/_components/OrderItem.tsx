@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import Image from "next/image";
 import type { OrderItemData, OrderItem as OrderItemType } from "@/utils/types";
 import {
@@ -40,23 +46,21 @@ const OrderItem: React.FC<OrderItemProps> = ({
   onItemUpdate,
   onItemDelete,
 }) => {
-  const [selectedSize, setSelectedSize] = useState<string>(item.size);
-  const [selectedQuantity, setSelectedQuantity] = useState<number>(
-    item.quantity
-  );
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
-  const [alertOpen, setAlertOpen] = useState<boolean>(false);
+  const [selectedSize, setSelectedSize] = useState(item.size);
+  const [selectedQuantity, setSelectedQuantity] = useState(item.quantity);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [alertOpen, setAlertOpen] = useState(false);
 
   const initialValues = useRef({ size: item.size, quantity: item.quantity });
-
   const sizeData = item.sizes?.find((s) => s.size === selectedSize);
-  const availableStock = sizeData ? sizeData.stock : 0;
+  const availableStock = sizeData?.stock ?? 0;
 
-  const quantityOptions = useMemo(() => {
-    return Array.from({ length: availableStock }, (_, i) => i + 1);
-  }, [availableStock]);
+  const quantityOptions = useMemo(
+    () => Array.from({ length: availableStock }, (_, i) => i + 1),
+    [availableStock]
+  );
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     try {
       const updatedItem: OrderItemType = {
         productOrderId: item.productOrderId,
@@ -68,17 +72,33 @@ const OrderItem: React.FC<OrderItemProps> = ({
 
       await updateOrderItem(updatedItem);
 
-      const newItem: OrderItemData = {
+      onItemUpdate?.({
         ...item,
         size: selectedSize,
         quantity: selectedQuantity,
-      };
-
-      onItemUpdate?.(newItem);
+      });
     } catch (error) {
       console.error("Помилка оновлення позиції:", error);
     }
-  };
+  }, [item, selectedSize, selectedQuantity, onItemUpdate]);
+
+  useEffect(() => {
+    if (
+      selectedSize === initialValues.current.size &&
+      selectedQuantity === initialValues.current.quantity
+    )
+      return;
+
+    const timer = setTimeout(() => {
+      handleSave();
+      initialValues.current = {
+        size: selectedSize,
+        quantity: selectedQuantity,
+      };
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [selectedSize, selectedQuantity, handleSave]);
 
   const handleConfirmDelete = async () => {
     setIsDeleting(true);
@@ -92,23 +112,6 @@ const OrderItem: React.FC<OrderItemProps> = ({
       setAlertOpen(false);
     }
   };
-
-  useEffect(() => {
-    if (
-      selectedSize === initialValues.current.size &&
-      selectedQuantity === initialValues.current.quantity
-    ) {
-      return;
-    }
-    const timer = setTimeout(() => {
-      handleSave();
-      initialValues.current = {
-        size: selectedSize,
-        quantity: selectedQuantity,
-      };
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [selectedSize, selectedQuantity, handleSave]);
 
   const originalPrice =
     item.discount > 0 ? item.price / (1 - item.discount / 100) : item.price;
@@ -133,11 +136,14 @@ const OrderItem: React.FC<OrderItemProps> = ({
           </div>
         )}
       </Link>
+
       <div className="flex-1">
         <Link href={`/product/${item.articleNumber}`}>
           <h2 className="text-lg font-semibold hover:underline">{item.name}</h2>
         </Link>
+
         <p className="text-sm text-gray-500">Артикул: {item.articleNumber}</p>
+
         {item.discount > 0 ? (
           <div>
             <p className="text-gray-500 line-through text-sm">
@@ -152,6 +158,7 @@ const OrderItem: React.FC<OrderItemProps> = ({
             {item.price.toFixed(0)} грн.
           </p>
         )}
+
         <div className="mt-2 flex flex-col md:flex-row md:items-center gap-4">
           <div className="w-40">
             <Select value={selectedSize} onValueChange={setSelectedSize}>
@@ -167,6 +174,7 @@ const OrderItem: React.FC<OrderItemProps> = ({
               </SelectContent>
             </Select>
           </div>
+
           <div className="w-20">
             <Select
               value={selectedQuantity.toString()}
@@ -186,6 +194,7 @@ const OrderItem: React.FC<OrderItemProps> = ({
           </div>
         </div>
       </div>
+
       <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
         <AlertDialogTrigger asChild>
           <Button variant="outline" disabled={isDeleting}>

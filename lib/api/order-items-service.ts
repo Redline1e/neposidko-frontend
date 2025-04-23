@@ -10,7 +10,6 @@ import {
   OrderItemDataSchema,
 } from "@/utils/types";
 import { z } from "zod";
-import { toast } from "sonner";
 
 export const fetchOrderItems = async (): Promise<OrderItemData[]> => {
   try {
@@ -18,11 +17,10 @@ export const fetchOrderItems = async (): Promise<OrderItemData[]> => {
     if (headers.Authorization) {
       const response = await apiClient.get("/order-items", { headers });
       return z.array(OrderItemDataSchema).parse(response.data);
-    } else {
-      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      return cart;
     }
-  } catch (error: any) {
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    return cart;
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       "Не вдалося завантажити позиції замовлення"
@@ -43,15 +41,14 @@ export const addOrderItem = async (
       });
       window.dispatchEvent(new Event("cartUpdated"));
       return OrderItemSchema.parse(response.data);
-    } else {
-      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      orderItem.productOrderId = Date.now(); // Тимчасовий ID для гостей
-      cart.push(orderItem);
-      localStorage.setItem("cart", JSON.stringify(cart));
-      window.dispatchEvent(new Event("cartUpdated"));
-      return orderItem;
     }
-  } catch (error: any) {
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    orderItem.productOrderId = Date.now();
+    cart.push(orderItem);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    window.dispatchEvent(new Event("cartUpdated"));
+    return orderItem;
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       "Не вдалося додати позицію замовлення"
@@ -74,16 +71,15 @@ export const updateOrderItem = async (
       );
       window.dispatchEvent(new Event("cartUpdated"));
       return OrderItemSchema.parse(response.data);
-    } else {
-      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      const updatedCart = cart.map((item: OrderItem) =>
-        item.productOrderId === orderItem.productOrderId ? orderItem : item
-      );
-      localStorage.setItem("cart", JSON.stringify(updatedCart));
-      window.dispatchEvent(new Event("cartUpdated"));
-      return orderItem;
     }
-  } catch (error: any) {
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    const updatedCart = cart.map((item: OrderItem) =>
+      item.productOrderId === orderItem.productOrderId ? orderItem : item
+    );
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+    window.dispatchEvent(new Event("cartUpdated"));
+    return orderItem;
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       "Не вдалося оновити позицію замовлення"
@@ -108,7 +104,7 @@ export const deleteOrderItem = async (
       localStorage.setItem("cart", JSON.stringify(updatedCart));
     }
     window.dispatchEvent(new Event("cartUpdated"));
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       "Не вдалося видалити позицію замовлення"
@@ -124,7 +120,7 @@ export const fetchOrderHistoryItems = async (): Promise<OrderItem[]> => {
       headers: getAuthHeaders(),
     });
     return z.array(OrderItemSchema).parse(response.data);
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       "Не вдалося завантажити історію замовлень"
@@ -140,11 +136,10 @@ export const fetchCartCount = async (): Promise<number> => {
     if (headers.Authorization) {
       const response = await apiClient.get("/order-items/count", { headers });
       return response.data.count;
-    } else {
-      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      return cart.length;
     }
-  } catch (error: any) {
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    return cart.length;
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       "Не вдалося підрахувати товари в кошику"

@@ -33,7 +33,7 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({ isMobile }) => {
 
   const handleConfirmDelete = async () => {
     try {
-      await deleteUser(localStorage.getItem("token")!);
+      await deleteUser();
       toast.success("Акаунт видалено!");
       localStorage.removeItem("token");
       window.location.href = "/";

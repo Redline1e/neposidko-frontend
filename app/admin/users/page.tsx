@@ -17,7 +17,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Trash2, Edit } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 // Визначення типу User
 interface User {
@@ -25,7 +25,7 @@ interface User {
   roleId: number;
   name: string;
   email: string;
-  password: string;
+  password?: string;
   telephone: string;
   deliveryAddress: string;
 }
@@ -70,7 +70,7 @@ const AdminUsersPage: React.FC = () => {
         <thead className="bg-gray-100">
           <tr>
             <th className="px-4 py-3 text-left">ID</th>
-            <th className="px-4 py-3 text-left">Ім'я</th>
+            <th className="px-4 py-3 text-left">Ім&apos;я</th>
             <th className="px-4 py-3 text-left">Email</th>
             <th className="px-4 py-3 text-left">Телефон</th>
             <th className="px-4 py-3 text-left">Роль</th>

@@ -25,10 +25,10 @@ const AddBrand: React.FC = () => {
 
   const onSubmit = async (data: FormData) => {
     try {
-      await addBrand({ name: data.name, brandId: 0 }); // brandId присвоюється на сервері
+      await addBrand({ name: data.name, brandId: 0 });
       toast.success("Бренд успішно додано!");
       reset();
-    } catch (error) {
+    } catch {
       toast.error("Не вдалося додати бренд");
     }
   };

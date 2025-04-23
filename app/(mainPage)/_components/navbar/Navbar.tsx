@@ -1,7 +1,7 @@
-import { Logo } from "./Logo";
-import { Search } from "./Search";
-import { Actions } from "./Actions";
-import { User } from "./User";
+import { Logo } from "./logo";
+import { Search } from "./search";
+import { Actions } from "./actions";
+import { User } from "./user";
 
 export const Navbar = () => {
   return (

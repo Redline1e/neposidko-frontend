@@ -4,7 +4,7 @@ import {
   fetchAdminReviews,
   updateAdminReview,
   deleteAdminReview,
-} from "@/lib/api/reviews-service"
+} from "@/lib/api/reviews-service";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -17,12 +17,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Trash2, Edit } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 // Визначення типу Review
 interface Review {
   reviewId: number;
-  userId: number;
+  userId: string;
   articleNumber: string;
   rating: number;
   comment: string;

@@ -12,7 +12,7 @@ export const fetchCategories = async (): Promise<Category[]> => {
       headers: getAuthHeaders(),
     });
     return z.array(CategorySchema).parse(response.data);
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(
       error,
       "Не вдалося завантажити категорії"
@@ -31,7 +31,7 @@ export const addCategoryWithImage = async (
         "Content-Type": "multipart/form-data",
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(error, "Не вдалося додати категорію");
     throw new Error(message);
   }
@@ -42,7 +42,7 @@ export const addCategory = async (category: Category): Promise<void> => {
     await apiClient.post("/categories", category, {
       headers: getAuthHeaders(),
     });
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(error, "Не вдалося додати категорію");
     console.error(message);
     throw new Error(message);
@@ -57,7 +57,7 @@ export const updateCategory = async (category: Category): Promise<void> => {
     await apiClient.put(`/categories/${category.categoryId}`, category, {
       headers: getAuthHeaders(),
     });
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(error, "Не вдалося оновити категорію");
     console.error(message);
     throw new Error(message);
@@ -69,12 +69,13 @@ export const deleteCategory = async (categoryId: number): Promise<void> => {
     await apiClient.delete(`/categories/${categoryId}`, {
       headers: getAuthHeaders(),
     });
-  } catch (error: any) {
+  } catch (error) {
     const message = extractErrorMessage(error, "Не вдалося видалити категорію");
     console.error(message);
     throw new Error(message);
   }
 };
+
 export const updateCategoryWithImage = async (category: Category) => {
   try {
     const formData = new FormData();
@@ -93,6 +94,7 @@ export const updateCategoryWithImage = async (category: Category) => {
       },
     });
   } catch (error) {
+    console.error("Помилка оновлення категорії:", error);
     throw new Error("Не вдалося оновити категорію");
   }
 };

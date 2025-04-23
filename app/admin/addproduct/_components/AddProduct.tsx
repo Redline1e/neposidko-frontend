@@ -3,7 +3,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Product, Brand, Category } from "@/utils/types";
+import Image from "next/image";
+import { Brand, Category } from "@/utils/types";
 import { useDropzone } from "react-dropzone";
 import { Plus } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -19,7 +20,6 @@ import { fetchCategories } from "@/lib/api/category-service";
 import { toast } from "sonner";
 import { apiClient, getAuthHeaders } from "@/utils/apiClient";
 
-// Схема валідації для товару
 const productSchema = z.object({
   articleNumber: z.string().min(1, "Номер артикулу є обов'язковим"),
   name: z.string().min(1, "Назва товару є обов'язковою"),
@@ -123,9 +123,11 @@ const AddProduct: React.FC = () => {
       });
       toast.success("Товар успішно додано!");
       setPreviewUrls([]);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Помилка при додаванні товару:", error);
-      toast.error(error.message || "Не вдалося додати товар");
+      toast.error(
+        error instanceof Error ? error.message : "Не вдалося додати товар"
+      );
     }
   };
 
@@ -147,7 +149,7 @@ const AddProduct: React.FC = () => {
         />
         {errors.articleNumber && (
           <p className="text-red-500 text-sm mt-1">
-            {errors.articleNumber.message}
+            {errors.articleNumber.message as string}
           </p>
         )}
       </div>
@@ -162,7 +164,9 @@ const AddProduct: React.FC = () => {
           className="border p-2 rounded-md w-full"
         />
         {errors.name && (
-          <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+          <p className="text-red-500 text-sm mt-1">
+            {errors.name.message as string}
+          </p>
         )}
       </div>
 
@@ -184,7 +188,9 @@ const AddProduct: React.FC = () => {
           </SelectContent>
         </Select>
         {errors.brandId && (
-          <p className="text-red-500 text-sm mt-1">{errors.brandId.message}</p>
+          <p className="text-red-500 text-sm mt-1">
+            {errors.brandId.message as string}
+          </p>
         )}
       </div>
 
@@ -210,7 +216,7 @@ const AddProduct: React.FC = () => {
         </Select>
         {errors.categoryId && (
           <p className="text-red-500 text-sm mt-1">
-            {errors.categoryId.message}
+            {errors.categoryId.message as string}
           </p>
         )}
       </div>
@@ -223,7 +229,9 @@ const AddProduct: React.FC = () => {
           className="border p-2 rounded-md w-full"
         />
         {errors.price && (
-          <p className="text-red-500 text-sm mt-1">{errors.price.message}</p>
+          <p className="text-red-500 text-sm mt-1">
+            {errors.price.message as string}
+          </p>
         )}
       </div>
 
@@ -239,7 +247,7 @@ const AddProduct: React.FC = () => {
           />
           {errors.discount && (
             <p className="text-red-500 text-sm mt-1">
-              {errors.discount.message}
+              {errors.discount.message as string}
             </p>
           )}
         </div>
@@ -277,7 +285,7 @@ const AddProduct: React.FC = () => {
         />
         {errors.description && (
           <p className="text-red-500 text-sm mt-1">
-            {errors.description.message}
+            {errors.description.message as string}
           </p>
         )}
       </div>
@@ -302,19 +310,26 @@ const AddProduct: React.FC = () => {
         {previewUrls.length > 0 && (
           <div className="grid grid-cols-3 gap-2 mt-2">
             {previewUrls.map((url, index) => (
-              <img
-                key={index}
-                src={url}
-                alt={`Preview ${index}`}
-                className="h-24 w-full object-cover rounded"
-                onError={(e) => (e.currentTarget.src = "/fallback.jpg")}
-              />
+              <div key={index} className="relative h-24 w-full">
+                <Image
+                  src={url}
+                  alt={`Preview ${index}`}
+                  fill
+                  sizes="(max-width: 100px) 100vw, 100px"
+                  className="object-cover rounded"
+                  onError={(e) => {
+                    if (e.currentTarget.src !== "/fallback.jpg") {
+                      e.currentTarget.src = "/fallback.jpg";
+                    }
+                  }}
+                />
+              </div>
             ))}
           </div>
         )}
         {errors.imageFiles && (
           <p className="text-red-500 text-sm mt-1">
-            {errors.imageFiles.message}
+            {errors.imageFiles.message as string}
           </p>
         )}
       </div>

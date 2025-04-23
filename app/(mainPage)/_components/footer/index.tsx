@@ -62,7 +62,7 @@ export const Footer = () => {
           {/* Contact Info */}
           <div className="text-center md:text-right">
             <h3 className="text-lg sm:text-xl font-semibold mb-2">
-              Зв'язатись з нами
+              Зв&#39;язатись з нами
             </h3>
             <div className="flex flex-col gap-2 items-center md:items-end">
               <a
