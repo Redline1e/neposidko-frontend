@@ -2,7 +2,7 @@ import axios from "axios";
 import { getToken } from "@/lib/hooks/getToken";
 
 export const apiClient = axios.create({
-  baseURL: process.env.NODE_ENV,
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: { "Content-Type": "application/json" },
 });
 
