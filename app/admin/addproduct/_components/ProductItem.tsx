@@ -508,8 +508,8 @@ const updateProductWithImages = async (product: Product) => {
   const existingImages = product.imageUrls.filter(
     (url) => !url.startsWith("blob:")
   );
-  formData.append("imageUrls", JSON.stringify(existingImages));
   const newImages = product.imageUrls.filter((url) => url.startsWith("blob:"));
+  formData.append("existingImageUrls", JSON.stringify(existingImages));
   for (const url of newImages) {
     const response = await fetch(url);
     const blob = await response.blob();
@@ -529,7 +529,6 @@ const updateProductWithImages = async (product: Product) => {
     throw error;
   }
 };
-
 export const ProductItem: React.FC<{
   product: Product;
   onDelete: (product: Product) => Promise<void>;

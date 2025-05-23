@@ -71,7 +71,6 @@ export const deleteCategory = async (categoryId: number): Promise<void> => {
     });
   } catch (error) {
     const message = extractErrorMessage(error, "Не вдалося видалити категорію");
-    console.error(message);
     throw new Error(message);
   }
 };
@@ -81,10 +80,9 @@ export const updateCategoryWithImage = async (category: Category) => {
     const formData = new FormData();
     formData.append("name", category.name);
 
-    if (category.imageUrl && category.imageUrl.startsWith("blob:")) {
-      const response = await fetch(category.imageUrl);
-      const blob = await response.blob();
-      formData.append("image", blob, "category-image.jpg");
+    if (category.imageUrl.startsWith("blob:")) {
+      const blob = await (await fetch(category.imageUrl)).blob();
+      formData.append("image", blob, "category.jpg");
     }
 
     await apiClient.put(`/categories/${category.categoryId}`, formData, {
@@ -94,7 +92,7 @@ export const updateCategoryWithImage = async (category: Category) => {
       },
     });
   } catch (error) {
-    console.error("Помилка оновлення категорії:", error);
-    throw new Error("Не вдалося оновити категорію");
+    const message = extractErrorMessage(error, "Не вдалося оновити категорію");
+    throw new Error(message);
   }
 };

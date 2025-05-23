@@ -1,8 +1,4 @@
-import {
-  apiClient,
-  getAuthHeaders,
-  extractErrorMessage,
-} from "@/utils/apiClient";
+import { apiClient, getAuthHeaders } from "@/utils/apiClient";
 import { Product, ProductSchema } from "@/utils/types";
 import { z } from "zod";
 
@@ -136,14 +132,29 @@ export const updateProductActiveStatus = async (
   }
 };
 
+function extractErrorMessage(error: any, defaultMessage: string): string {
+  if (error.response?.data?.message) {
+    return error.response.data.message;
+  }
+  if (error.message) {
+    return `${defaultMessage}: ${error.message}`;
+  }
+  return defaultMessage;
+}
+
 export const deleteProduct = async (articleNumber: string): Promise<void> => {
   try {
     await apiClient.delete(`/product/${articleNumber}`, {
       headers: getAuthHeaders(),
     });
-  } catch (error) {
+  } catch (error: any) {
     const message = extractErrorMessage(error, "Не вдалося видалити товар");
-    console.error(message);
+    console.error("Delete product error:", {
+      message,
+      status: error.response?.status,
+      data: error.response?.data,
+      error: error.message,
+    });
     throw new Error(message);
   }
 };
