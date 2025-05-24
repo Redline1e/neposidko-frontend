@@ -117,7 +117,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
             width={400}
             height={600}
             src={imageSrc}
-            alt={name}
+            alt={name || "Product image"}
             className="w-full h-full object-cover rounded-t-lg"
           />
           {discount > 0 && (

@@ -3,8 +3,12 @@
 import React, { useEffect, useState, useCallback } from "react";
 import ProductItem from "@/app/(mainPage)/(productsPage)/products/_components/ProductItem";
 import { Product } from "@/utils/types";
-import { fetchFavorites } from "@/lib/api/favorites-service";
+import {
+  fetchFavorites,
+  fetchProductsByArticleNumbers,
+} from "@/lib/api/favorites-service";
 import { Loader2, AlertCircle } from "lucide-react";
+import { getToken } from "@/lib/hooks/getToken";
 
 export const FavoriteDisplay: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -14,8 +18,21 @@ export const FavoriteDisplay: React.FC = () => {
   const getFavorites = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await fetchFavorites();
-      setProducts(data);
+      const token = getToken();
+      if (token) {
+        // Для авторизованих користувачів
+        const data = await fetchFavorites();
+        setProducts(data);
+      } else {
+        // Для неавторизованих користувачів
+        const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+        if (favorites.length > 0) {
+          const productsData = await fetchProductsByArticleNumbers(favorites);
+          setProducts(productsData);
+        } else {
+          setProducts([]);
+        }
+      }
       setError(null);
     } catch (err) {
       console.error("Помилка отримання улюблених товарів:", err);
