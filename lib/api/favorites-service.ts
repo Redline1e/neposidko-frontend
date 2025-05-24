@@ -25,11 +25,8 @@ export const fetchFavorites = async (): Promise<Product[]> => {
       }
       return [];
     }
-  } catch (error) {
-    const message = extractErrorMessage(
-      error,
-      "Не вдалося завантажити улюблені товари"
-    );
+  } catch {
+    // Видалено невикористовуваний параметр error
     return [];
   }
 };
@@ -46,8 +43,8 @@ export const fetchProductsByArticleNumbers = async (
       articleNumbers,
     });
     return z.array(ProductSchema).parse(response.data);
-  } catch (error) {
-    const message = extractErrorMessage(error, "Не вдалося завантажити товари");
+  } catch {
+    // Видалено невикористовуваний параметр error
     return [];
   }
 };
@@ -118,11 +115,8 @@ export const fetchFavoritesCount = async (): Promise<number> => {
     }
     const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
     return favorites.length;
-  } catch (error) {
-    const message = extractErrorMessage(
-      error,
-      "Не вдалося підрахувати улюблені товари"
-    );
+  } catch {
+    // Видалено невикористовуваний параметр error
     return 0;
   }
 };
