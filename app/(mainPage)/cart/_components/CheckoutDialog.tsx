@@ -40,19 +40,20 @@ interface CheckoutDialogProps {
   onCheckoutSuccess: () => void;
   isOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
+  captchaToken?: string | null;
 }
 
 const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
   onCheckoutSuccess,
   isOpen: controlledOpen,
   onOpenChange,
+  captchaToken,
 }) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = onOpenChange || setInternalOpen;
   const router = useRouter();
 
-  // Використовуємо наш хук для визначення автентифікації
   const { isAuthenticated } = useAuth();
 
   const {
@@ -70,7 +71,6 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
     },
   });
 
-  // Відновлення даних форми
   useEffect(() => {
     const savedData = localStorage.getItem("checkoutFormData");
     if (savedData) {
@@ -84,7 +84,16 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
   const onSubmit = async (data: CheckoutFormData) => {
     try {
       const token = getToken();
-      const cartItems = JSON.parse(localStorage.getItem("cart") || "[]");
+      let cartItems;
+      try {
+        cartItems = JSON.parse(localStorage.getItem("cart") || "[]");
+        if (!Array.isArray(cartItems)) {
+          throw new Error("cartItems is not an array");
+        }
+      } catch (error) {
+        toast.error("Невірні дані кошика");
+        return;
+      }
 
       if (token) {
         // Для авторизованих користувачів
@@ -96,13 +105,18 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
         toast.success(response.data.message || "Замовлення оформлено успішно");
       } else {
         // Для гостей
-        if (!cartItems.length) {
+        if (cartItems.length === 0) {
           toast.error("Кошик порожній");
+          return;
+        }
+        if (!captchaToken) {
+          toast.error("Будь ласка, пройдіть перевірку reCAPTCHA");
           return;
         }
         const response = await apiClient.post("/orders/guest-checkout", {
           ...data,
           cartItems,
+          recaptchaToken: captchaToken,
         });
         localStorage.removeItem("cart");
         toast.success(response.data.message || "Замовлення оформлено успішно");
@@ -112,10 +126,16 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
       setOpen(false);
       reset();
       onCheckoutSuccess();
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : "Невідома помилка";
-      toast.error(message || "Помилка оформлення замовлення");
+    } catch (error: any) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Помилка оформлення замовлення");
+      }
     }
   };
 

@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -12,6 +12,7 @@ import { apiClient } from "@/utils/apiClient";
 const registerSchema = z.object({
   email: z.string().email("Некоректний email"),
   password: z.string().min(6, "Пароль повинен бути не менше 6 символів"),
+  recaptchaToken: z.string().min(1, "Підтвердіть, що ви не робот"),
 });
 
 type FormData = z.infer<typeof registerSchema>;
@@ -22,23 +23,42 @@ const RegisterPage: FC = () => {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm<FormData>({
     resolver: zodResolver(registerSchema),
   });
 
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://www.google.com/recaptcha/api.js";
+    script.async = true;
+    script.onerror = () => console.error("Failed to load reCAPTCHA script");
+    document.body.appendChild(script);
+
+    (window as any).onRecaptchaSuccess = (token: string) => {
+      console.log("reCAPTCHA Token:", token);
+      setValue("recaptchaToken", token);
+    };
+
+    (window as any).onRecaptchaError = () => {
+      console.error("reCAPTCHA Error: Failed to generate token");
+      toast.error("Помилка reCAPTCHA. Спробуйте ще раз.");
+    };
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, [setValue]);
+
   const onSubmit = async (data: FormData) => {
     try {
-      // Зчитуємо дані з localStorage: кошик та favorites
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
       const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-
-      // Формуємо payload, який містить email, password, а також дані localStorage
       const payload = { ...data, cart, favorites };
-
+      console.log("Register Payload:", payload);
       const response = await apiClient.post("/register", payload);
       const token = response.data.token;
       localStorage.setItem("token", token);
-      // Після успішної реєстрації – очищуємо localStorage (якщо дані вже синхронізовано)
       localStorage.removeItem("cart");
       localStorage.removeItem("favorites");
 
@@ -48,13 +68,24 @@ const RegisterPage: FC = () => {
       } else {
         router.push("/");
       }
-      toast.success("Авторизація успішна!");
+      toast.success("Реєстрація успішна!");
     } catch (error: unknown) {
+      console.error("Submission Error:", error);
+      // Використовуємо приведення до any для grecaptcha
+      if ((window as any).grecaptcha) {
+        (window as any).grecaptcha.reset();
+        setValue("recaptchaToken", "");
+      }
       const message =
         error instanceof Error ? error.message : "Невідома помилка";
       toast.error(message || "Помилка реєстрації");
     }
   };
+
+  console.log(
+    "reCAPTCHA Site Key:",
+    process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+  );
 
   return (
     <div className="w-[400px] mx-auto p-8 bg-white rounded-lg shadow-lg">
@@ -81,6 +112,19 @@ const RegisterPage: FC = () => {
           {errors.password && (
             <p className="text-red-500 text-sm mt-2">
               {errors.password.message}
+            </p>
+          )}
+        </div>
+        <div>
+          <div
+            className="g-recaptcha"
+            data-sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+            data-callback="onRecaptchaSuccess"
+            data-error-callback="onRecaptchaError"
+          ></div>
+          {errors.recaptchaToken && (
+            <p className="text-red-500 text-sm mt-2">
+              {errors.recaptchaToken.message}
             </p>
           )}
         </div>

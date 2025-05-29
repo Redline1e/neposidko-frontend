@@ -80,7 +80,7 @@ export const OrderDisplay: React.FC = () => {
               key={item.productOrderId}
               item={item}
               onItemUpdate={handleItemUpdate}
-              onItemDelete={handleItemDelete} 
+              onItemDelete={handleItemDelete}
             />
           ))
         ) : (
