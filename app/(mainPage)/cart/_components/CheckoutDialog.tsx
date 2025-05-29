@@ -91,6 +91,7 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
         }
       } catch (error) {
         toast.error("Невірні дані кошика");
+        console.log(error);
         return;
       }
 
@@ -124,10 +125,8 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
       reset();
       onCheckoutSuccess();
     } catch (error: unknown) {
-      if (
-        error instanceof Error &&
-        error.message
-      ) {
+      // Обрабатываем ошибку
+      if (error instanceof Error && error.message) {
         toast.error(error.message);
       } else {
         toast.error("Помилка оформлення замовлення");
