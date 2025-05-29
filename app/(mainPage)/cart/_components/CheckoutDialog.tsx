@@ -20,7 +20,6 @@ import { apiClient } from "@/utils/apiClient";
 import { useAuth } from "@/lib/hooks/auth";
 import { Check } from "lucide-react";
 
-// Схема валідації
 const checkoutSchema = z.object({
   deliveryAddress: z.string().min(1, "Місце доставки є обов'язковим"),
   telephone: z
@@ -96,7 +95,6 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
       }
 
       if (token) {
-        // Для авторизованих користувачів
         const response = await apiClient.post(
           "/orders/checkout",
           { ...data },
@@ -104,7 +102,6 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
         );
         toast.success(response.data.message || "Замовлення оформлено успішно");
       } else {
-        // Для гостей
         if (cartItems.length === 0) {
           toast.error("Кошик порожній");
           return;
@@ -126,13 +123,12 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
       setOpen(false);
       reset();
       onCheckoutSuccess();
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (
-        error.response &&
-        error.response.data &&
-        error.response.data.message
+        error instanceof Error &&
+        error.message
       ) {
-        toast.error(error.response.data.message);
+        toast.error(error.message);
       } else {
         toast.error("Помилка оформлення замовлення");
       }

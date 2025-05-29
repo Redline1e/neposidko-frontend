@@ -35,12 +35,12 @@ const RegisterPage: FC = () => {
     script.onerror = () => console.error("Failed to load reCAPTCHA script");
     document.body.appendChild(script);
 
-    (window as any).onRecaptchaSuccess = (token: string) => {
+    (window as WindowWithRecaptcha).onRecaptchaSuccess = (token: string) => {
       console.log("reCAPTCHA Token:", token);
       setValue("recaptchaToken", token);
     };
 
-    (window as any).onRecaptchaError = () => {
+    (window as WindowWithRecaptcha).onRecaptchaError = () => {
       console.error("reCAPTCHA Error: Failed to generate token");
       toast.error("Помилка reCAPTCHA. Спробуйте ще раз.");
     };
@@ -71,9 +71,9 @@ const RegisterPage: FC = () => {
       toast.success("Реєстрація успішна!");
     } catch (error: unknown) {
       console.error("Submission Error:", error);
-      // Використовуємо приведення до any для grecaptcha
-      if ((window as any).grecaptcha) {
-        (window as any).grecaptcha.reset();
+      // Используем типизацию для grecaptcha
+      if ((window as WindowWithRecaptcha).grecaptcha) {
+        (window as WindowWithRecaptcha).grecaptcha.reset();
         setValue("recaptchaToken", "");
       }
       const message =
@@ -149,3 +149,32 @@ const RegisterPage: FC = () => {
 };
 
 export default RegisterPage;
+
+// Типизация для window.grecaptcha
+declare global {
+  interface Window {
+    onRecaptchaSuccess: (token: string) => void;
+    onRecaptchaError: () => void;
+    grecaptcha: {
+      reset: () => void;
+      render: (
+        container: string | HTMLElement,
+        parameters: { sitekey: string; theme: string }
+      ) => void;
+      execute: () => void;
+      getResponse: () => string;
+    };
+  }
+}
+
+interface WindowWithRecaptcha extends Window {
+  grecaptcha: {
+    reset: () => void;
+    render: (
+      container: string | HTMLElement,
+      parameters: { sitekey: string; theme: string }
+    ) => void;
+    execute: () => void;
+    getResponse: () => string;
+  };
+}
