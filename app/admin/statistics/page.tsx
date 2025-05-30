@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/chart";
 import { fetchAllOrders } from "@/lib/api/order-service";
 import { Order } from "@/utils/types";
+import Head from "next/head";
 
 const monthNames = [
   "Січень",
@@ -65,7 +66,6 @@ const ChartComponent: React.FC = () => {
           return acc;
         }, {} as Record<string, OrderChartData>);
 
-        // Сортуємо дані за порядком місяців
         const sortedData = Object.values(dataMap).sort(
           (a, b) => monthNames.indexOf(a.month) - monthNames.indexOf(b.month)
         );
@@ -81,7 +81,9 @@ const ChartComponent: React.FC = () => {
 
   return (
     <div className="container mx-auto p-4 mt-20">
-      {/* Заголовок */}
+      <Head>
+        <meta name="robots" content="noindex, nofollow" />
+      </Head>
       <h1 className="text-center text-2xl font-bold mb-4">
         Статистика замовлень
       </h1>
@@ -103,13 +105,11 @@ const ChartComponent: React.FC = () => {
               fill={colorPalette[index % colorPalette.length]}
               radius={4}
             >
-              {/* Відображення числових значень на стовпцях */}
               <LabelList dataKey={status} position="inside" fill="#fff" />
             </Bar>
           ))}
         </BarChart>
       </ChartContainer>
-      {/* Легенда */}
       <div className="flex justify-center mt-4 space-x-4">
         {statuses.map((status, index) => (
           <div key={status} className="flex items-center">

@@ -7,6 +7,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AdminSidebar } from "./_components/AdminSidebar";
 import { Loader2 } from "lucide-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import Head from "next/head";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -18,7 +19,6 @@ const AdminLayout: React.FC<LayoutProps> = ({ children }) => {
   const { hasAccess, loading } = useCheckRole();
   const router = useRouter();
 
-  // Перевірка доступу та редірект
   useEffect(() => {
     if (!loading && !hasAccess) {
       router.push("/");
@@ -40,6 +40,9 @@ const AdminLayout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <QueryClientProvider client={queryClient}>
       <SidebarProvider>
+        <Head>
+          <meta name="robots" content="noindex, nofollow" />
+        </Head>
         <div className="flex min-h-screen w-full">
           <AdminSidebar />
           <main className="flex-1">

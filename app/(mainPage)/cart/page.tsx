@@ -1,12 +1,19 @@
+import Head from "next/head";
 import { OrderDisplay } from "./_components/OrderDisplay";
 
-const OrdersPage: React.FC = () => {
+const CartPage = () => {
   return (
-    <div className="max-w-5xl mx-auto p-6">
-      <h1 className="text-2xl font-semibold mb-4 text-center">Кошик</h1>
-      <OrderDisplay />
-    </div>
+    <>
+      <Head>
+        <title>Кошик - Непосидько</title>
+        <meta name="robots" content="noindex, nofollow" />{" "}
+      </Head>
+      <div className="container mx-auto p-4">
+        <h1 className="text-2xl font-bold mb-6">Ваш кошик</h1>
+        <OrderDisplay />
+      </div>
+    </>
   );
 };
 
-export default OrdersPage;
+export default CartPage;

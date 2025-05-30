@@ -9,10 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+import Head from "next/head";
 
-// Схема валідації для форми редагування користувача
 const userSchema = z.object({
-  name: z.string().min(1, "Ім'я є обов'язковим"),
+  name: z.string().min(1, "Ім&apos;я є обов&apos;язковим"),
   email: z.string().email("Некоректний email"),
   telephone: z
     .string()
@@ -97,77 +97,84 @@ const EditUser: React.FC = () => {
   }
 
   return (
-    <Card className="w-full sm:w-[600px] mx-auto mt-10 p-4">
-      <CardHeader>
-        <CardTitle>Редагувати профіль</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium">Ім&#39;я</label>
-            <Controller
-              control={control}
-              name="name"
-              render={({ field }) => (
-                <>
-                  <Input {...field} />
-                  {errors.name && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {errors.name.message}
-                    </p>
-                  )}
-                </>
-              )}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium">Email</label>
-            <Controller
-              control={control}
-              name="email"
-              render={({ field }) => (
-                <>
-                  <Input {...field} type="email" />
-                  {errors.email && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {errors.email.message}
-                    </p>
-                  )}
-                </>
-              )}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium">Телефон</label>
-            <Controller
-              control={control}
-              name="telephone"
-              render={({ field }) => (
-                <>
-                  <Input {...field} />
-                  {errors.telephone && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {errors.telephone.message}
-                    </p>
-                  )}
-                </>
-              )}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium">Адреса доставки</label>
-            <Controller
-              control={control}
-              name="deliveryAddress"
-              render={({ field }) => <Input {...field} />}
-            />
-          </div>
-          <Button type="submit" className="w-full">
-            Зберегти зміни
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+    <>
+      <Head>
+        <meta name="robots" content="noindex, nofollow" />
+      </Head>
+      <Card className="w-full sm:w-[600px] mx-auto mt-10 p-4">
+        <CardHeader>
+          <CardTitle>Редагувати профіль</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium">Ім&apos;я</label>
+              <Controller
+                control={control}
+                name="name"
+                render={({ field }) => (
+                  <>
+                    <Input {...field} />
+                    {errors.name && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.name.message}
+                      </p>
+                    )}
+                  </>
+                )}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Email</label>
+              <Controller
+                control={control}
+                name="email"
+                render={({ field }) => (
+                  <>
+                    <Input {...field} type="email" />
+                    {errors.email && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.email.message}
+                      </p>
+                    )}
+                  </>
+                )}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Телефон</label>
+              <Controller
+                control={control}
+                name="telephone"
+                render={({ field }) => (
+                  <>
+                    <Input {...field} />
+                    {errors.telephone && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.telephone.message}
+                      </p>
+                    )}
+                  </>
+                )}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium">
+                Адреса доставки
+              </label>
+              <Controller
+                control={control}
+                name="deliveryAddress"
+                render={({ field }) => <Input {...field} />}
+              />
+            </div>
+            <Button type="submit" className="w-full">
+              Зберегти зміни
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </>
   );
 };
 

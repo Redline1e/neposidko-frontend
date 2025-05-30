@@ -5,6 +5,7 @@ import { fetchCategories } from "@/lib/api/category-service";
 import { Category } from "@/utils/types";
 import { CategoriesItem } from "./CategoryItem";
 import { Loader2 } from "lucide-react";
+import Head from "next/head";
 
 export const CategoriesDisplay = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -40,15 +41,29 @@ export const CategoriesDisplay = () => {
   }
 
   return (
-    <div className="container mx-auto p-4 sm:p-6">
-      <h1 className="text-2xl font-bold text-center mb-6">
-        Популярні категорії
-      </h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {categories.map((category, id) => (
-          <CategoriesItem key={id} category={category} />
-        ))}
+    <>
+      <Head>
+        <title>Категорії дитячого взуття - Непосидько</title>
+        <meta
+          name="description"
+          content="Перегляньте популярні категорії дитячого взуття в інтернет-магазині Непосидько. Якісне взуття для дітей з доставкою по Україні."
+        />
+        <meta
+          name="keywords"
+          content="категорії взуття, дитяче взуття, Непосидько, купити взуття для дітей"
+        />
+        <link rel="canonical" href="https://www.neposidko.com/categories" />
+      </Head>
+      <div className="container mx-auto p-4 sm:p-6">
+        <h1 className="text-2xl font-bold text-center mb-6">
+          Популярні категорії
+        </h1>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {categories.map((category, id) => (
+            <CategoriesItem key={id} category={category} />
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 };

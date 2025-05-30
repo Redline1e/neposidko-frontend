@@ -109,6 +109,16 @@ export const ProductDisplay: React.FC<ProductDisplayProps> = ({
   const endIndex = startIndex + itemsPerPage;
   const currentProducts = sortedProducts.slice(startIndex, endIndex);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: currentProducts.map((product, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: `https://www.neposidko.com/product/${product.articleNumber}`,
+    })),
+  };
+
   if (loading) return <Loader2 className="animate-spin h-10 w-10" />;
   if (error)
     return (
@@ -117,6 +127,10 @@ export const ProductDisplay: React.FC<ProductDisplayProps> = ({
 
   return (
     <div className="md:mt-20 mt-28 mb-10">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {sortedProducts.length === 0 ? (
         <p className="flex justify-center items-center text-xl font-semibold gap-x-2">
           Товари не знайдено <Frown />

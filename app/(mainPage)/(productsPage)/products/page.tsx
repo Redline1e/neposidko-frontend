@@ -6,6 +6,7 @@ import { FilterSidebar } from "./_components/FilterSidebar";
 import ProductDisplay from "./_components/ProductDisplay";
 import SortSelect from "./_components/SortSelect";
 import LoadingSkeleton from "./_components/LoadingSkeleton";
+import Head from "next/head";
 
 export interface FiltersState {
   categories: string[];
@@ -34,13 +35,27 @@ function ProductsContent() {
   }, [categoryQuery]);
 
   return (
-    <div className="flex w-full min-h-[calc(100vh-250px)]">
-      <FilterSidebar filters={filters} setFilters={setFilters} />
-      <main className="flex-1 flex flex-col overflow-y-auto">
-        <ProductDisplay filters={filters} sortOrder={sortOrder} />
-      </main>
-      <SortSelect sortOrder={sortOrder} setSortOrder={setSortOrder} />
-    </div>
+    <>
+      <Head>
+        <title>Товари - Непосидько</title>
+        <meta
+          name="description"
+          content="Перегляньте широкий вибір дитячого взуття в інтернет-магазині Непосидько. Якісне взуття для дітей з доставкою по Україні."
+        />
+        <meta
+          name="keywords"
+          content="дитяче взуття, інтернет-магазин, Непосидько, купити взуття для дітей"
+        />
+        <link rel="canonical" href="https://www.neposidko.com/products" />
+      </Head>
+      <div className="flex w-full min-h-[calc(100vh-250px)]">
+        <FilterSidebar filters={filters} setFilters={setFilters} />
+        <main className="flex-1 flex flex-col overflow-y-auto">
+          <ProductDisplay filters={filters} sortOrder={sortOrder} />
+        </main>
+        <SortSelect sortOrder={sortOrder} setSortOrder={setSortOrder} />
+      </div>
+    </>
   );
 }
 

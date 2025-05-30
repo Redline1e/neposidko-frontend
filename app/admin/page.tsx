@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { fetchBrands } from "@/lib/api/brands-service";
 import { fetchCategories } from "@/lib/api/category-service";
+import Head from "next/head";
 
 interface ProductFilters {
   categories: string[];
@@ -91,6 +92,7 @@ const AdminProductsPage: React.FC = () => {
       console.error("Error loading products:", error);
     }
   }, [filters, query]);
+
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
       loadProducts();
@@ -150,6 +152,9 @@ const AdminProductsPage: React.FC = () => {
 
   return (
     <div className="mx-auto mt-20 max-w-7xl px-4">
+      <Head>
+        <meta name="robots" content="noindex, nofollow" />
+      </Head>
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         <div className="flex-1 relative">
           <Input

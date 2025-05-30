@@ -1,7 +1,8 @@
 import React from "react";
-import { Navbar } from "./_components/navbar";
-import { Footer } from "./_components/footer";
+
+import { Footer } from "./_components/footer/Footer";
 import { Toaster } from "sonner";
+import { Navbar } from "./_components/navbar/Navbar";
 
 interface BrowseLayoutProps {
   children: React.ReactNode;

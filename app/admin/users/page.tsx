@@ -18,8 +18,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Trash2 } from "lucide-react";
+import Head from "next/head";
 
-// Визначення типу User
 interface User {
   userId: string;
   roleId: number;
@@ -65,6 +65,9 @@ const AdminUsersPage: React.FC = () => {
 
   return (
     <div className="mx-auto mt-20 max-w-7xl px-4">
+      <Head>
+        <meta name="robots" content="noindex, nofollow" />
+      </Head>
       <h1 className="text-2xl font-bold mb-6">Управління користувачами</h1>
       <table className="w-full border rounded-lg">
         <thead className="bg-gray-100">

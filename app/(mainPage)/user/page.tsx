@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { fetchUser } from "@/lib/api/user-service";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import Head from "next/head";
 
 export type User = {
   name: string;
@@ -17,7 +18,6 @@ const UserProfilePage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // Токен перевіряється всередині fetchUser (через getAuthHeaders)
     fetchUser()
       .then((data: User) => setUser(data))
       .catch((error) => {
@@ -35,10 +35,15 @@ const UserProfilePage: React.FC = () => {
     );
   }
   return (
-    <div className="w-full sm:w-[600px] mx-auto p-8">
-      <h1 className="text-3xl font-bold mb-4">Вітаємо, {user?.name}!</h1>
-      <p className="text-lg">Ласкаво просимо на вашу особисту сторінку.</p>
-    </div>
+    <>
+      <Head>
+        <meta name="robots" content="noindex, nofollow" />
+      </Head>
+      <div className="w-full sm:w-[600px] mx-auto p-8">
+        <h1 className="text-3xl font-bold mb-4">Вітаємо, {user?.name}!</h1>
+        <p className="text-lg">Ласкаво просимо на вашу особисту сторінку.</p>
+      </div>
+    </>
   );
 };
 

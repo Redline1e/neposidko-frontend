@@ -52,6 +52,7 @@ export const Footer = () => {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label={`Підписатись на ${social.name}`}
                 >
                   {social.icon}
                 </a>
@@ -62,12 +63,13 @@ export const Footer = () => {
           {/* Contact Info */}
           <div className="text-center md:text-right">
             <h3 className="text-lg sm:text-xl font-semibold mb-2">
-              Зв&#39;язатись з нами
+              Зв&apos;язатись з нами
             </h3>
             <div className="flex flex-col gap-2 items-center md:items-end">
               <a
                 href={`mailto:${footerData.contact.email}`}
                 className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+                aria-label="Надіслати email"
               >
                 <Mail className="w-5 h-5" />
                 <span>{footerData.contact.email}</span>
@@ -75,6 +77,7 @@ export const Footer = () => {
               <a
                 href={`tel:${footerData.contact.phone}`}
                 className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+                aria-label="Зателефонувати"
               >
                 <Phone className="w-5 h-5" />
                 <span>{footerData.contact.phone}</span>

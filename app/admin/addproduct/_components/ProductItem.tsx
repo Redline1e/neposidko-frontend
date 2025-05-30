@@ -68,11 +68,12 @@ const SortableImage: React.FC<SortableImageProps> = ({
       </div>
       <Image
         src={image}
-        alt={`Зображення ${id}`}
+        alt={`Зображення товару ${id}`}
         width={96}
         height={96}
         className="w-24 h-24 object-cover rounded"
         onError={(e) => (e.currentTarget.src = "/fallback.jpg")}
+        loading="lazy"
       />
       <button
         type="button"
@@ -445,48 +446,74 @@ const renderProductCard = (product: Product) => {
       ? Math.round(product.price * (1 - product.discount / 100))
       : product.price;
 
+  // Структуровані дані для продукту
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    image: product.imageUrls,
+    description: product.description || "Якісне дитяче взуття від Непосидько",
+    sku: product.articleNumber,
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "UAH",
+      price: discountedPrice,
+      availability:
+        product.sizes && product.sizes.some((s) => s.stock > 0)
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+    },
+  };
+
   return (
-    <div className="bg-white shadow-lg rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border">
-      <div className="relative">
-        <Image
-          src={imageSrc}
-          alt={product.name}
-          width={300}
-          height={300}
-          className="w-full h-60 object-cover"
-        />
-        {product.discount > 0 && (
-          <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
-            -{product.discount}%
-          </div>
-        )}
-      </div>
-      <div className="p-4">
-        <h2 className="text-lg font-semibold text-gray-800 truncate">
-          {product.name}
-        </h2>
-        <p className="text-sm text-gray-600 truncate mb-2">
-          {product.description}
-        </p>
-        <div className="mt-2 flex items-center space-x-2">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <div className="bg-white shadow-lg rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border">
+        <div className="relative">
+          <Image
+            src={imageSrc}
+            alt={product.name || "Дитяче взуття"}
+            width={300}
+            height={300}
+            className="w-full h-60 object-cover"
+            loading="lazy"
+          />
           {product.discount > 0 && (
-            <span className="text-gray-400 line-through text-sm">
-              {product.price} грн
-            </span>
+            <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+              -{product.discount}%
+            </div>
           )}
-          <span className="text-red-500 font-semibold text-lg">
-            {discountedPrice} грн
-          </span>
         </div>
-        {product.sizes && product.sizes.length > 0 && (
-          <div className="mt-2">
-            <span className="text-md text-gray-600">
-              {product.sizes.map((s) => s.size).join(", ")}
+        <div className="p-4">
+          <h2 className="text-lg font-semibold text-gray-800 truncate">
+            {product.name}
+          </h2>
+          <p className="text-sm text-gray-600 truncate mb-2">
+            {product.description}
+          </p>
+          <div className="mt-2 flex items-center space-x-2">
+            {product.discount > 0 && (
+              <span className="text-gray-400 line-through text-sm">
+                {product.price} грн
+              </span>
+            )}
+            <span className="text-red-500 font-semibold text-lg">
+              {discountedPrice} грн
             </span>
           </div>
-        )}
+          {product.sizes && product.sizes.length > 0 && (
+            <div className="mt-2">
+              <span className="text-md text-gray-600">
+                {product.sizes.map((s) => s.size).join(", ")}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
@@ -529,6 +556,7 @@ const updateProductWithImages = async (product: Product) => {
     throw error;
   }
 };
+
 export const ProductItem: React.FC<{
   product: Product;
   onDelete: (product: Product) => Promise<void>;

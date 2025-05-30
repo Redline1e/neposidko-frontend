@@ -8,6 +8,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/utils/apiClient";
+import Head from "next/head";
 
 const registerSchema = z.object({
   email: z.string().email("Некоректний email"),
@@ -71,7 +72,6 @@ const RegisterPage: FC = () => {
       toast.success("Реєстрація успішна!");
     } catch (error: unknown) {
       console.error("Submission Error:", error);
-      // Используем типизацию для grecaptcha
       if ((window as WindowWithRecaptcha).grecaptcha) {
         (window as WindowWithRecaptcha).grecaptcha.reset();
         setValue("recaptchaToken", "");
@@ -88,69 +88,76 @@ const RegisterPage: FC = () => {
   );
 
   return (
-    <div className="w-[400px] mx-auto p-8 bg-white rounded-lg shadow-lg">
-      <h1 className="text-2xl font-semibold text-center mb-8">Реєстрація</h1>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div>
-          <input
-            {...register("email")}
-            type="email"
-            placeholder="Email"
-            className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-          />
-          {errors.email && (
-            <p className="text-red-500 text-sm mt-2">{errors.email.message}</p>
-          )}
-        </div>
-        <div>
-          <input
-            {...register("password")}
-            type="password"
-            placeholder="Пароль"
-            className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-          />
-          {errors.password && (
-            <p className="text-red-500 text-sm mt-2">
-              {errors.password.message}
-            </p>
-          )}
-        </div>
-        <div>
-          <div
-            className="g-recaptcha"
-            data-sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
-            data-callback="onRecaptchaSuccess"
-            data-error-callback="onRecaptchaError"
-          ></div>
-          {errors.recaptchaToken && (
-            <p className="text-red-500 text-sm mt-2">
-              {errors.recaptchaToken.message}
-            </p>
-          )}
-        </div>
-        <div className="flex justify-between text-sm gap-5">
-          <p>Вже маєте акаунт?</p>
-          <Link
-            className="font-semibold text-blue-600 hover:underline"
-            href="/login"
+    <>
+      <Head>
+        <title>Реєстрація - Непосидько</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Head>
+      <div className="w-[400px] mx-auto p-8 bg-white rounded-lg shadow-lg">
+        <h1 className="text-2xl font-semibold text-center mb-8">Реєстрація</h1>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div>
+            <input
+              {...register("email")}
+              type="email"
+              placeholder="Email"
+              className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+            />
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-2">
+                {errors.email.message}
+              </p>
+            )}
+          </div>
+          <div>
+            <input
+              {...register("password")}
+              type="password"
+              placeholder="Пароль"
+              className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+            />
+            {errors.password && (
+              <p className="text-red-500 text-sm mt-2">
+                {errors.password.message}
+              </p>
+            )}
+          </div>
+          <div>
+            <div
+              className="g-recaptcha"
+              data-sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+              data-callback="onRecaptchaSuccess"
+              data-error-callback="onRecaptchaError"
+            ></div>
+            {errors.recaptchaToken && (
+              <p className="text-red-500 text-sm mt-2">
+                {errors.recaptchaToken.message}
+              </p>
+            )}
+          </div>
+          <div className="flex justify-between text-sm gap-5">
+            <p>Вже маєте акаунт?</p>
+            <Link
+              className="font-semibold text-blue-600 hover:underline"
+              href="/login"
+            >
+              Увійти
+            </Link>
+          </div>
+          <button
+            type="submit"
+            className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Увійти
-          </Link>
-        </div>
-        <button
-          type="submit"
-          className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          Зареєструватися
-        </button>
-      </form>
-    </div>
+            Зареєструватися
+          </button>
+        </form>
+      </div>
+    </>
   );
 };
 
 export default RegisterPage;
 
-// Типизация для window.grecaptcha
 declare global {
   interface Window {
     onRecaptchaSuccess: (token: string) => void;

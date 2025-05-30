@@ -1,4 +1,3 @@
-// AdminOrdersPage.tsx
 "use client";
 import React, { useState, useEffect } from "react";
 import {
@@ -20,6 +19,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Trash2 } from "lucide-react";
+import Head from "next/head";
 
 interface OrderItem {
   orderItemId: number;
@@ -78,7 +78,6 @@ const AdminOrdersPage: React.FC = () => {
 
   const handleStatusChange = async (orderId: number, newStatus: number) => {
     try {
-      // Викликаємо API для оновлення статусу (запаси коригуються на бекенді)
       await updateAdminOrder(orderId, { orderStatusId: newStatus });
       setOrders(
         orders.map((o) =>
@@ -111,6 +110,9 @@ const AdminOrdersPage: React.FC = () => {
 
   return (
     <div className="mx-auto mt-20 max-w-7xl px-4">
+      <Head>
+        <meta name="robots" content="noindex, nofollow" />
+      </Head>
       <h1 className="text-2xl font-bold mb-6">Управління замовленнями</h1>
       <table className="w-full border rounded-lg">
         <thead className="bg-gray-100">

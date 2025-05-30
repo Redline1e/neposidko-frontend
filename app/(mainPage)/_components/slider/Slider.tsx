@@ -14,13 +14,28 @@ export const Slider = () => {
       <div className="container mx-auto p-5">
         <Swiper modules={[Navigation, Pagination]} navigation pagination loop>
           <SwiperSlide className="flex items-center justify-center bg-gray-100 rounded-lg overflow-hidden">
-            <Image src="/slide1.jpg" alt="Slide 1" width={629} height={224} />
+            <Image
+              src="/slide1.jpg"
+              alt="Акція на дитяче взуття"
+              width={629}
+              height={224}
+            />
           </SwiperSlide>
           <SwiperSlide className="flex items-center justify-center bg-gray-100 rounded-lg overflow-hidden">
-            <Image src="/slide2.jpg" alt="Slide 2" width={629} height={224} />
+            <Image
+              src="/slide2.jpg"
+              alt="Нова колекція дитячого взуття"
+              width={629}
+              height={224}
+            />
           </SwiperSlide>
           <SwiperSlide className="flex items-center justify-center bg-gray-100 rounded-lg overflow-hidden">
-            <Image src="/slide3.jpg" alt="Slide 3" width={629} height={224} />
+            <Image
+              src="/slide3.jpg"
+              alt="Знижки на дитяче взуття"
+              width={629}
+              height={224}
+            />
           </SwiperSlide>
         </Swiper>
       </div>

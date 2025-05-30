@@ -20,14 +20,40 @@ interface ActionLink {
   name: string;
   href: string;
   icon: React.ElementType;
+  title: string;
 }
 
 const actionLinks: ActionLink[] = [
-  { name: "Головна", href: "/", icon: Home },
-  { name: "Товари", href: "/products", icon: ShoppingBag },
-  { name: "Контакти", href: "/contact", icon: Phone },
-  { name: "Обране", href: "/favorite", icon: Heart },
-  { name: "Кошик", href: "/cart", icon: ShoppingCart },
+  {
+    name: "Головна",
+    href: "/",
+    icon: Home,
+    title: "Перейти на головну сторінку",
+  },
+  {
+    name: "Товари",
+    href: "/products",
+    icon: ShoppingBag,
+    title: "Переглянути товари",
+  },
+  {
+    name: "Контакти",
+    href: "/contact",
+    icon: Phone,
+    title: "Зв'язатися з нами",
+  },
+  {
+    name: "Обране",
+    href: "/favorite",
+    icon: Heart,
+    title: "Переглянути обрані товари",
+  },
+  {
+    name: "Кошик",
+    href: "/cart",
+    icon: ShoppingCart,
+    title: "Переглянути кошик",
+  },
 ];
 
 export const Actions = () => {
@@ -35,7 +61,6 @@ export const Actions = () => {
   const [favoriteCount, setFavoriteCount] = useState<number>(0);
   const [orderItemsCount, setOrderItemsCount] = useState<number>(0);
 
-  // Функція для оновлення лічильників
   const updateCounts = async () => {
     try {
       const favCount = await fetchFavoritesCount();
@@ -47,12 +72,10 @@ export const Actions = () => {
     }
   };
 
-  // Завантаження початкових значень
   useEffect(() => {
     updateCounts();
   }, []);
 
-  // Обробник глобальних подій для оновлення лічильників
   useEffect(() => {
     const handleUpdate = () => updateCounts();
     window.addEventListener("favoritesUpdated", handleUpdate);
@@ -72,6 +95,7 @@ export const Actions = () => {
               <Link
                 href={link.href}
                 className="flex items-center gap-2 hover:text-neutral-500 transition-colors duration-200"
+                title={link.title}
               >
                 <link.icon className="w-6 h-6" />
                 {link.name === "Обране" && favoriteCount > 0 && (
@@ -91,8 +115,12 @@ export const Actions = () => {
         </ul>
       ) : (
         <div className="flex items-center gap-4 px-4 -mr-2">
-          {/* Обране */}
-          <Link href="/favorite" className="relative" aria-label="Обране">
+          <Link
+            href="/favorite"
+            className="relative"
+            aria-label="Обране"
+            title="Переглянути обрані товари"
+          >
             <Heart className="w-6 h-6 text-neutral-700 hover:text-neutral-500 transition-colors duration-200" />
             {favoriteCount > 0 && (
               <span className="absolute -top-1 left-4 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
@@ -100,9 +128,12 @@ export const Actions = () => {
               </span>
             )}
           </Link>
-
-          {/* Кошик */}
-          <Link href="/cart" className="relative" aria-label="Кошик">
+          <Link
+            href="/cart"
+            className="relative"
+            aria-label="Кошик"
+            title="Переглянути кошик"
+          >
             <ShoppingCart className="w-6 h-6 text-neutral-700 hover:text-neutral-500 transition-colors duration-200" />
             {orderItemsCount > 0 && (
               <span className="absolute -top-1 left-4 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
@@ -110,8 +141,6 @@ export const Actions = () => {
               </span>
             )}
           </Link>
-
-          {/* Бургер-меню */}
           <Sheet>
             <SheetTrigger className="p-2 rounded-md border-none focus:outline-none">
               <Menu className="w-6 h-6 text-neutral-700 hover:text-neutral-500 transition-colors duration-200" />
@@ -124,6 +153,7 @@ export const Actions = () => {
                     <Link
                       href={link.href}
                       className="flex items-center gap-3 text-lg font-medium text-neutral-700 hover:text-neutral-500 transition-colors duration-200 font-open-sans"
+                      title={link.title}
                     >
                       <link.icon className="w-6 h-6" />
                       <span>{link.name}</span>

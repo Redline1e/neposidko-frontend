@@ -7,7 +7,7 @@ export const Logo = () => {
       <div className="hidden lg:flex items-center">
         <Image
           src="/logo.png"
-          alt="logo"
+          alt="Логотип інтернет-магазину Непосидько"
           height={28}
           width={200}
           className="hover:opacity-80 transition-opacity duration-200"
