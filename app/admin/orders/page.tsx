@@ -1,3 +1,4 @@
+// AdminOrdersPage.tsx
 "use client";
 import React, { useState, useEffect } from "react";
 import {
@@ -20,7 +21,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Trash2 } from "lucide-react";
 
-// Визначення типу OrderItem
 interface OrderItem {
   orderItemId: number;
   orderId: number;
@@ -30,14 +30,12 @@ interface OrderItem {
   size: string;
 }
 
-// Визначення типу Order
 interface Order {
   orderId: number;
-  userId: string | null; // Відповідає API
+  userId: string | null;
   orderStatusId: number | null;
   orderDate: string;
   userEmail: string | null;
-  // Нові поля з деталей замовлення
   statusName?: string;
   deliveryAddress?: string;
   telephone?: string;
@@ -53,16 +51,18 @@ const AdminOrdersPage: React.FC = () => {
     const loadOrders = async () => {
       try {
         const ordersList = await fetchAdminOrders();
+        const filteredOrders = ordersList.filter(
+          (order) => order.orderStatusId !== 1
+        );
 
         const ordersWithDetails = await Promise.all(
-          ordersList.map(async (order) => {
+          filteredOrders.map(async (order) => {
             const details = await fetchAdminOrderDetails(order.orderId);
-
             return {
               ...order,
-              ...details, // Об'єднуємо основні дані з деталями
+              ...details,
               items: details.items,
-              userId: order.userId, // Зберігаємо оригінальний тип
+              userId: order.userId,
             } as Order;
           })
         );
@@ -78,6 +78,7 @@ const AdminOrdersPage: React.FC = () => {
 
   const handleStatusChange = async (orderId: number, newStatus: number) => {
     try {
+      // Викликаємо API для оновлення статусу (запаси коригуються на бекенді)
       await updateAdminOrder(orderId, { orderStatusId: newStatus });
       setOrders(
         orders.map((o) =>
@@ -86,6 +87,7 @@ const AdminOrdersPage: React.FC = () => {
       );
     } catch (error) {
       console.error("Помилка оновлення статусу:", error);
+      alert("Не вдалося оновити статус замовлення");
     }
   };
 
@@ -99,7 +101,6 @@ const AdminOrdersPage: React.FC = () => {
   };
 
   const toggleOrderDetails = (orderId: number) => {
-    console.log(`Toggling details for order ${orderId}`);
     setExpandedOrderId(expandedOrderId === orderId ? null : orderId);
   };
 
@@ -138,11 +139,11 @@ const AdminOrdersPage: React.FC = () => {
                     }
                     className="border rounded p-1"
                   >
-                    <option value={1}>В кошику</option>
                     <option value={2}>В обробці</option>
-                    <option value={3}>Відправлено</option>
-                    <option value={4}>Доставлено</option>
-                    <option value={5}>Скасовано</option>
+                    <option value={3}>Прийнято</option>
+                    <option value={4}>Відправлено</option>
+                    <option value={5}>Доставлено</option>
+                    <option value={6}>Скасовано</option>
                   </select>
                 </td>
                 <td className="px-4 py-3">

@@ -7,6 +7,7 @@ import {
   updateProductActiveStatus,
 } from "@/lib/api/product-service";
 import { ProductItem } from "./ProductItem";
+import { Loader2 } from "lucide-react";
 
 export const ProductDisplay = () => {
   const {
@@ -20,7 +21,7 @@ export const ProductDisplay = () => {
   });
 
   if (isLoading)
-    return <p className="text-center text-xl font-semibold">Завантаження...</p>;
+    return <Loader2 className="animate-spin h-10 w-10" />;
   if (error)
     return (
       <p className="text-center text-xl font-semibold text-red-500">

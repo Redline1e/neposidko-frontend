@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Order, OrderItem } from "@/utils/types";
 import { fetchOrderHistory } from "@/lib/api/order-service";
 import { fetchOrderHistoryItems } from "@/lib/api/order-items-service";
+import { Loader2 } from "lucide-react";
 
 interface ExtendedOrderItem extends OrderItem {
   name?: string;
@@ -69,7 +70,7 @@ const OrderHistory: React.FC = () => {
   }, []);
 
   if (loading) {
-    return <div className="text-center p-4">Завантаження...</div>;
+    return <Loader2 className="animate-spin h-10 w-10" />;
   }
 
   if (error) {

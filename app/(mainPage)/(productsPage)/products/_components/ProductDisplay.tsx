@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Frown } from "lucide-react";
+import { Frown, Loader2 } from "lucide-react";
 import ProductItem from "./ProductItem";
 import { fetchActiveProducts } from "@/lib/api/product-service";
 import { Product } from "@/utils/types";
@@ -109,10 +109,7 @@ export const ProductDisplay: React.FC<ProductDisplayProps> = ({
   const endIndex = startIndex + itemsPerPage;
   const currentProducts = sortedProducts.slice(startIndex, endIndex);
 
-  if (loading)
-    return (
-      <p className="mt-20 text-center text-xl font-semibold">Завантаження...</p>
-    );
+  if (loading) return <Loader2 className="animate-spin h-10 w-10" />;
   if (error)
     return (
       <p className="text-center text-xl font-semibold text-red-500">{error}</p>

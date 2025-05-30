@@ -99,21 +99,14 @@ export const fetchAdminOrderDetails = async (orderId: number) => {
 
 export const updateAdminOrder = async (
   orderId: number,
-  data: Partial<Order>
+  data: { orderStatusId: number }
 ) => {
-  try {
-    const response = await apiClient.put(`/admin/orders/${orderId}`, data, {
-      headers: getAuthHeaders(),
-    });
-    return OrderSchema.parse(response.data);
-  } catch (error) {
-    const message = extractErrorMessage(
-      error,
-      `Не вдалося оновити замовлення ${orderId}`
-    );
-    console.error(message);
-    throw new Error(message);
-  }
+  const response = await apiClient.post(
+    `/orders/update-status`,
+    { orderId, newStatus: data.orderStatusId },
+    { headers: getAuthHeaders() }
+  );
+  return response.data;
 };
 
 export const deleteAdminOrder = async (orderId: number) => {
