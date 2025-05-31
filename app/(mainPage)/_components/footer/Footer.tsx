@@ -8,7 +8,7 @@ const footerData = {
   socialMedia: [
     {
       name: "Facebook",
-      href: "https://www.facebook.com/people/Neposidko/",
+      href: "https://www.facebook.com/people/Neposidko-%D1%8F%D0%BA%D1%96%D1%81%D0%BD%D0%B5-%D0%B2%D0%B7%D1%83%D1%82%D1%82%D1%8F-%D1%82%D0%B0-%D0%BF%D1%80%D0%B8%D0%BA%D0%BE%D0%BB%D1%8C%D0%BD%D0%B8%D0%B9-%D0%BE%D0%B4%D1%8F%D0%B3/61553676252337/?mibextid=wwXIfr%2F&rdid=726raA0HuLna9SR9&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F15UDwjc7X2%2F%3Fmibextid%3DwwXIfr%252F",
       icon: (
         <Facebook className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 hover:text-white transition-colors" />
       ),

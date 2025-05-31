@@ -52,6 +52,21 @@ export const ProductDisplay: React.FC<ProductDisplayProps> = ({
     getProducts();
   }, []);
 
+  // Якщо йде завантаження, показуємо спіннер у центрі
+  if (loading) {
+    return (
+      <div className="flex flex-col justify-center items-center md:mt-20 mt-28 mb-10">
+        <Loader2 className="animate-spin h-10 w-10" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <p className="text-center text-xl font-semibold text-red-500">{error}</p>
+    );
+  }
+
   const filteredProducts = products.filter((product) => {
     const categoryIdStr =
       product.categoryId != null ? product.categoryId.toString() : "";
@@ -118,12 +133,6 @@ export const ProductDisplay: React.FC<ProductDisplayProps> = ({
       url: `https://www.neposidko.com/product/${product.articleNumber}`,
     })),
   };
-
-  if (loading) return <Loader2 className="animate-spin h-10 w-10" />;
-  if (error)
-    return (
-      <p className="text-center text-xl font-semibold text-red-500">{error}</p>
-    );
 
   return (
     <div className="md:mt-20 mt-28 mb-10">

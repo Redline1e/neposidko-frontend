@@ -28,22 +28,10 @@ export const CategoriesDisplay = () => {
     loadCategories();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64 animate-spin">
-        <Loader2 className="w-8 h-8" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return <div className="text-red-500 text-center">{error}</div>;
-  }
-
   return (
     <>
       <Head>
-        <title>Категорії дитячого взуття - Непосидько</title>
+        <title>Категорії дитячого взуття – Непосидько</title>
         <meta
           name="description"
           content="Перегляньте популярні категорії дитячого взуття в інтернет-магазині Непосидько. Якісне взуття для дітей з доставкою по Україні."
@@ -54,15 +42,29 @@ export const CategoriesDisplay = () => {
         />
         <link rel="canonical" href="https://www.neposidko.com/categories" />
       </Head>
+
       <div className="container mx-auto p-4 sm:p-6">
-        <h1 className="text-2xl font-bold text-center mb-6">
+        {/* 
+          Тепер заголовок на малих екранах буде трохи менший (text-xl замість text-2xl), 
+          але збережено font-bold і text-center.
+        */}
+        <h1 className="text-xl sm:text-2xl font-bold text-center mb-6">
           Популярні категорії
         </h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {categories.map((category, id) => (
-            <CategoriesItem key={id} category={category} />
-          ))}
-        </div>
+
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <Loader2 className="w-8 h-8 animate-spin" />
+          </div>
+        ) : error ? (
+          <div className="text-red-500 text-center">{error}</div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {categories.map((category, idx) => (
+              <CategoriesItem key={idx} category={category} />
+            ))}
+          </div>
+        )}
       </div>
     </>
   );

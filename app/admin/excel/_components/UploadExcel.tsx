@@ -20,12 +20,19 @@ const UploadExcel: React.FC = () => {
     }
     const formData = new FormData();
     formData.append("file", file);
+
     try {
       const data = await uploadExcelFile(formData);
+      // Сервер повертає { message: "..." }
       alert(data.message);
+      setFile(null);
     } catch (error) {
       console.error("Помилка завантаження файлу:", error);
-      alert("Помилка сервера");
+      alert(
+        `Помилка: ${
+          error instanceof Error ? error.message : "Невідома помилка"
+        }`
+      );
     }
   };
 
@@ -33,6 +40,7 @@ const UploadExcel: React.FC = () => {
     <form
       onSubmit={handleSubmit}
       className="bg-white p-6 shadow-md rounded-lg flex flex-col gap-4 w-full max-w-md mx-auto"
+      encType="multipart/form-data"
     >
       <input
         type="file"
@@ -42,7 +50,8 @@ const UploadExcel: React.FC = () => {
       />
       <button
         type="submit"
-        className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-md"
+        className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-md disabled:opacity-50"
+        disabled={!file}
       >
         Завантажити
       </button>

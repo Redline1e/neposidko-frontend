@@ -15,17 +15,20 @@ export const CategoriesItem: React.FC<CategoriesItemProps> = ({ category }) => {
       className="cursor-pointer"
     >
       <div className="bg-white shadow-md rounded-xl overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-xl">
-        {category.imageUrl && (
+        <div className="w-full aspect-square relative">
           <Image
             src={category.imageUrl}
             alt={category.name}
-            width={300}
-            height={300}
-            className="w-full h-56 object-cover"
+            fill
+            className="object-cover"
           />
-        )}
+        </div>
         <div className="p-4">
-          <h2 className="text-lg font-semibold text-gray-800">
+          {/* 
+            Текст вирівняний ліворуч (text-left). 
+            Додаємо break-words, щоб слова переносилися всередині блоку і не вилазили за межі.
+          */}
+          <h2 className="text-base sm:text-lg font-semibold text-gray-800 text-left break-words">
             {category.name}
           </h2>
         </div>

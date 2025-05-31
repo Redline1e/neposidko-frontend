@@ -74,6 +74,7 @@ export const OrderDisplay: React.FC = () => {
   return (
     <div className="flex flex-col md:flex-row gap-8 p-4">
       <div className="flex-1 space-y-4">
+        <h1 className="text-2xl font-bold mb-6">Ваш кошик</h1>
         {orderItems.length > 0 ? (
           orderItems.map((item) => (
             <OrderItem
