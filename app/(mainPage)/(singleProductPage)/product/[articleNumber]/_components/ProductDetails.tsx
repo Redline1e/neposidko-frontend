@@ -10,6 +10,16 @@ import {
 } from "@/components/ui/accordion";
 import { toast } from "sonner";
 
+
+// Тип для OrderItem (визначаємо для коректної типізації)
+interface OrderItem {
+  articleNumber: string;
+  size: string;
+  quantity: number;
+  orderId: number;
+  productOrderId: number;
+}
+
 // Фіксований порядок для текстових розмірів
 const sizeOrder = ["XS", "S", "M", "L", "XL", "XXL"];
 
@@ -21,19 +31,22 @@ const getSizeValue = (size: string) => {
   return sizeOrder.indexOf(size); // Якщо текст, повертаємо індекс із sizeOrder
 };
 
+// Інтерфейс для пропсів компонента
 interface ProductDetailsProps {
+  articleNumber: string;
   title: string;
   description: string;
   price: number;
   discount: number;
   sizes: { size: string; stock: number }[];
-  onAddToCart: () => void;
+  onAddToCart: (cartItem: OrderItem) => void;
   onToggleWishlist: () => void;
   onSizeSelect: (size: string) => void;
   isFavorite: boolean;
 }
 
 export const ProductDetails: React.FC<ProductDetailsProps> = ({
+  articleNumber,
   title,
   description,
   price,
@@ -58,7 +71,14 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
       toast.error("Будь ласка, виберіть розмір перед додаванням в кошик!");
       return;
     }
-    onAddToCart();
+    const cartItem: OrderItem = {
+      articleNumber,
+      size: selectedSize,
+      quantity: 1,
+      orderId: 0,
+      productOrderId: 0,
+    };
+    onAddToCart(cartItem); // Передаємо cartItem у функцію
   };
 
   // Сортування розмірів
@@ -75,11 +95,11 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
         <div className="flex items-baseline gap-2">
           {discount > 0 && (
             <span className="line-through text-gray-500 text-lg self-start">
-              {price.toFixed(0)}$
+              {price.toFixed(0)}₴
             </span>
           )}
           <span className="text-2xl font-semibold text-red-600">
-            {discountedPrice.toFixed(0)}$
+            {discountedPrice.toFixed(0)}₴
           </span>
         </div>
       </div>
@@ -173,7 +193,9 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
                 <span>{product.upperMaterial}</span>
               </div>
               <div className="flex justify-between">
-                <span className="font-semibold">Матеріал підкладки:</span>
+                <span className="font-semibold">
+                  Матеріал підਮaterial підкладки:
+                </span>
                 <span>{product.liningMaterial}</span>
               </div>
             </div>

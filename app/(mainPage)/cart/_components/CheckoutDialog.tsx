@@ -19,6 +19,7 @@ import { getToken } from "@/lib/hooks/getToken";
 import { apiClient } from "@/utils/apiClient";
 import { useAuth } from "@/lib/hooks/auth";
 import { Check } from "lucide-react";
+import { fetchUser } from "@/lib/api/user-service";
 
 const checkoutSchema = z.object({
   deliveryAddress: z.string().min(1, "Місце доставки є обов'язковим"),
@@ -35,7 +36,7 @@ const checkoutSchema = z.object({
 export type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
 interface CheckoutDialogProps {
-  orderId: number;
+  orderId?: number; // Зроблено необов'язковим, оскільки для гостей не потрібен
   onCheckoutSuccess: () => void;
   isOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -43,6 +44,7 @@ interface CheckoutDialogProps {
 }
 
 const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
+  orderId,
   onCheckoutSuccess,
   isOpen: controlledOpen,
   onOpenChange,
@@ -70,6 +72,31 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
     },
   });
 
+  // Завантаження даних користувача при відкритті діалогу
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (isAuthenticated) {
+        try {
+          const userData = await fetchUser();
+          if (userData.telephone) {
+            setValue("telephone", userData.telephone);
+          }
+          if (userData.deliveryAddress) {
+            setValue("deliveryAddress", userData.deliveryAddress);
+          }
+        } catch (error) {
+          console.error("Помилка завантаження даних користувача:", error);
+          toast.error("Не вдалося завантажити дані профілю");
+        }
+      }
+    };
+
+    if (open) {
+      loadUserData();
+    }
+  }, [open, isAuthenticated, setValue]);
+
+  // Завантаження збережених даних із localStorage
   useEffect(() => {
     const savedData = localStorage.getItem("checkoutFormData");
     if (savedData) {
@@ -96,13 +123,19 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
       }
 
       if (token) {
+        // Для авторизованих користувачів
+        if (!orderId) {
+          toast.error("orderId відсутній для авторизованого користувача");
+          return;
+        }
         const response = await apiClient.post(
           "/orders/checkout",
-          { ...data },
+          { orderId, ...data },
           { headers: { Authorization: `Bearer ${token}` } }
         );
         toast.success(response.data.message || "Замовлення оформлено успішно");
       } else {
+        // Для гостей
         if (cartItems.length === 0) {
           toast.error("Кошик порожній");
           return;
@@ -111,6 +144,11 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
           toast.error("Будь ласка, пройдіть перевірку reCAPTCHA");
           return;
         }
+        console.log("Sending guest checkout data:", {
+          ...data,
+          cartItems,
+          recaptchaToken: captchaToken,
+        });
         const response = await apiClient.post("/orders/guest-checkout", {
           ...data,
           cartItems,
@@ -125,7 +163,6 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
       reset();
       onCheckoutSuccess();
     } catch (error: unknown) {
-      // Обрабатываем ошибку
       if (error instanceof Error && error.message) {
         toast.error(error.message);
       } else {

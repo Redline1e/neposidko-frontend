@@ -30,6 +30,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
   const [editComment, setEditComment] = useState<string>("");
   const [editRating, setEditRating] = useState<number>(5);
   const [reviewUsers, setReviewUsers] = useState<Record<string, string>>({});
+  const [isSubmittingEdit, setIsSubmittingEdit] = useState<boolean>(false);
 
   const { isAuthenticated, user } = useAuth();
 
@@ -115,6 +116,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
   };
 
   const handleEditSubmit = async (reviewId: number) => {
+    setIsSubmittingEdit(true); // Починаємо завантаження
     try {
       const updated = await updateReview(reviewId, {
         rating: editRating,
@@ -123,10 +125,13 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
       setReviews((prevReviews) =>
         prevReviews.map((r) => (r.reviewId === reviewId ? updated : r))
       );
-      setEditingReviewId(null);
+      setEditingReviewId(null); // Успішний вихід із режиму редагування
     } catch (error) {
       console.error("Помилка під час збереження змін", error);
       toast.error("Не вдалося оновити відгук");
+      setEditingReviewId(null); // Вихід із режиму редагування при помилці
+    } finally {
+      setIsSubmittingEdit(false); // Завершуємо завантаження
     }
   };
 
@@ -235,8 +240,11 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
                       rows={3}
                     />
                     <div className="space-x-2">
-                      <Button onClick={() => handleEditSubmit(review.reviewId)}>
-                        Зберегти
+                      <Button
+                        onClick={() => handleEditSubmit(review.reviewId)}
+                        disabled={isSubmittingEdit}
+                      >
+                        {isSubmittingEdit ? "Збереження..." : "Зберегти"}
                       </Button>
                       <Button
                         variant="outline"

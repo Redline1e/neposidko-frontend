@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Menu,
   Home,
@@ -32,7 +32,7 @@ const actionLinks: ActionLink[] = [
   },
   {
     name: "Товари",
-    href: "/products",
+    href: "/products?reset=true",
     icon: ShoppingBag,
     title: "Переглянути товари",
   },
@@ -145,7 +145,7 @@ export const Actions = () => {
             <SheetTrigger className="p-2 rounded-md border-none focus:outline-none">
               <Menu className="w-6 h-6 text-neutral-700 hover:text-neutral-500 transition-colors duration-200" />
             </SheetTrigger>
-            <SheetContent side="right" className="w-64 bg-white">
+            <SheetContent side="right" className="w-64 bg-white z-50">
               <DialogTitle className="sr-only">Sidebar Menu</DialogTitle>
               <ul className="flex flex-col gap-4 mt-6">
                 {actionLinks.map((link, index) => (

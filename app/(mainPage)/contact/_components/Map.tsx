@@ -22,11 +22,11 @@ const MapClient: React.FC = () => {
     <MapContainer
       center={position}
       zoom={17}
-      className="w-full h-96 rounded-lg shadow-lg"
+      className="w-full h-96 rounded-lg shadow-lg z-0"
     >
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
       <Marker position={position} icon={customIcon}>
         <Popup>

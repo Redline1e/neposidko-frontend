@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { ProductImageGallery } from "./ProductImageGallery";
 import { ProductDetails } from "./ProductDetails";
-import { CommentsSection } from "./CommentsSection";
 import { fetchProductByArticle } from "@/lib/api/product-service";
 import { Product, OrderItem } from "@/utils/types";
 import { Loader2 } from "lucide-react";
@@ -15,11 +14,11 @@ import {
 } from "@/lib/api/favorites-service";
 import { addOrderItem } from "@/lib/api/order-items-service";
 import { toast } from "sonner";
+// import { CommentsSection } from "./CommentsSection";
 
 export const ProductPage: React.FC = () => {
   const { articleNumber } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
@@ -60,25 +59,8 @@ export const ProductPage: React.FC = () => {
     }
   }, [product]);
 
-  const handleSizeSelect = (size: string) => {
-    setSelectedSize(size);
-  };
-
-  const handleAddToCart = async () => {
-    if (!selectedSize || !product) {
-      toast.error("Будь ласка, виберіть розмір перед додаванням в кошик!");
-      return;
-    }
-
+  const handleAddToCart = async (cartItem: OrderItem) => {
     try {
-      const cartItem: OrderItem = {
-        articleNumber: product.articleNumber,
-        size: selectedSize,
-        quantity: 1,
-        orderId: 0, // Сервер сам призначить
-        productOrderId: 0,
-      };
-
       await addOrderItem(cartItem);
       toast.success("Товар додано до кошика!");
     } catch {
@@ -115,18 +97,19 @@ export const ProductPage: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
         <ProductImageGallery images={product.imageUrls} />
         <ProductDetails
+          articleNumber={product.articleNumber}
           title={product.name}
           description={product.description}
           price={product.price}
           discount={product.discount}
           sizes={product.sizes}
           onAddToCart={handleAddToCart}
-          onSizeSelect={handleSizeSelect}
+          onSizeSelect={() => {}}
           onToggleWishlist={handleToggleWishlist}
           isFavorite={isFavorite}
         />
       </div>
-      <CommentsSection articleNumber={product.articleNumber} />
+      {/* <CommentsSection articleNumber={product.articleNumber} /> */}
     </div>
   );
 };

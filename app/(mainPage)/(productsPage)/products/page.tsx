@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { FilterSidebar } from "./_components/FilterSidebar";
 import ProductDisplay from "./_components/ProductDisplay";
 import SortSelect from "./_components/SortSelect";
@@ -17,7 +17,10 @@ export interface FiltersState {
 
 function ProductsContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const reset = searchParams.get("reset");
   const categoryQuery = searchParams.get("categories") || "";
+
   const initialFilters: FiltersState = {
     categories: categoryQuery ? [categoryQuery] : [],
     sizes: [],
@@ -29,10 +32,18 @@ function ProductsContent() {
   const [sortOrder, setSortOrder] = useState("default");
 
   useEffect(() => {
-    if (categoryQuery) {
+    if (reset === "true") {
+      setFilters({
+        categories: [],
+        sizes: [],
+        priceRange: "",
+        discountOnly: false,
+      });
+      router.replace("/products", { scroll: false });
+    } else if (categoryQuery) {
       setFilters((prev) => ({ ...prev, categories: [categoryQuery] }));
     }
-  }, [categoryQuery]);
+  }, [reset, categoryQuery, router]);
 
   return (
     <>
@@ -40,7 +51,7 @@ function ProductsContent() {
         <title>Товари - Непосидько</title>
         <meta
           name="description"
-          content="Перегляньте широкий вибір дитячого взуття в інтернет-магазині Непосидько. Якісне взуття для дітей з доставкою по Україні."
+          content="ПерегляньTOD широкий вибір дитячого взуття в інтернет-магазині Непосидько. Якісне взуття для дітей з доставкою по Україні."
         />
         <meta
           name="keywords"

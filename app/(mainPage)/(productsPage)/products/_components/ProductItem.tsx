@@ -93,7 +93,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
       const cartItem: OrderItem = {
         articleNumber,
         size: selectedSize,
-        quantity: 1,
+        quantity: 1, // Додаємо по 1 одиниці
         orderId: 0,
         productOrderId: 0,
       };
@@ -177,7 +177,8 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
               className="w-full flex items-center justify-center bg-blue-700 text-white py-1 sm:py-2 rounded-lg hover:bg-blue-600 transition duration-200 gap-1 sm:gap-2 text-xs sm:text-sm"
               disabled={!hasAvailableSizes}
             >
-              <ShoppingCart size={18} /> Додати до кошика
+              <ShoppingCart size={18} />
+              До кошика
             </Button>
           </div>
         </div>

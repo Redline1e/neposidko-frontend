@@ -1,5 +1,7 @@
+// File: app/(mainPage)/(singleProductPage)/product/[articleNumber]/_components/ProductImageGallery.tsx
 import React, { useState } from "react";
 import Image from "next/image";
+import { useSwipeable } from "react-swipeable";
 
 interface ProductImageGalleryProps {
   images: string[];
@@ -8,7 +10,28 @@ interface ProductImageGalleryProps {
 export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
   images,
 }) => {
-  const [selectedImage, setSelectedImage] = useState<string>(images[0]);
+  // Если массив пустой, инициализируем selectedImage пустой строкой
+  const [selectedImage, setSelectedImage] = useState<string>(images[0] || "");
+
+  const handleSwipe = (direction: "left" | "right") => {
+    const currentIndex = images.indexOf(selectedImage);
+    let newIndex;
+
+    if (direction === "left") {
+      newIndex = currentIndex < images.length - 1 ? currentIndex + 1 : 0;
+    } else {
+      newIndex = currentIndex > 0 ? currentIndex - 1 : images.length - 1;
+    }
+
+    setSelectedImage(images[newIndex]);
+  };
+
+  const handlers = useSwipeable({
+    onSwipedLeft: () => handleSwipe("left"),
+    onSwipedRight: () => handleSwipe("right"),
+    trackMouse: true,
+  });
+
   if (!images || images.length === 0) {
     return <div className="text-center text-gray-500">Зображення відсутні</div>;
   }
@@ -32,7 +55,7 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
           />
         ))}
       </div>
-      <div className="flex-1">
+      <div className="flex-1" {...handlers}>
         <div className="relative" style={{ paddingBottom: "100%" }}>
           <Image
             src={selectedImage}
