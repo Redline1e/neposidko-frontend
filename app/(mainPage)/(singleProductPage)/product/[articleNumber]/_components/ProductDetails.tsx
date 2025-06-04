@@ -10,8 +10,6 @@ import {
 } from "@/components/ui/accordion";
 import { toast } from "sonner";
 
-
-// Тип для OrderItem (визначаємо для коректної типізації)
 interface OrderItem {
   articleNumber: string;
   size: string;
@@ -20,18 +18,13 @@ interface OrderItem {
   productOrderId: number;
 }
 
-// Фіксований порядок для текстових розмірів
 const sizeOrder = ["XS", "S", "M", "L", "XL", "XXL"];
 
-// Функція для визначення значення розміру
 const getSizeValue = (size: string) => {
-  if (!isNaN(Number(size))) {
-    return Number(size); // Якщо це число, повертаємо його
-  }
-  return sizeOrder.indexOf(size); // Якщо текст, повертаємо індекс із sizeOrder
+  if (!isNaN(Number(size))) return Number(size);
+  return sizeOrder.indexOf(size);
 };
 
-// Інтерфейс для пропсів компонента
 interface ProductDetailsProps {
   articleNumber: string;
   title: string;
@@ -68,7 +61,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
 
   const handleAddToCartClick = () => {
     if (!selectedSize) {
-      toast.error("Будь ласка, виберіть розмір перед додаванням в кошик!");
+      toast.error("Будь ласка, виберіть розмір перед додаванням у кошик!");
       return;
     }
     const cartItem: OrderItem = {
@@ -78,10 +71,9 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
       orderId: 0,
       productOrderId: 0,
     };
-    onAddToCart(cartItem); // Передаємо cartItem у функцію
+    onAddToCart(cartItem);
   };
 
-  // Сортування розмірів
   const sortedSizes = sizes.sort((a, b) => {
     const aValue = getSizeValue(a.size);
     const bValue = getSizeValue(b.size);

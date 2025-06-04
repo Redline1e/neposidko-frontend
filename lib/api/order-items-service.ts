@@ -43,21 +43,29 @@ export const addOrderItem = async (
       return OrderItemSchema.parse(response.data);
     }
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    orderItem.productOrderId = Date.now();
-    cart.push(orderItem);
+    const existingItemIndex = cart.findIndex(
+      (item: OrderItem) =>
+        item.articleNumber === orderItem.articleNumber &&
+        item.size === orderItem.size
+    );
+
+    if (existingItemIndex !== -1) {
+      cart[existingItemIndex].quantity += orderItem.quantity;
+    } else {
+      orderItem.productOrderId = Date.now();
+      cart.push(orderItem);
+    }
     localStorage.setItem("cart", JSON.stringify(cart));
     window.dispatchEvent(new Event("cartUpdated"));
     return orderItem;
   } catch (error) {
     const message = extractErrorMessage(
       error,
-      "Не вдалося додати позицію замовлення"
+      "Не вдалося додати товар до кошика"
     );
-    console.error(message);
     throw new Error(message);
   }
 };
-
 export const updateOrderItem = async (
   orderItem: OrderItem
 ): Promise<OrderItem> => {

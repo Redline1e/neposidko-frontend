@@ -1,3 +1,4 @@
+// ./app/(mainPage)/(productsPage)/_components/ProductItem.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -33,13 +34,20 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
     imageUrls,
     sizes = [],
   } = product;
+
   const discountedPrice = discount
     ? Math.round(price * (1 - discount / 100))
     : price;
   const imageSrc = imageUrls?.length > 0 ? imageUrls[0] : "/fallback.jpg";
+
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
   const sortedSizes = [...sizes].sort((a, b) => a.size.localeCompare(b.size));
+  const hasAvailableSizes = sortedSizes.some((s) => s.stock > 0);
+  const defaultSize =
+    sortedSizes.find((s) => s.stock > 0)?.size ||
+    sortedSizes[0]?.size ||
+    "OneSize";
 
   useEffect(() => {
     const checkFavoriteStatus = async () => {
@@ -73,13 +81,6 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
     }
   };
 
-  const availableSizeObj = sortedSizes.find((s) => s.stock > 0);
-  const selectedSize = availableSizeObj
-    ? availableSizeObj.size
-    : sortedSizes[0]?.size || "OneSize";
-
-  const hasAvailableSizes = sortedSizes.some((s) => s.stock > 0);
-
   const handleAddToCart = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -92,16 +93,25 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
     try {
       const cartItem: OrderItem = {
         articleNumber,
-        size: selectedSize,
-        quantity: 1, // Додаємо по 1 одиниці
+        size: defaultSize,
+        quantity: 1,
         orderId: 0,
         productOrderId: 0,
       };
       await addOrderItem(cartItem);
       toast.success("Товар додано до кошика!");
-    } catch (error) {
-      console.error("Помилка при додаванні до кошика:", error);
-      toast.error("Не вдалося додати товар до кошика");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        if (error.message === "Вибраного розміру немає в наявності") {
+          toast.error("Вибраного розміру немає в наявності.");
+        } else if (error.message === "Недостатньо товару на складі") {
+          toast.error("Недостатньо товару на складі для вибраного розміру.");
+        } else {
+          toast.error("Не вдалося додати товар до кошика.");
+        }
+      } else {
+        toast.error("Не вдалося додати товар до кошика.");
+      }
     }
   };
 

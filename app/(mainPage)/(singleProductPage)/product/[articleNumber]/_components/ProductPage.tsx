@@ -1,3 +1,4 @@
+// ./app/(mainPage)/(singleProductPage)/product/[articleNumber]/_components/ProductPage.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -14,7 +15,6 @@ import {
 } from "@/lib/api/favorites-service";
 import { addOrderItem } from "@/lib/api/order-items-service";
 import { toast } from "sonner";
-// import { CommentsSection } from "./CommentsSection";
 
 export const ProductPage: React.FC = () => {
   const { articleNumber } = useParams();
@@ -41,7 +41,6 @@ export const ProductPage: React.FC = () => {
     loadProduct();
   }, [articleNumber]);
 
-  // Перевірка наявності товару в обраному
   useEffect(() => {
     if (product) {
       const checkFavorite = async () => {
@@ -63,8 +62,18 @@ export const ProductPage: React.FC = () => {
     try {
       await addOrderItem(cartItem);
       toast.success("Товар додано до кошика!");
-    } catch {
-      toast.error("Не вдалося додати товар до кошика");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        if (error.message === "Вибраного розміру немає в наявності") {
+          toast.error("Вибраного розміру немає в наявності.");
+        } else if (error.message === "Недостатньо товару на складі") {
+          toast.error("Недостатньо товару на складі для вибраного розміру.");
+        } else {
+          toast.error("Не вдалося додати товар до кошика.");
+        }
+      } else {
+        toast.error("Не вдалося додати товар до кошика.");
+      }
     }
   };
 
@@ -109,7 +118,6 @@ export const ProductPage: React.FC = () => {
           isFavorite={isFavorite}
         />
       </div>
-      {/* <CommentsSection articleNumber={product.articleNumber} /> */}
     </div>
   );
 };
